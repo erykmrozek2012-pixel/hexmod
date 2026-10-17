@@ -43,13 +43,16 @@ public final class ModuleManager {
         register(new SaturationModule());
         register(new EatTimerModule());
         register(new CooldownModule());
+        register(new TotemModule());
+        register(new EnemyHealthModule());
+        register(new EnemyArmorModule());
         register(new CpsModule());
         register(new ArmorModule());
         register(new EffectsModule());
         register(new EnemyShieldModule());
         register(new ShieldBreakModule());
         register(new AlliesModule());
-        register(new Module("spotify", "Spotify", "Aktualny utwor i tekst piosenki (wkrotce)"));
+        register(new SpotifyModule());
     }
 
     public static void register(Module module) {

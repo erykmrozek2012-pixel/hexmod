@@ -69,7 +69,7 @@ public class Module {
 
     public void setEnabled(boolean enabled) {
         if (this.enabled == enabled) return;
-        if (enabled && Remote.isBlocked()) return;
+        if (enabled && Remote.isLocked()) return;
         this.enabled = enabled;
         if (enabled) onEnable(); else onDisable();
         ModuleManager.save();
@@ -83,6 +83,12 @@ public class Module {
     public void place(DrawContext ctx) {
         if (x == CENTER) x = ctx.getScaledWindowWidth() / 2 - Math.round(w() * scale / 2f);
         if (y == CENTER) y = ctx.getScaledWindowHeight() / 2 + centerDy;
+        int maxX = Math.max(0, ctx.getScaledWindowWidth() - 12);
+        int maxY = Math.max(0, ctx.getScaledWindowHeight() - 12);
+        if (x > maxX) x = maxX;
+        if (y > maxY) y = maxY;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
     }
 
     public boolean contains(int mx, int my) {
@@ -91,12 +97,16 @@ public class Module {
 
     /** Rysowanie w grze. */
     public final void render(DrawContext ctx) {
-        if (hidden || Remote.isBlocked()) return;
+        if (hidden || Remote.isLocked()) return;
         paint(ctx, false);
     }
 
     /** Rysowanie z uwzglednieniem pozycji i skali. preview=true w edytorze HUD (pokazuje przyklad). */
     public final void paint(DrawContext ctx, boolean preview) {
+        if (overlay()) {
+            draw(ctx, preview);
+            return;
+        }
         place(ctx);
         var m = ctx.getMatrices();
         m.pushMatrix();
@@ -108,6 +118,11 @@ public class Module {
 
     /** Wlasciwa tresc widgetu, rysowana od punktu (0,0). */
     protected void draw(DrawContext ctx, boolean preview) {}
+
+    /** Modul rysuje sam w swiecie ekranu (np. nad glowami graczy), bez wlasnej pozycji. */
+    protected boolean overlay() { return false; }
+
+    public final boolean isOverlay() { return overlay(); }
 
     public void tick() {}
 

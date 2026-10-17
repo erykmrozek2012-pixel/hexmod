@@ -38,6 +38,7 @@ public final class Remote {
     private static final Gson GSON = new Gson();
     private static volatile Blocklist blocklist = new Blocklist();
     private static volatile Catalog catalog = new Catalog();
+    private static volatile boolean ready = false;
 
     private Remote() {}
 
@@ -51,6 +52,7 @@ public final class Remote {
                 Catalog c = GSON.fromJson(Web.get(BASE + "catalog.json"), Catalog.class);
                 if (c != null && c.mods != null) catalog = c;
             } catch (IOException | RuntimeException ignored) {}
+            ready = true;
         });
     }
 
@@ -79,6 +81,15 @@ public final class Remote {
             if (!name.isEmpty() && e.nick != null && e.nick.equalsIgnoreCase(name)) return true;
         }
         return false;
+    }
+
+    /** Mod jest zablokowany: do pierwszego sprawdzenia listy albo gdy gracz jest na liscie blokad. */
+    public static boolean isLocked() {
+        return !ready || isBlocked();
+    }
+
+    public static boolean isReady() {
+        return ready;
     }
 
     public static boolean isAdmin() {
