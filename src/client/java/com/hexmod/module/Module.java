@@ -124,6 +124,14 @@ public class Module {
 
     public final boolean isOverlay() { return overlay(); }
 
+    /** Modul z podgladem w edytorze HUD (np. wskazniki nad glowa wroga). */
+    public boolean hasOverlayPreview() { return false; }
+
+    public void drawOverlayPreview(DrawContext ctx, int ax, int ay) {}
+
+    /** Ramka podgladu {lewo, gora, prawo, dol} lub null. */
+    public int[] overlayPreviewBox(int ax, int ay) { return null; }
+
     public void tick() {}
 
     protected void onEnable() {}

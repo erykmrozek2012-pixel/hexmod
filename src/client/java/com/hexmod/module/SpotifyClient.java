@@ -7,7 +7,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -63,6 +70,8 @@ public final class SpotifyClient {
     private static volatile Track track = null;
     private static final AtomicBoolean polling = new AtomicBoolean(false);
     public static volatile String status = "";
+    private static volatile String lastUrl = "";
+    private static final AtomicBoolean autoRunning = new AtomicBoolean(false);
 
     private SpotifyClient() {}
 
@@ -84,9 +93,16 @@ public final class SpotifyClient {
         } catch (IOException ignored) {}
     }
 
+    /** Client ID wpisany recznie (zaawansowane). */
     public static String clientId() {
         ensureLoaded();
         return cfg.clientId;
+    }
+
+    /** Client ID, ktorego mod faktycznie uzywa: wlasny albo ustawiony przez admina. */
+    public static String effectiveClientId() {
+        ensureLoaded();
+        return cfg.clientId.isEmpty() ? Remote.spotifyClientId() : cfg.clientId;
     }
 
     public static void setClientId(String id) {
@@ -131,7 +147,7 @@ public final class SpotifyClient {
     /** Tworzy link logowania (zapisuje klucz PKCE). Zwraca null, gdy brak Client ID. */
     public static String loginUrl() {
         ensureLoaded();
-        if (cfg.clientId.isEmpty()) return null;
+        if (effectiveClientId().isEmpty()) return null;
         try {
             byte[] rnd = new byte[48];
             new SecureRandom().nextBytes(rnd);
@@ -139,10 +155,11 @@ public final class SpotifyClient {
             save();
             String challenge = b64url(MessageDigest.getInstance("SHA-256")
                     .digest(cfg.verifier.getBytes(StandardCharsets.US_ASCII)));
-            return "https://accounts.spotify.com/authorize?client_id=" + enc(cfg.clientId)
+            lastUrl = "https://accounts.spotify.com/authorize?client_id=" + enc(effectiveClientId())
                     + "&response_type=code&redirect_uri=" + enc(REDIRECT)
                     + "&code_challenge_method=S256&code_challenge=" + challenge
                     + "&scope=" + enc(SCOPE);
+            return lastUrl;
         } catch (Exception e) {
             return null;
         }
@@ -179,7 +196,23 @@ public final class SpotifyClient {
         save();
     }
 
-    /** Konczy logowanie po wklejeniu adresu, na ktory przekierowala przegladarka. */
+    private static void exchangeCode(String code) throws IOException {
+        Map<String, String> f = new LinkedHashMap<>();
+        f.put("grant_type", "authorization_code");
+        f.put("code", code);
+        f.put("redirect_uri", REDIRECT);
+        f.put("client_id", effectiveClientId());
+        f.put("code_verifier", cfg.verifier);
+        storeTokens(postForm(f));
+        lastUrl = "";
+    }
+
+    /** Link logowania z biezacej proby (nie zmienia klucza PKCE trwajacego logowania). */
+    public static String currentLoginUrl() {
+        return lastUrl.isEmpty() ? loginUrl() : lastUrl;
+    }
+
+    /** Logowanie reczne: wklejony adres, na ktory przekierowala przegladarka. */
     public static void completeLogin(String pasted) {
         ensureLoaded();
         String code = null;
@@ -199,16 +232,93 @@ public final class SpotifyClient {
         status = "Loguje...";
         CompletableFuture.runAsync(() -> {
             try {
-                Map<String, String> f = new LinkedHashMap<>();
-                f.put("grant_type", "authorization_code");
-                f.put("code", c);
-                f.put("redirect_uri", REDIRECT);
-                f.put("client_id", cfg.clientId);
-                f.put("code_verifier", cfg.verifier);
-                storeTokens(postForm(f));
+                exchangeCode(c);
                 status = "Zalogowano do Spotify.";
             } catch (IOException | RuntimeException e) {
                 status = "Blad logowania: " + e.getMessage() + ". Sprawdz Client ID i Redirect URI.";
+            }
+        });
+    }
+
+    private static void reply(Socket s, int code, String html) throws IOException {
+        byte[] body = html.getBytes(StandardCharsets.UTF_8);
+        OutputStream out = s.getOutputStream();
+        out.write(("HTTP/1.1 " + code + " OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: "
+                + body.length + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+        out.write(body);
+        out.flush();
+    }
+
+    private static String page(String title, String text) {
+        return "<!doctype html><meta charset=utf-8><title>Hexmod</title>"
+                + "<body style=\"background:#0d0d0d;color:#fff;font-family:sans-serif;text-align:center;padding-top:15vh\">"
+                + "<h1 style=\"color:#d10a0a\">" + title + "</h1><p>" + text + "</p></body>";
+    }
+
+    /** Logowanie jednym klikniem: otwiera przegladarke i sam odbiera odpowiedz Spotify. */
+    public static void startAutoLogin() {
+        ensureLoaded();
+        String url = loginUrl();
+        if (url == null) {
+            status = "Brak Client ID. Poproś admina o ustawienie go (zakladka Zaawansowane).";
+            return;
+        }
+        if (!autoRunning.compareAndSet(false, true)) {
+            status = "Logowanie juz trwa. Dokoncz je w przegladarce.";
+            return;
+        }
+        status = "Otwieram przegladarke... zaloguj sie i wroc do gry.";
+        CompletableFuture.runAsync(() -> {
+            try (ServerSocket server = new ServerSocket(8888, 5, InetAddress.getByName("127.0.0.1"))) {
+                server.setSoTimeout(15_000);
+                if (!Browser.open(url)) {
+                    status = "Nie moge otworzyc przegladarki. Uzyj logowania recznego (Zaawansowane).";
+                }
+                long deadline = System.currentTimeMillis() + 180_000;
+                while (System.currentTimeMillis() < deadline) {
+                    try (Socket s = server.accept()) {
+                        s.setSoTimeout(5000);
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(s.getInputStream(), StandardCharsets.US_ASCII));
+                        String line = in.readLine();
+                        String[] parts = line == null ? new String[0] : line.split(" ");
+                        String path = parts.length > 1 ? parts[1] : "";
+                        if (!path.startsWith("/callback")) {
+                            reply(s, 404, "");
+                            continue;
+                        }
+                        String code = null;
+                        boolean denied = false;
+                        int q = path.indexOf('?');
+                        if (q >= 0) {
+                            for (String part : path.substring(q + 1).split("&")) {
+                                if (part.startsWith("code=")) code = part.substring(5);
+                                if (part.startsWith("error=")) denied = true;
+                            }
+                        }
+                        if (code == null || denied) {
+                            reply(s, 200, page("Nie udalo sie", "Spotify odrzucil logowanie. Wroc do Minecrafta i sprobuj ponownie."));
+                            status = "Spotify odrzucil logowanie.";
+                            return;
+                        }
+                        reply(s, 200, page("Zalogowano!", "Mozesz zamknac te karte i wrocic do Minecrafta."));
+                        status = "Loguje...";
+                        try {
+                            exchangeCode(code);
+                            status = "Zalogowano do Spotify.";
+                        } catch (IOException | RuntimeException e) {
+                            status = "Blad logowania: " + e.getMessage();
+                        }
+                        return;
+                    } catch (SocketTimeoutException ignored) {
+                        // brak polaczenia w tej chwili - czekaj dalej do konca limitu czasu
+                    }
+                }
+                status = "Czas na logowanie minal. Sprobuj ponownie.";
+            } catch (IOException e) {
+                status = "Nie moge uruchomic logowania (port 8888 zajety?). Uzyj logowania recznego.";
+            } finally {
+                autoRunning.set(false);
             }
         });
     }
@@ -219,7 +329,7 @@ public final class SpotifyClient {
             Map<String, String> f = new LinkedHashMap<>();
             f.put("grant_type", "refresh_token");
             f.put("refresh_token", cfg.refreshToken);
-            f.put("client_id", cfg.clientId);
+            f.put("client_id", effectiveClientId());
             storeTokens(postForm(f));
         }
         return cfg.accessToken;
@@ -238,7 +348,7 @@ public final class SpotifyClient {
                         .header("Authorization", "Bearer " + tok)
                         .timeout(Duration.ofSeconds(10)).GET().build();
                 HttpResponse<String> r = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
-                if (r.statusCode() == 204) { track = null; return; }
+                if (r.statusCode() == 204) { track = null; if (status.startsWith("Spotify")) status = ""; return; }
                 if (r.statusCode() == 401) { cfg.accessToken = ""; return; }
                 if (r.statusCode() / 100 != 2) { status = "Spotify: HTTP " + r.statusCode(); return; }
                 JsonObject o = JsonParser.parseString(r.body()).getAsJsonObject();
@@ -252,6 +362,7 @@ public final class SpotifyClient {
                 boolean playing = o.has("is_playing") && o.get("is_playing").getAsBoolean();
                 String key = artist + "|" + title + "|" + dur;
 
+                if (status.startsWith("Spotify")) status = "";
                 Track cur = track;
                 if (cur == null || !cur.key.equals(key)) {
                     Track t = new Track();

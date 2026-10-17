@@ -31,6 +31,10 @@ public final class Remote {
         public String modrinth = "";
     }
 
+    public static class AppConfig {
+        public String spotifyClientId = "";
+    }
+
     public static class Catalog {
         public List<CatalogEntry> mods = new ArrayList<>();
     }
@@ -39,6 +43,7 @@ public final class Remote {
     private static volatile Blocklist blocklist = new Blocklist();
     private static volatile Catalog catalog = new Catalog();
     private static volatile boolean ready = false;
+    private static volatile AppConfig appConfig = new AppConfig();
 
     private Remote() {}
 
@@ -52,6 +57,10 @@ public final class Remote {
                 Catalog c = GSON.fromJson(Web.get(BASE + "catalog.json"), Catalog.class);
                 if (c != null && c.mods != null) catalog = c;
             } catch (IOException | RuntimeException ignored) {}
+            try {
+                AppConfig a = GSON.fromJson(Web.get(BASE + "config.json"), AppConfig.class);
+                if (a != null) appConfig = a;
+            } catch (IOException | RuntimeException ignored) {}
             ready = true;
         });
     }
@@ -59,6 +68,12 @@ public final class Remote {
     public static Blocklist blocklist() { return blocklist; }
 
     public static Catalog catalog() { return catalog; }
+
+    /** Client ID aplikacji Spotify ustawiony przez admina w hexmod-data/config.json. */
+    public static String spotifyClientId() {
+        String id = appConfig.spotifyClientId;
+        return id == null ? "" : id.trim();
+    }
 
     public static String username() {
         var s = MinecraftClient.getInstance().getSession();

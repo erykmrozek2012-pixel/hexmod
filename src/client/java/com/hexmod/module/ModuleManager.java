@@ -44,8 +44,7 @@ public final class ModuleManager {
         register(new EatTimerModule());
         register(new CooldownModule());
         register(new TotemModule());
-        register(new EnemyHealthModule());
-        register(new EnemyArmorModule());
+        register(new EnemyTagsModule());
         register(new CpsModule());
         register(new ArmorModule());
         register(new EffectsModule());

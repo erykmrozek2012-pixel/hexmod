@@ -31,7 +31,14 @@ public class SpotifyModule extends Module {
             return;
         }
         SpotifyClient.Track t = SpotifyClient.current();
-        if (t == null) return;
+        if (t == null) {
+            String msg;
+            if (!SpotifyClient.isLoggedIn()) msg = "Spotify: zaloguj sie (Prawy Shift > Spotify)";
+            else if (SpotifyClient.status.startsWith("Spotify")) msg = SpotifyClient.status;
+            else msg = "Spotify: nic nie gra (wlacz muzyke w aplikacji)";
+            ctx.drawTextWithShadow(mc.textRenderer, mc.textRenderer.trimToWidth(msg, 200), 0, 0, 0xFF9A9A9A);
+            return;
+        }
         String head = mc.textRenderer.trimToWidth("\u266A " + t.artist + " - " + t.title, 200);
         ctx.drawTextWithShadow(mc.textRenderer, head, 0, 0, rgb());
         Map.Entry<Long, String> e = t.lyrics.floorEntry(SpotifyClient.progressNow(t));
