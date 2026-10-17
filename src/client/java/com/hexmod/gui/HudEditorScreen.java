@@ -95,30 +95,38 @@ public class HudEditorScreen extends Screen {
         ctx.fill(0, height - PANEL_H, width, height - PANEL_H + 2, HexTheme.RED);
     }
 
+    /** Czy kursor jest nad przyciskiem panelu (wtedy klikniecie nie chwyta widgetu). */
+    private boolean overPanelWidget(int mx, int my) {
+        for (var c : children()) {
+            if (c.isMouseOver(mx, my)) return true;
+        }
+        return false;
+    }
+
     private void handleMouse(int mx, int my) {
         long win = client.getWindow().getHandle();
         boolean down = GLFW.glfwGetMouseButton(win, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 
-        if (down && !wasDown && my < height - PANEL_H) {
+        if (down && !wasDown && !overPanelWidget(mx, my)) {
             List<Module> all = ModuleManager.all();
             Module hit = null;
             for (int i = all.size() - 1; i >= 0; i--) {
                 Module m = all.get(i);
-                if (m.isEnabled() && m.contains(mx, my)) { hit = m; break; }
+                if (m.isEnabled() && !m.isOverlay() && m.contains(mx, my)) { hit = m; break; }
             }
             if (hit != null) {
                 if (hit != selected) { selected = hit; needsInit = true; }
                 dragging = true;
                 dragDx = mx - hit.x;
                 dragDy = my - hit.y;
-            } else if (selected != null) {
+            } else if (selected != null && my < height - PANEL_H) {
                 selected = null;
                 needsInit = true;
             }
         }
         if (down && dragging && selected != null) {
-            selected.x = Math.max(0, Math.min(width - 10, mx - dragDx));
-            selected.y = Math.max(0, Math.min(height - PANEL_H - 6, my - dragDy));
+            selected.x = Math.max(0, Math.min(width - 12, mx - dragDx));
+            selected.y = Math.max(0, Math.min(height - 12, my - dragDy));
         }
         if (!down && wasDown && dragging) {
             dragging = false;
@@ -141,7 +149,7 @@ public class HudEditorScreen extends Screen {
 
         boolean any = false;
         for (Module m : ModuleManager.all()) {
-            if (!m.isEnabled()) continue;
+            if (!m.isEnabled() || m.isOverlay()) continue;
             any = true;
             m.place(ctx);
             boolean sel = m == selected;

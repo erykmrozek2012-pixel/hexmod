@@ -119,6 +119,7 @@ public class AdminScreen extends Screen {
 
     private void block(String nick) {
         if (nick.isEmpty()) { status = "Wpisz nick."; return; }
+        if (nick.equalsIgnoreCase(Remote.username())) { status = "Nie mozesz zablokowac siebie."; return; }
         status = "Szukam gracza " + nick + "...";
         CompletableFuture.runAsync(() -> {
             try {
