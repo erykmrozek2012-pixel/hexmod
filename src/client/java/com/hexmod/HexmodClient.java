@@ -1,13 +1,23 @@
 package com.hexmod;
 
 import com.hexmod.gui.HexmodScreen;
+import com.hexmod.module.AlliesManager;
+import com.hexmod.module.CombatTracker;
+import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
+import com.hexmod.module.Remote;
+import com.hexmod.module.ShieldBreakModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,6 +30,8 @@ public class HexmodClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModuleManager.init();
         ModuleManager.load();
+        AlliesManager.load();
+        Remote.refresh();
 
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.hexmod.open_menu",
@@ -32,6 +44,32 @@ public class HexmodClient implements ClientModInitializer {
             while (openMenuKey.wasPressed()) {
                 client.setScreen(new HexmodScreen());
             }
+            if (Remote.isBlocked()) return;
+            CombatTracker.tick();
+            for (Module m : ModuleManager.all()) {
+                if (m.isEnabled()) m.tick();
+            }
         });
+
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (world.isClient() && !Remote.isBlocked()) {
+                CombatTracker.markCombat();
+                if (entity instanceof PlayerEntity target
+                        && target.isBlocking()
+                        && player.getStackInHand(hand).isIn(ItemTags.AXES)) {
+                    ShieldBreakModule.onEnemyShieldHit(target);
+                }
+            }
+            return ActionResult.PASS;
+        });
+
+        HudElementRegistry.attachElementAfter(
+                VanillaHudElements.MISC_OVERLAYS,
+                Identifier.of(MOD_ID, "widgets"),
+                (ctx, tickCounter) -> {
+                    for (Module m : ModuleManager.all()) {
+                        if (m.isEnabled()) m.render(ctx);
+                    }
+                });
     }
 }
