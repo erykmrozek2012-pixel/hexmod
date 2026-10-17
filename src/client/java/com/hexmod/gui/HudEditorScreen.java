@@ -95,6 +95,11 @@ public class HudEditorScreen extends Screen {
         ctx.fill(0, height - PANEL_H, width, height - PANEL_H + 2, HexTheme.RED);
     }
 
+    private boolean previewHit(Module m, int mx, int my) {
+        int[] b = m.overlayPreviewBox(width / 2, height / 3);
+        return b != null && mx >= b[0] - 2 && mx <= b[2] + 2 && my >= b[1] - 2 && my <= b[3] + 2;
+    }
+
     /** Czy kursor jest nad przyciskiem panelu (wtedy klikniecie nie chwyta widgetu). */
     private boolean overPanelWidget(int mx, int my) {
         for (var c : children()) {
@@ -112,7 +117,9 @@ public class HudEditorScreen extends Screen {
             Module hit = null;
             for (int i = all.size() - 1; i >= 0; i--) {
                 Module m = all.get(i);
-                if (m.isEnabled() && !m.isOverlay() && m.contains(mx, my)) { hit = m; break; }
+                if (!m.isEnabled()) continue;
+                boolean inside = m.hasOverlayPreview() ? previewHit(m, mx, my) : (!m.isOverlay() && m.contains(mx, my));
+                if (inside) { hit = m; break; }
             }
             if (hit != null) {
                 if (hit != selected) { selected = hit; needsInit = true; }
@@ -125,8 +132,13 @@ public class HudEditorScreen extends Screen {
             }
         }
         if (down && dragging && selected != null) {
-            selected.x = Math.max(0, Math.min(width - 12, mx - dragDx));
-            selected.y = Math.max(0, Math.min(height - 12, my - dragDy));
+            if (selected.isOverlay()) {
+                selected.x = Math.max(-200, Math.min(200, mx - dragDx));
+                selected.y = Math.max(-200, Math.min(200, my - dragDy));
+            } else {
+                selected.x = Math.max(0, Math.min(width - 12, mx - dragDx));
+                selected.y = Math.max(0, Math.min(height - 12, my - dragDy));
+            }
         }
         if (!down && wasDown && dragging) {
             dragging = false;
@@ -149,8 +161,20 @@ public class HudEditorScreen extends Screen {
 
         boolean any = false;
         for (Module m : ModuleManager.all()) {
-            if (!m.isEnabled() || m.isOverlay()) continue;
+            if (!m.isEnabled()) continue;
             any = true;
+            if (m.hasOverlayPreview()) {
+                int ax = width / 2, ay = height / 3;
+                if (!m.hidden) m.drawOverlayPreview(ctx, ax, ay);
+                int[] b = m.overlayPreviewBox(ax, ay);
+                if (b != null) {
+                    outline(ctx, b[0] - 2, b[1] - 2, b[2] + 2, b[3] + 2, m == selected ? HexTheme.RED : HexTheme.TEXT_DIM);
+                }
+                ctx.drawCenteredTextWithShadow(textRenderer,
+                        m.hidden ? "Wskazniki wroga (ukryte)" : "\u25BC glowa wroga", ax, ay + 3, HexTheme.TEXT_DIM);
+                continue;
+            }
+            if (m.isOverlay()) continue;
             m.place(ctx);
             boolean sel = m == selected;
             if (!m.hidden) m.paint(ctx, true);
