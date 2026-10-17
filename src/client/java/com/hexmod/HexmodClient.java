@@ -25,6 +25,7 @@ public class HexmodClient implements ClientModInitializer {
     public static final String MOD_ID = "hexmod";
 
     private static KeyBinding openMenuKey;
+    private static int refreshTicks = 0;
 
     @Override
     public void onInitializeClient() {
@@ -44,7 +45,8 @@ public class HexmodClient implements ClientModInitializer {
             while (openMenuKey.wasPressed()) {
                 client.setScreen(new HexmodScreen());
             }
-            if (Remote.isBlocked()) return;
+            if (++refreshTicks % 6000 == 0) Remote.refresh();
+            if (Remote.isLocked()) return;
             CombatTracker.tick();
             for (Module m : ModuleManager.all()) {
                 if (m.isEnabled()) m.tick();
@@ -52,7 +54,7 @@ public class HexmodClient implements ClientModInitializer {
         });
 
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (world.isClient() && !Remote.isBlocked()) {
+            if (world.isClient() && !Remote.isLocked()) {
                 CombatTracker.markCombat();
                 if (entity instanceof PlayerEntity target
                         && target.isBlocking()
