@@ -33,7 +33,7 @@ public class SpotifyModule extends Module {
         SpotifyClient.Track t = SpotifyClient.current();
         if (t == null) {
             String msg;
-            if (!SpotifyClient.isLoggedIn()) msg = "Spotify: zaloguj sie (Prawy Shift > Spotify)";
+            if (!SpotifyClient.isLoggedIn()) msg = SpotifyClient.localInfo.isEmpty() ? "Spotify: wlacz muzyke w aplikacji" : SpotifyClient.localInfo;
             else if (SpotifyClient.status.startsWith("Spotify")) msg = SpotifyClient.status;
             else msg = "Spotify: nic nie gra (wlacz muzyke w aplikacji)";
             ctx.drawTextWithShadow(mc.textRenderer, mc.textRenderer.trimToWidth(msg, 200), 0, 0, 0xFF9A9A9A);

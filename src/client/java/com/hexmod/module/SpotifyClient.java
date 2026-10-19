@@ -2,6 +2,7 @@ package com.hexmod.module;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -31,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +72,10 @@ public final class SpotifyClient {
     private static volatile Track track = null;
     private static final AtomicBoolean polling = new AtomicBoolean(false);
     public static volatile String status = "";
+    /** Co wykryto w lokalnej aplikacji Spotify (bez logowania). */
+    public static volatile String localInfo = "";
+    private static volatile Track localTrack = null;
+    private static final AtomicBoolean localBusy = new AtomicBoolean(false);
     private static volatile String lastUrl = "";
     private static final AtomicBoolean autoRunning = new AtomicBoolean(false);
 
@@ -127,13 +133,13 @@ public final class SpotifyClient {
     }
 
     public static Track current() {
-        return track;
+        return isLoggedIn() ? track : localTrack;
     }
 
     public static long progressNow(Track t) {
         long p = t.progressMs;
         if (t.playing) p += System.currentTimeMillis() - t.sampledAt;
-        return Math.max(0, Math.min(p, t.durationMs));
+        return t.durationMs > 0 ? Math.max(0, Math.min(p, t.durationMs)) : Math.max(0, p);
     }
 
     private static String enc(String s) {
@@ -338,7 +344,11 @@ public final class SpotifyClient {
     /** Odpytuje Spotify w tle (wywoluj co kilka sekund). */
     public static void pollAsync() {
         ensureLoaded();
-        if (!isLoggedIn() || !polling.compareAndSet(false, true)) return;
+        if (!isLoggedIn()) {
+            pollLocalAsync();
+            return;
+        }
+        if (!polling.compareAndSet(false, true)) return;
         CompletableFuture.runAsync(() -> {
             try {
                 String tok = token();
@@ -393,10 +403,21 @@ public final class SpotifyClient {
     private static void fetchLyrics(Track t) {
         CompletableFuture.runAsync(() -> {
             try {
-                String url = "https://lrclib.net/api/get?track_name=" + enc(t.title)
-                        + "&artist_name=" + enc(t.artist) + "&duration=" + (t.durationMs / 1000);
-                JsonObject o = JsonParser.parseString(Web.get(url)).getAsJsonObject();
-                if (!o.has("syncedLyrics") || o.get("syncedLyrics").isJsonNull()) return;
+                JsonObject o = null;
+                if (t.durationMs > 0) {
+                    String url = "https://lrclib.net/api/get?track_name=" + enc(t.title)
+                            + "&artist_name=" + enc(t.artist) + "&duration=" + (t.durationMs / 1000);
+                    o = JsonParser.parseString(Web.get(url)).getAsJsonObject();
+                } else {
+                    String url = "https://lrclib.net/api/search?track_name=" + enc(t.title)
+                            + "&artist_name=" + enc(t.artist);
+                    JsonArray arr = JsonParser.parseString(Web.get(url)).getAsJsonArray();
+                    for (JsonElement e : arr) {
+                        JsonObject c = e.getAsJsonObject();
+                        if (c.has("syncedLyrics") && !c.get("syncedLyrics").isJsonNull()) { o = c; break; }
+                    }
+                }
+                if (o == null || !o.has("syncedLyrics") || o.get("syncedLyrics").isJsonNull()) return;
                 TreeMap<Long, String> map = new TreeMap<>();
                 for (String line : o.get("syncedLyrics").getAsString().split("\n")) {
                     Matcher m = LRC.matcher(line.trim());
@@ -406,6 +427,100 @@ public final class SpotifyClient {
                 }
                 t.lyrics = map;
             } catch (IOException | RuntimeException ignored) {}
+        });
+    }
+
+    // ---------- lokalne wykrywanie utworu (okno aplikacji Spotify, bez logowania) ----------
+
+    private static String run(String... cmd) {
+        try {
+            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+            String out = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            p.waitFor(5, TimeUnit.SECONDS);
+            return out.trim();
+        } catch (IOException e) {
+            return "";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "";
+        }
+    }
+
+    /** Zwraca {stan, tytul}: stan 0 = Spotify nie dziala, 1 = pauza, 2 = gra. */
+    private static String[] readLocal() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        if (os.contains("win")) {
+            String out = run("powershell", "-NoProfile", "-NonInteractive", "-Command",
+                    "[Console]::OutputEncoding=[Text.Encoding]::UTF8; "
+                            + "(Get-Process -Name Spotify -ErrorAction SilentlyContinue | "
+                            + "Where-Object { $_.MainWindowTitle } | Select-Object -First 1 -ExpandProperty MainWindowTitle)");
+            if (out.isEmpty()) return new String[]{"0", ""};
+            if (out.contains(" - ")) return new String[]{"2", out};
+            return new String[]{"1", ""};
+        }
+        if (os.contains("mac")) {
+            String out = run("osascript", "-e",
+                    "tell application \"System Events\" to if (name of processes) contains \"Spotify\" then "
+                            + "tell application \"Spotify\" to if player state is playing then "
+                            + "return \"P|\" & (artist of current track) & \" - \" & (name of current track) "
+                            + "else return \"S\"");
+            if (out.startsWith("P|")) return new String[]{"2", out.substring(2)};
+            if (out.equals("S")) return new String[]{"1", ""};
+            return new String[]{"0", ""};
+        }
+        String status = run("sh", "-c", "playerctl -p spotify status 2>/dev/null");
+        if (status.isEmpty()) return new String[]{"0", ""};
+        if (!status.equalsIgnoreCase("Playing")) return new String[]{"1", ""};
+        String title = run("sh", "-c", "playerctl -p spotify metadata --format '{{artist}} - {{title}}' 2>/dev/null");
+        return new String[]{"2", title};
+    }
+
+    private static void applyLocal(String[] r) {
+        int state = Integer.parseInt(r[0]);
+        Track t = localTrack;
+        long now = System.currentTimeMillis();
+        if (state == 0) {
+            localTrack = null;
+            localInfo = "Spotify nie jest uruchomiony";
+            return;
+        }
+        if (state == 1) {
+            if (t != null && t.playing) {
+                t.progressMs = progressNow(t);
+                t.playing = false;
+            }
+            localInfo = "Spotify: pauza";
+            return;
+        }
+        String full = r[1];
+        if (t == null || !t.key.equals(full)) {
+            int i = full.indexOf(" - ");
+            Track nt = new Track();
+            nt.key = full;
+            nt.artist = i > 0 ? full.substring(0, i) : "";
+            nt.title = i > 0 ? full.substring(i + 3) : full;
+            nt.durationMs = 0;
+            nt.progressMs = 0;
+            nt.sampledAt = now;
+            nt.playing = true;
+            localTrack = nt;
+            fetchLyrics(nt);
+        } else if (!t.playing) {
+            t.sampledAt = now;
+            t.playing = true;
+        }
+        localInfo = "Gra: " + full;
+    }
+
+    private static void pollLocalAsync() {
+        if (!localBusy.compareAndSet(false, true)) return;
+        CompletableFuture.runAsync(() -> {
+            try {
+                applyLocal(readLocal());
+            } catch (RuntimeException ignored) {
+            } finally {
+                localBusy.set(false);
+            }
         });
     }
 }

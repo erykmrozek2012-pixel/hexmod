@@ -9,9 +9,12 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
-/** Ile jeszcze poleci Twoja perla enderu (szacunek z fizyki lotu, tylko liczba w widgecie). */
+/** Ile jeszcze poleci kazda z Twoich pereł enderu (szacunek z fizyki lotu). */
 public class PearlTimerModule extends Module {
     public PearlTimerModule() {
         super("pearl_timer", "Czas perly", "Ile sekund jeszcze poleci Twoja perla");
@@ -19,6 +22,7 @@ public class PearlTimerModule extends Module {
     }
 
     @Override public int w() { return 90; }
+    @Override public int h() { return 36; }
 
     private static double flightSeconds(MinecraftClient mc, EnderPearlEntity pearl) {
         ClientWorld world = mc.world;
@@ -40,18 +44,22 @@ public class PearlTimerModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Perla: 1.4s", 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, "Perla 1: 1.4s", 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, "Perla 2: 2.1s", 0, 12, rgb());
             return;
         }
         if (mc.world == null || mc.player == null) return;
-        double best = -1;
+        List<Double> times = new ArrayList<>();
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof EnderPearlEntity pearl) || pearl.getOwner() != mc.player) continue;
             double s = flightSeconds(mc, pearl);
-            if (s >= 0 && (best < 0 || s < best)) best = s;
+            if (s >= 0) times.add(s);
         }
-        if (best >= 0) {
-            ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, "Perla: %.1fs", best), 0, 0, rgb());
+        Collections.sort(times);
+        for (int i = 0; i < Math.min(4, times.size()); i++) {
+            String label = times.size() == 1 ? "Perla" : "Perla " + (i + 1);
+            ctx.drawTextWithShadow(mc.textRenderer,
+                    String.format(Locale.ROOT, "%s: %.1fs", label, times.get(i)), 0, i * 12, rgb());
         }
     }
 }

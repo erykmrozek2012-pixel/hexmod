@@ -44,6 +44,7 @@ public class Module {
         this.id = id;
         this.name = name;
         this.description = description;
+        option("bg", "Tlo", false);
     }
 
     public Module at(int x, int y) {
@@ -146,6 +147,10 @@ public class Module {
         m.pushMatrix();
         m.translate((float) x, (float) y);
         m.scale(scale, scale);
+        if (option("bg")) {
+            ctx.fill(-3, -2, w() + 3, h() + 2, 0x99000000);
+            ctx.fill(-3, -2, -1, h() + 2, 0xFFD10A0A);
+        }
         draw(ctx, preview);
         m.popMatrix();
     }

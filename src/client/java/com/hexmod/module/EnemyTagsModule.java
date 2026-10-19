@@ -186,7 +186,6 @@ public class EnemyTagsModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview || mc.player == null || mc.world == null) return;
-        if (!mc.options.getPerspective().isFirstPerson()) return;
         float tp = mc.getRenderTickCounter().getTickProgress(false);
 
         for (PlayerEntity pl : mc.world.getPlayers()) {
