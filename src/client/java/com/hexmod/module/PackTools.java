@@ -185,4 +185,21 @@ public final class PackTools {
             return "Blad: " + e.getMessage();
         }
     }
+
+    /**
+     * Zwraca plik tekstury w pakiecie. Jesli pakiet jeszcze jej nie ma, kopiuje aktualna teksture z gry
+     * (np. oryginalna), zeby mozna ja bylo edytowac.
+     */
+    public static Path ensureTexture(Path packFolder, String rel) throws IOException {
+        Path target = packRoot(packFolder).resolve("assets").resolve("minecraft").resolve(rel);
+        if (Files.exists(target)) return target;
+        var rm = MinecraftClient.getInstance().getResourceManager();
+        Optional<Resource> res = rm.getResource(Identifier.ofVanilla(rel));
+        if (res.isEmpty()) throw new IOException("Brak tej tekstury w grze: " + rel);
+        Files.createDirectories(target.getParent());
+        try (InputStream in = res.get().getInputStream()) {
+            Files.copy(in, target);
+        }
+        return target;
+    }
 }
