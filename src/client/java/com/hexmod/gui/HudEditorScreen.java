@@ -21,6 +21,7 @@ public class HudEditorScreen extends Screen {
     private int dragDx, dragDy;
     private boolean needsInit;
     private Module listening;
+    private boolean paletteOpen;
     private final boolean[] heldAtStart = new boolean[349];
 
     public HudEditorScreen(Screen parent) {
@@ -50,7 +51,7 @@ public class HudEditorScreen extends Screen {
                 .dimensions(x, y0 + 6, 24, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("+"), b -> changeScale(0.1f))
                 .dimensions(x + 28, y0 + 6, 24, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Kolor"), b -> cycleColor())
+        addDrawableChild(ButtonWidget.builder(Text.literal("Kolor"), b -> paletteOpen = !paletteOpen)
                 .dimensions(x + 56, y0 + 6, 56, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(selected.hidden ? "Pokaz" : "Ukryj"), b -> {
             selected.hidden = !selected.hidden;
@@ -79,7 +80,7 @@ public class HudEditorScreen extends Screen {
             needsInit = true;
         }).dimensions(cx + 109, y0 + 30, 36, 20).build());
 
-        int ox = cx - (selected.options.size() * 74) / 2;
+        int ox = cx - (selected.options.size() * 70) / 2;
         for (String key : selected.options.keySet()) {
             String label = selected.optionLabels.getOrDefault(key, key)
                     + ": " + (selected.option(key) ? "ON" : "OFF");
@@ -88,10 +89,20 @@ public class HudEditorScreen extends Screen {
                 selected.options.put(k, !selected.option(k));
                 ModuleManager.save();
                 needsInit = true;
-            }).dimensions(ox, y0 + 54, 70, 20).build());
-            ox += 74;
+            }).dimensions(ox, y0 + 54, 66, 20).build());
+            ox += 70;
         }
     }
+
+    private static final int[] PALETTE_HEX = {
+            0xD10A0A, 0xFF3B30, 0xFF6A00, 0xFF9500, 0xFFD60A, 0xFFE680, 0xBFFF00, 0x30D158,
+            0x00A86B, 0x00C7BE, 0x64D2FF, 0x32ADE6, 0x0A84FF, 0x5E5CE6, 0xBF5AF2, 0xFF6EB4,
+            0xFFFFFF, 0xE5E5EA, 0xC7C7CC, 0x8E8E93, 0x636366, 0x3A3A3C, 0x1C1C1E, 0x000000,
+            0x8B5A2B, 0xC8A165, 0xA2845E, 0x7A0505, 0x1E6B3A, 0x2C3E6B, 0x6B2C5E, 0x40E0D0};
+
+    private int paletteX() { return width / 2 - 105; }
+
+    private int paletteY() { return height - PANEL_H - 70; }
 
     private void resetHeld() {
         long win = client.getWindow().getHandle();
@@ -117,7 +128,7 @@ public class HudEditorScreen extends Screen {
         }
     }
 
-    private static String keyName(int k) {
+    static String keyName(int k) {
         if (k <= 0) return "brak";
         switch (k) {
             case 32: return "Spacja";
@@ -193,6 +204,20 @@ public class HudEditorScreen extends Screen {
         long win = client.getWindow().getHandle();
         boolean down = GLFW.glfwGetMouseButton(win, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 
+        if (paletteOpen && down && !wasDown && selected != null) {
+            int px0 = paletteX(), py0 = paletteY();
+            if (mx >= px0 && mx < px0 + 8 * 16 + 4 && my >= py0 && my < py0 + 4 * 16 + 4) {
+                int col = Math.floorDiv(mx - px0 - 2, 16), row = Math.floorDiv(my - py0 - 2, 16);
+                if (col >= 0 && col < 8 && row >= 0 && row < 4) {
+                    selected.color = PALETTE_HEX[row * 8 + col];
+                    ModuleManager.save();
+                }
+                wasDown = true;
+                return;
+            }
+            if (!overPanelWidget(mx, my)) paletteOpen = false;
+        }
+
         if (down && !wasDown && !overPanelWidget(mx, my)) {
             List<Module> all = ModuleManager.all();
             Module hit = null;
@@ -265,6 +290,17 @@ public class HudEditorScreen extends Screen {
             outline(ctx, x1, y1, x2, y2, sel ? HexTheme.RED : HexTheme.TEXT_DIM);
             if (m.hidden) {
                 ctx.drawTextWithShadow(textRenderer, m.name + " (ukryty)", m.x, m.y, HexTheme.TEXT_DIM);
+            }
+        }
+
+        if (paletteOpen && selected != null) {
+            int px0 = paletteX(), py0 = paletteY();
+            ctx.fill(px0 - 2, py0 - 2, px0 + 8 * 16 + 4, py0 + 4 * 16 + 4, 0xFF000000);
+            ctx.fill(px0 - 1, py0 - 1, px0 + 8 * 16 + 3, py0 + 4 * 16 + 3, HexTheme.PANEL);
+            for (int i = 0; i < PALETTE_HEX.length; i++) {
+                int sx = px0 + 2 + (i % 8) * 16, sy = py0 + 2 + (i / 8) * 16;
+                ctx.fill(sx, sy, sx + 14, sy + 14, 0xFF000000 | PALETTE_HEX[i]);
+                if (PALETTE_HEX[i] == selected.color) outline(ctx, sx - 1, sy - 1, sx + 15, sy + 15, HexTheme.RED);
             }
         }
 

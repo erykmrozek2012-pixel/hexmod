@@ -19,8 +19,10 @@ public class PixelEditorScreen extends Screen {
 
     private static final int MAX = 64;
     private static final int[] PALETTE = {
-            0xFF000000, 0xFFFFFFFF, 0xFF7F7F7F, 0xFFD10A0A, 0xFFFF7F00, 0xFFFFD60A, 0xFF30D158, 0xFF00A86B,
-            0xFF64D2FF, 0xFF0A84FF, 0xFFBF5AF2, 0xFFFF6EB4, 0xFF8B5A2B, 0xFFC8A165, 0xFF3C3C3C, 0xFFDADADA};
+            0xFFD10A0A, 0xFFFF3B30, 0xFFFF6A00, 0xFFFF9500, 0xFFFFD60A, 0xFFFFE680, 0xFFBFFF00, 0xFF30D158,
+            0xFF00A86B, 0xFF00C7BE, 0xFF64D2FF, 0xFF32ADE6, 0xFF0A84FF, 0xFF5E5CE6, 0xFFBF5AF2, 0xFFFF6EB4,
+            0xFFFFFFFF, 0xFFE5E5EA, 0xFFC7C7CC, 0xFF8E8E93, 0xFF636366, 0xFF3A3A3C, 0xFF1C1C1E, 0xFF000000,
+            0xFF8B5A2B, 0xFFC8A165, 0xFFA2845E, 0xFF7A0505, 0xFF1E6B3A, 0xFF2C3E6B, 0xFF6B2C5E, 0xFF40E0D0};
 
     private final Screen parent;
     private final Path file;
@@ -51,8 +53,7 @@ public class PixelEditorScreen extends Screen {
         }
     }
 
-    private int palX() { return 216; }
-    private int palY() { return height - 28; }
+    private int palY() { return height - 84; }
 
     @Override
     protected void init() {
@@ -174,10 +175,8 @@ public class PixelEditorScreen extends Screen {
                 lastX = cx;
                 lastY = cy;
             } else {
-                for (int i = 0; i < PALETTE.length; i++) {
-                    int sx = palX() + i * 14;
-                    if (mx >= sx && mx < sx + 12 && my >= palY() && my < palY() + 12) color = PALETTE[i];
-                }
+                int gx = Math.floorDiv(mx - 10, 10), gy = Math.floorDiv(my - palY(), 10);
+                if (gx >= 0 && gx < 8 && gy >= 0 && gy < 4) color = PALETTE[gy * 8 + gx];
             }
         } else if (down && inside && lastX >= 0) {
             if (tool == Tool.PENCIL) line(lastX, lastY, cx, cy, color);
@@ -221,9 +220,14 @@ public class PixelEditorScreen extends Screen {
         ctx.fill(4, 22 + row * 22, 8, 38 + row * 22, HexTheme.RED);
 
         for (int i = 0; i < PALETTE.length; i++) {
-            int sx = palX() + i * 14;
-            ctx.fill(sx - 1, palY() - 1, sx + 13, palY() + 13, 0xFF000000);
-            ctx.fill(sx, palY(), sx + 12, palY() + 12, PALETTE[i]);
+            int sx = 10 + (i % 8) * 10, sy = palY() + (i / 8) * 10;
+            ctx.fill(sx, sy, sx + 9, sy + 9, PALETTE[i]);
+            if (PALETTE[i] == color) {
+                ctx.fill(sx - 1, sy - 1, sx + 10, sy, HexTheme.RED);
+                ctx.fill(sx - 1, sy + 9, sx + 10, sy + 10, HexTheme.RED);
+                ctx.fill(sx - 1, sy, sx, sy + 9, HexTheme.RED);
+                ctx.fill(sx + 9, sy, sx + 10, sy + 9, HexTheme.RED);
+            }
         }
         ctx.fill(96, 6 + 0, 108, 18, 0xFF000000);
         ctx.fill(97, 7, 107, 17, color);

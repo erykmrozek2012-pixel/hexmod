@@ -4,20 +4,30 @@ import com.hexmod.module.PackTools;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
-/** Przegladanie folderow tekstur pakietu; klikniecie PNG otwiera edytor pikseli. */
+/** Przegladanie tekstur pakietu z wyszukiwarka; klikniecie PNG otwiera edytor pikseli. */
 public class TextureBrowserScreen extends Screen {
-    private static final int ROWS = 8;
+    private static final int ROWS = 7;
 
     private final Screen parent;
     private final Path root;
     private Path dir;
     private int offset = 0;
-    private List<Path> entries = List.of();
+    private String query = "";
+    private boolean dirty;
+    private TextFieldWidget search;
+    private final List<ButtonWidget> rowButtons = new ArrayList<>();
+    private List<Path> items = List.of();
 
     public TextureBrowserScreen(Screen parent, Path root) {
         super(Text.literal("Tekstury"));
@@ -26,46 +36,98 @@ public class TextureBrowserScreen extends Screen {
         this.dir = root;
     }
 
+    private List<Path> searchAll() {
+        List<Path> out = new ArrayList<>();
+        try (Stream<Path> s = Files.walk(root)) {
+            s.filter(p -> p.toString().toLowerCase(Locale.ROOT).endsWith(".png"))
+                    .filter(p -> root.relativize(p).toString().replace('\\', '/').toLowerCase(Locale.ROOT).contains(query))
+                    .sorted().limit(400).forEach(out::add);
+        } catch (IOException ignored) {}
+        return out;
+    }
+
     @Override
     protected void init() {
         int cx = width / 2;
-        entries = PackTools.listEntries(dir);
-        int y = 40;
-        if (!dir.equals(root)) {
-            addDrawableChild(ButtonWidget.builder(Text.literal("[..] wstecz"), b -> {
+        if (search == null) {
+            search = new TextFieldWidget(textRenderer, cx - 140, 34, 250, 18, Text.literal("Szukaj"));
+            search.setPlaceholder(Text.literal("Szukaj tekstury (np. shield, sword)"));
+            search.setMaxLength(40);
+            search.setChangedListener(s -> {
+                query = s.trim().toLowerCase(Locale.ROOT);
+                offset = 0;
+                dirty = true;
+            });
+        }
+        search.setPosition(cx - 140, 34);
+        addDrawableChild(search);
+
+        addDrawableChild(ButtonWidget.builder(Text.literal("^"), b -> {
+            offset = Math.max(0, offset - ROWS);
+            refreshRows();
+        }).dimensions(cx + 116, 34, 24, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("v"), b -> {
+            if (offset + ROWS < items.size()) offset += ROWS;
+            refreshRows();
+        }).dimensions(cx + 116, 56, 24, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+                .dimensions(cx - 50, height - 28, 100, 20).build());
+
+        rowButtons.clear();
+        buildRows();
+    }
+
+    private void refreshRows() {
+        for (ButtonWidget b : rowButtons) remove(b);
+        rowButtons.clear();
+        buildRows();
+    }
+
+    private void addRow(String label, int y, Runnable action) {
+        ButtonWidget b = ButtonWidget.builder(Text.literal(textRenderer.trimToWidth(label, 240)), x -> action.run())
+                .dimensions(width / 2 - 140, y, 250, 18).build();
+        rowButtons.add(b);
+        addDrawableChild(b);
+    }
+
+    private void buildRows() {
+        boolean searching = !query.isEmpty();
+        items = searching ? searchAll() : PackTools.listEntries(dir);
+        int y = 58;
+        if (!searching && !dir.equals(root)) {
+            addRow("[..] wstecz", y, () -> {
                 dir = dir.getParent();
                 offset = 0;
-                clearAndInit();
-            }).dimensions(cx - 140, y, 250, 18).build());
+                refreshRows();
+            });
             y += 20;
         }
         int shown = 0;
-        for (int i = offset; i < entries.size() && shown < ROWS; i++, shown++) {
-            final Path p = entries.get(i);
-            boolean isDir = java.nio.file.Files.isDirectory(p);
-            String name = p.getFileName().toString();
-            String label = textRenderer.trimToWidth(isDir ? "[" + name + "]" : name, 240);
-            addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
+        for (int i = offset; i < items.size() && shown < ROWS; i++, shown++) {
+            final Path p = items.get(i);
+            boolean isDir = Files.isDirectory(p);
+            String label = searching
+                    ? root.relativize(p).toString().replace('\\', '/')
+                    : (isDir ? "[" + p.getFileName() + "]" : p.getFileName().toString());
+            addRow(label, y, () -> {
                 if (isDir) {
                     dir = p;
                     offset = 0;
-                    clearAndInit();
+                    refreshRows();
                 } else {
                     client.setScreen(new PixelEditorScreen(this, p));
                 }
-            }).dimensions(cx - 140, y, 250, 18).build());
+            });
             y += 20;
         }
-        addDrawableChild(ButtonWidget.builder(Text.literal("^"), b -> {
-            offset = Math.max(0, offset - ROWS);
-            clearAndInit();
-        }).dimensions(cx + 116, 40, 24, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("v"), b -> {
-            if (offset + ROWS < entries.size()) offset += ROWS;
-            clearAndInit();
-        }).dimensions(cx + 116, 62, 24, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
-                .dimensions(cx - 50, height - 28, 100, 20).build());
+    }
+
+    @Override
+    public void tick() {
+        if (dirty) {
+            dirty = false;
+            refreshRows();
+        }
     }
 
     @Override
@@ -80,10 +142,12 @@ public class TextureBrowserScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         int x = width / 2 - 140;
         ctx.drawTextWithShadow(textRenderer, "TEKSTURY", x, 14, HexTheme.RED);
-        String rel = root.relativize(dir).toString().replace('\\', '/');
-        ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth("/textures/" + rel, 280), x, 27, HexTheme.TEXT_DIM);
-        if (entries.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Pusty folder.", x, 62, HexTheme.TEXT_DIM);
+        String where = query.isEmpty()
+                ? "/textures/" + root.relativize(dir).toString().replace('\\', '/')
+                : "Wyniki wyszukiwania: " + items.size();
+        ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(where, 150), x + 80, 14, HexTheme.TEXT_DIM);
+        if (items.isEmpty()) {
+            ctx.drawTextWithShadow(textRenderer, query.isEmpty() ? "Pusty folder." : "Brak wynikow.", x, 80, HexTheme.TEXT_DIM);
         }
     }
 

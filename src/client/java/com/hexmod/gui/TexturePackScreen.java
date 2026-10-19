@@ -12,15 +12,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/** Edytor tekstur: wybierz pakiet z folderu resourcepacks, potem edytuj tekstury lub wstaw obraz na tarcze. */
+/** Edytor tekstur: wybierz pakiet z folderu resourcepacks, potem Itemy PvP, wszystkie tekstury albo obraz na tarcze. */
 public class TexturePackScreen extends Screen {
     private static final int ROWS = 7;
+
+    private static Path lastFolder = null;
+    private static String lastName = "";
 
     private final Screen parent;
     private List<Path> packs = List.of();
     private int offset = 0;
-    private Path folder = null;
-    private String packName = "";
+    private Path folder = lastFolder;
+    private String packName = lastName;
     private String status = "";
 
     public TexturePackScreen(Screen parent) {
@@ -32,6 +35,8 @@ public class TexturePackScreen extends Screen {
         try {
             folder = PackTools.extractIfZip(p);
             packName = p.getFileName().toString();
+            lastFolder = folder;
+            lastName = packName;
             status = Files.isDirectory(p) ? "" : "Pakiet .zip rozpakowano do kopii: " + folder.getFileName();
         } catch (IOException e) {
             status = "Blad: " + e.getMessage();
@@ -61,23 +66,27 @@ public class TexturePackScreen extends Screen {
                 clearAndInit();
             }).dimensions(cx + 116, 72, 24, 20).build());
         } else {
-            addDrawableChild(ButtonWidget.builder(Text.literal("Przegladaj tekstury (edytor pikseli)"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal("Itemy PvP (szybki wybor)"),
+                    b -> client.setScreen(new PvpItemsScreen(this, folder)))
+                    .dimensions(cx - 140, 50, 280, 24).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal("Wszystkie tekstury (foldery i szukanie)"), b -> {
                 Path tex = PackTools.texturesDir(folder);
                 if (Files.isDirectory(tex)) client.setScreen(new TextureBrowserScreen(this, tex));
-                else status = "Ten pakiet nie ma folderu assets/minecraft/textures.";
-            }).dimensions(cx - 140, 54, 280, 22).build());
+                else status = "Ten pakiet nie ma jeszcze folderu tekstur. Najpierw edytuj item w 'Itemy PvP'.";
+            }).dimensions(cx - 140, 78, 280, 22).build());
             addDrawableChild(ButtonWidget.builder(Text.literal("Obraz na tarcze"),
                     b -> client.setScreen(new ShieldImageScreen(this, folder)))
-                    .dimensions(cx - 140, 80, 280, 22).build());
+                    .dimensions(cx - 140, 104, 280, 22).build());
             addDrawableChild(ButtonWidget.builder(Text.literal("Przeladuj tekstury w grze"), b -> {
                 client.reloadResources();
                 status = "Przeladowuje tekstury...";
-            }).dimensions(cx - 140, 106, 280, 22).build());
+            }).dimensions(cx - 140, 130, 280, 22).build());
             addDrawableChild(ButtonWidget.builder(Text.literal("Zmien pakiet"), b -> {
                 folder = null;
+                lastFolder = null;
                 status = "";
                 clearAndInit();
-            }).dimensions(cx - 140, 132, 280, 22).build());
+            }).dimensions(cx - 140, 156, 280, 22).build());
         }
         addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
@@ -112,7 +121,7 @@ public class TexturePackScreen extends Screen {
         } else {
             ctx.drawTextWithShadow(textRenderer, "Pakiet: " + textRenderer.trimToWidth(packName, 230), x, 32, HexTheme.TEXT);
             wrapped(ctx, "Aby zobaczyc zmiany, pakiet musi byc wlaczony w ustawieniach gry (Pakiety zasobow).",
-                    x, 160, 280, HexTheme.TEXT_DIM);
+                    x, 184, 280, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             wrapped(ctx, status, x, height - 62, 280, HexTheme.TEXT);

@@ -99,7 +99,8 @@ public class HexmodScreen extends Screen {
             tool("Katalog modow", 3, new ModCatalogScreen(this));
             tool("Spotify", 4, new SpotifyScreen(this));
             tool("Edytor tekstur", 5, new TexturePackScreen(this));
-            if (Remote.isAdmin()) tool("Panel admina", 6, new AdminScreen(this));
+            tool("Makra", 6, new MacroScreen(this));
+            if (Remote.isAdmin()) tool("Panel admina", 7, new AdminScreen(this));
         }
     }
 
