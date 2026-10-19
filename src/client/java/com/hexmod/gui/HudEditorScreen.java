@@ -12,7 +12,7 @@ import java.util.List;
 
 /** Edytor HUD: przeciagnij widget myszka, a na dole ustaw skale, kolor, ukrywanie i opcje. */
 public class HudEditorScreen extends Screen {
-    private static final int PANEL_H = 64;
+    private static final int PANEL_H = 82;
 
     private final Screen parent;
     private Module selected;
@@ -20,6 +20,8 @@ public class HudEditorScreen extends Screen {
     private boolean wasDown;
     private int dragDx, dragDy;
     private boolean needsInit;
+    private Module listening;
+    private final boolean[] heldAtStart = new boolean[349];
 
     public HudEditorScreen(Screen parent) {
         super(Text.literal("Edytor HUD"));
@@ -31,6 +33,12 @@ public class HudEditorScreen extends Screen {
         int cx = width / 2;
         int y0 = height - PANEL_H;
 
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal("Ukryj dodatkowe: " + (Module.extrasHidden ? "ON" : "OFF")), b -> {
+            Module.extrasHidden = !Module.extrasHidden;
+            needsInit = true;
+        }).dimensions(width - 140, 20, 136, 18).build());
+
         if (selected == null) {
             addDrawableChild(ButtonWidget.builder(Text.literal("Gotowe"), b -> client.setScreen(parent))
                     .dimensions(cx - 30, y0 + 20, 60, 20).build());
@@ -39,18 +47,37 @@ public class HudEditorScreen extends Screen {
 
         int x = cx - 125;
         addDrawableChild(ButtonWidget.builder(Text.literal("-"), b -> changeScale(-0.1f))
-                .dimensions(x, y0 + 8, 24, 20).build());
+                .dimensions(x, y0 + 6, 24, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("+"), b -> changeScale(0.1f))
-                .dimensions(x + 28, y0 + 8, 24, 20).build());
+                .dimensions(x + 28, y0 + 6, 24, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Kolor"), b -> cycleColor())
-                .dimensions(x + 56, y0 + 8, 56, 20).build());
+                .dimensions(x + 56, y0 + 6, 56, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(selected.hidden ? "Pokaz" : "Ukryj"), b -> {
             selected.hidden = !selected.hidden;
             ModuleManager.save();
             needsInit = true;
-        }).dimensions(x + 116, y0 + 8, 70, 20).build());
+        }).dimensions(x + 116, y0 + 6, 70, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Gotowe"), b -> client.setScreen(parent))
-                .dimensions(x + 190, y0 + 8, 60, 20).build());
+                .dimensions(x + 190, y0 + 6, 60, 20).build());
+
+        String keyLabel = listening == selected
+                ? "Nacisnij klawisz..." : "Klawisz: " + keyName(selected.bindKey);
+        addDrawableChild(ButtonWidget.builder(Text.literal(keyLabel), b -> {
+            listening = listening == selected ? null : selected;
+            resetHeld();
+            needsInit = true;
+        }).dimensions(cx - 125, y0 + 30, 130, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Tryb: " + (selected.bindHold ? "trzymaj" : "przelacz")), b -> {
+            selected.bindHold = !selected.bindHold;
+            ModuleManager.save();
+            needsInit = true;
+        }).dimensions(cx + 9, y0 + 30, 96, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+            selected.bindKey = -1;
+            listening = null;
+            ModuleManager.save();
+            needsInit = true;
+        }).dimensions(cx + 109, y0 + 30, 36, 20).build());
 
         int ox = cx - (selected.options.size() * 74) / 2;
         for (String key : selected.options.keySet()) {
@@ -61,9 +88,63 @@ public class HudEditorScreen extends Screen {
                 selected.options.put(k, !selected.option(k));
                 ModuleManager.save();
                 needsInit = true;
-            }).dimensions(ox, y0 + 34, 70, 20).build());
+            }).dimensions(ox, y0 + 54, 70, 20).build());
             ox += 74;
         }
+    }
+
+    private void resetHeld() {
+        long win = client.getWindow().getHandle();
+        for (int k = 32; k < heldAtStart.length; k++) {
+            heldAtStart[k] = GLFW.glfwGetKey(win, k) == GLFW.GLFW_PRESS;
+        }
+    }
+
+    /** Czeka na nacisniecie klawisza przypisywanego do widgetu (Backspace = usun, Prawy Shift pominiety). */
+    private void pollListening() {
+        if (listening == null) return;
+        if (listening != selected) { listening = null; return; }
+        long win = client.getWindow().getHandle();
+        for (int k = 32; k < heldAtStart.length; k++) {
+            boolean down = GLFW.glfwGetKey(win, k) == GLFW.GLFW_PRESS;
+            if (!down) { heldAtStart[k] = false; continue; }
+            if (heldAtStart[k] || k == GLFW.GLFW_KEY_ESCAPE || k == GLFW.GLFW_KEY_RIGHT_SHIFT) continue;
+            selected.bindKey = k == GLFW.GLFW_KEY_BACKSPACE ? -1 : k;
+            listening = null;
+            ModuleManager.save();
+            needsInit = true;
+            return;
+        }
+    }
+
+    private static String keyName(int k) {
+        if (k <= 0) return "brak";
+        switch (k) {
+            case 32: return "Spacja";
+            case 257: return "Enter";
+            case 258: return "Tab";
+            case 260: return "Insert";
+            case 261: return "Delete";
+            case 262: return "Strzalka w prawo";
+            case 263: return "Strzalka w lewo";
+            case 264: return "Strzalka w dol";
+            case 265: return "Strzalka w gore";
+            case 266: return "Page Up";
+            case 267: return "Page Down";
+            case 268: return "Home";
+            case 269: return "End";
+            case 280: return "Caps Lock";
+            case 340: return "Lewy Shift";
+            case 341: return "Lewy Ctrl";
+            case 342: return "Lewy Alt";
+            case 345: return "Prawy Ctrl";
+            case 346: return "Prawy Alt";
+            default: break;
+        }
+        if (k >= 290 && k <= 301) return "F" + (k - 289);
+        if (k >= 320 && k <= 329) return "Num " + (k - 320);
+        String n = GLFW.glfwGetKeyName(k, 0);
+        return n == null ? "Klawisz " + k : n.toUpperCase();
     }
 
     private void changeScale(float d) {
@@ -158,6 +239,7 @@ public class HudEditorScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         handleMouse(mouseX, mouseY);
+        pollListening();
 
         boolean any = false;
         for (Module m : ModuleManager.all()) {

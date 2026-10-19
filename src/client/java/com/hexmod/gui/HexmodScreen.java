@@ -10,13 +10,16 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
-/** Glowne menu Hexmoda (Prawy Shift). Zablokowany gracz widzi tylko komunikat. */
+/** Glowne menu Hexmoda (Prawy Shift) z zakladkami: Moduly i Narzedzia. Zablokowany gracz widzi tylko komunikat. */
 public class HexmodScreen extends Screen {
     private static final int PANEL_W = 340;
     private static final int CELL_W = 160;
-    private static final int ROW_H = 20;
-    private static final int HEADER_H = 24;
-    private static final int FOOTER_H = 82;
+    private static final int ROW_H = 18;
+    private static final int HEADER_H = 40;
+    private static final int FOOTER_H = 30;
+    private static final int TAB_W = 90;
+
+    private static int tab = 0; // zapamietana zakladka: 0 = Moduly, 1 = Narzedzia
 
     private int panelX, panelY, panelH;
 
@@ -36,10 +39,14 @@ public class HexmodScreen extends Screen {
         return panelY + HEADER_H + (i / 2) * ROW_H;
     }
 
-    private void button(String label, int col, int row, Screen target) {
-        int bw = (PANEL_W - 16 - 8) / 3;
-        int x = panelX + 8 + col * (bw + 4);
-        int y = panelY + panelH - FOOTER_H + 6 + row * 24;
+    private int tabX(int i) {
+        return panelX + 8 + i * (TAB_W + 4);
+    }
+
+    private void tool(String label, int index, Screen target) {
+        int bw = (PANEL_W - 24) / 2;
+        int x = panelX + 8 + (index % 2) * (bw + 8);
+        int y = panelY + HEADER_H + 4 + (index / 2) * 26;
         addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> client.setScreen(target))
                 .dimensions(x, y, bw, 20).build());
     }
@@ -56,29 +63,44 @@ public class HexmodScreen extends Screen {
         }
 
         List<Module> modules = ModuleManager.all();
-        panelH = HEADER_H + rows() * ROW_H + FOOTER_H;
         panelX = (width - PANEL_W) / 2;
+        panelH = tab == 0 ? HEADER_H + rows() * ROW_H + FOOTER_H : HEADER_H + 4 * 26 + 10;
         panelY = Math.max(2, (height - panelH) / 2);
 
-        for (int i = 0; i < modules.size(); i++) {
-            Module m = modules.get(i);
-            addDrawableChild(new ToggleSwitch(cellX(i) + CELL_W - 36 - 4, cellY(i) + 1, m.isEnabled(), m::setEnabled));
+        String[] tabs = {"Moduly", "Narzedzia"};
+        for (int i = 0; i < tabs.length; i++) {
+            final int target = i;
+            addDrawableChild(ButtonWidget.builder(Text.literal(tabs[i]), b -> {
+                tab = target;
+                clearAndInit();
+            }).dimensions(tabX(i), panelY + 18, TAB_W, 16).build());
         }
 
-        button("Edytuj HUD", 0, 0, new HudEditorScreen(this));
-        button("Configi", 1, 0, new ConfigScreen(this));
-        button("Sojusznicy", 2, 0, new AlliesScreen(this));
-        button("Katalog modow", 0, 1, new ModCatalogScreen(this));
-        button("Spotify", 1, 1, new SpotifyScreen(this));
-        if (Remote.isAdmin()) {
-            button("Panel admina", 2, 1, new AdminScreen(this));
+        if (tab == 0) {
+            for (int i = 0; i < modules.size(); i++) {
+                Module m = modules.get(i);
+                addDrawableChild(new ToggleSwitch(cellX(i) + CELL_W - 36 - 2, cellY(i), m.isEnabled(), m::setEnabled));
+            }
+            int by = panelY + panelH - FOOTER_H + 6;
+            int half = (PANEL_W - 20) / 2;
+            addDrawableChild(ButtonWidget.builder(Text.literal("Wylacz wszystkie moduly"), b -> {
+                ModuleManager.disableAll();
+                clearAndInit();
+            }).dimensions(panelX + 8, by, half, 18).build());
+            addDrawableChild(ButtonWidget.builder(
+                    Text.literal("Ukryj dodatkowe: " + (Module.extrasHidden ? "ON" : "OFF")), b -> {
+                Module.extrasHidden = !Module.extrasHidden;
+                clearAndInit();
+            }).dimensions(panelX + 12 + half, by, half, 18).build());
+        } else {
+            tool("Edytuj HUD", 0, new HudEditorScreen(this));
+            tool("Configi", 1, new ConfigScreen(this));
+            tool("Sojusznicy", 2, new AlliesScreen(this));
+            tool("Katalog modow", 3, new ModCatalogScreen(this));
+            tool("Spotify", 4, new SpotifyScreen(this));
+            tool("Edytor tekstur", 5, new TexturePackScreen(this));
+            if (Remote.isAdmin()) tool("Panel admina", 6, new AdminScreen(this));
         }
-
-        int by = panelY + panelH - FOOTER_H + 6 + 48;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wylacz wszystkie moduly"), b -> {
-            ModuleManager.disableAll();
-            clearAndInit();
-        }).dimensions(panelX + 8, by, PANEL_W - 16, 20).build());
     }
 
     @Override
@@ -87,8 +109,11 @@ public class HexmodScreen extends Screen {
         ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, HexTheme.PANEL);
         ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + 3, HexTheme.RED);
         if (Remote.isLocked()) return;
-        for (int i = 0; i < ModuleManager.all().size(); i++) {
-            ctx.fill(cellX(i), cellY(i), cellX(i) + CELL_W, cellY(i) + ROW_H - 2, HexTheme.PANEL_ROW);
+        ctx.fill(tabX(tab), panelY + 34, tabX(tab) + TAB_W, panelY + 37, HexTheme.RED);
+        if (tab == 0) {
+            for (int i = 0; i < ModuleManager.all().size(); i++) {
+                ctx.fill(cellX(i), cellY(i), cellX(i) + CELL_W, cellY(i) + ROW_H - 1, HexTheme.PANEL_ROW);
+            }
         }
     }
 
@@ -106,10 +131,12 @@ public class HexmodScreen extends Screen {
             }
             return;
         }
-        ctx.drawTextWithShadow(textRenderer, "HEXMOD", panelX + 10, panelY + 9, HexTheme.RED);
-        List<Module> modules = ModuleManager.all();
-        for (int i = 0; i < modules.size(); i++) {
-            ctx.drawTextWithShadow(textRenderer, modules.get(i).name, cellX(i) + 6, cellY(i) + 5, HexTheme.TEXT);
+        ctx.drawTextWithShadow(textRenderer, "HEXMOD", panelX + 10, panelY + 6, HexTheme.RED);
+        if (tab == 0) {
+            List<Module> modules = ModuleManager.all();
+            for (int i = 0; i < modules.size(); i++) {
+                ctx.drawTextWithShadow(textRenderer, modules.get(i).name, cellX(i) + 6, cellY(i) + 5, HexTheme.TEXT);
+            }
         }
     }
 
