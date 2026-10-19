@@ -25,6 +25,8 @@ public final class ModuleManager {
         public float scale = 1f;
         public int color = 0xFFFFFF;
         public boolean hidden;
+        public int bindKey = -1;
+        public boolean bindHold;
         public Map<String, Boolean> options = new LinkedHashMap<>();
     }
 
@@ -45,6 +47,9 @@ public final class ModuleManager {
         register(new CooldownModule());
         register(new TotemModule());
         register(new EnemyTagsModule());
+        register(new ReachCircleModule());
+        register(new DamageDealtModule());
+        register(new PearlTimerModule());
         register(new CpsModule());
         register(new ArmorModule());
         register(new EffectsModule());
@@ -78,6 +83,8 @@ public final class ModuleManager {
             s.scale = m.scale;
             s.color = m.color;
             s.hidden = m.hidden;
+            s.bindKey = m.bindKey;
+            s.bindHold = m.bindHold;
             s.options = new LinkedHashMap<>(m.options);
             map.put(m.id, s);
         }
@@ -94,6 +101,8 @@ public final class ModuleManager {
             m.scale = Math.max(0.5f, Math.min(3f, s.scale));
             m.color = s.color & 0xFFFFFF;
             m.hidden = s.hidden;
+            m.bindKey = s.bindKey;
+            m.bindHold = s.bindHold;
             if (s.options != null) {
                 for (Map.Entry<String, Boolean> e : s.options.entrySet()) {
                     if (m.options.containsKey(e.getKey()) && e.getValue() != null) {

@@ -1,13 +1,20 @@
 package com.hexmod.module;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** Modul Hexmoda: widget HUD z pozycja, skala, kolorem i opcjami, ktory mozna wlaczyc/wylaczyc. */
 public class Module {
     public static final int CENTER = -1;
+
+    /** Globalny przelacznik: gdy true, widoczne sa tylko podstawowe widgety. */
+    public static boolean extrasHidden = false;
+    private static final Set<String> BASIC = Set.of("fps", "cps", "cooldowns", "effects", "spotify");
     public static final int[] PALETTE = {0xD10A0A, 0xFFFFFF, 0xFFD60A, 0x30D158, 0x64D2FF, 0x0A84FF, 0xBF5AF2};
 
     public final String id;
@@ -19,6 +26,13 @@ public class Module {
     public float scale = 1f;
     public int color = 0xFFFFFF;
     public boolean hidden = false;
+
+    /** Klawisz (kod GLFW) do pokazywania/ukrywania widgetu, -1 = brak. */
+    public int bindKey = -1;
+    /** true = widget widoczny tylko, gdy trzymasz klawisz; false = klawisz przelacza. */
+    public boolean bindHold = false;
+    private boolean keyHidden = false;
+    private boolean keyWasDown = false;
 
     public final Map<String, Boolean> options = new LinkedHashMap<>();
     public final Map<String, String> optionLabels = new LinkedHashMap<>();
@@ -97,8 +111,28 @@ public class Module {
 
     /** Rysowanie w grze. */
     public final void render(DrawContext ctx) {
-        if (hidden || Remote.isLocked()) return;
+        if (Remote.isLocked()) return;
+        pollKey();
+        if (hidden || keyHidden) return;
+        if (extrasHidden && !BASIC.contains(id)) return;
         paint(ctx, false);
+    }
+
+    /** Sprawdza klawisz widgetu co klatke (tylko gdy nie ma otwartego ekranu, np. czatu). */
+    private void pollKey() {
+        if (bindKey <= 0) {
+            keyHidden = false;
+            return;
+        }
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen != null) return;
+        boolean down = GLFW.glfwGetKey(mc.getWindow().getHandle(), bindKey) == GLFW.GLFW_PRESS;
+        if (bindHold) {
+            keyHidden = !down;
+        } else if (down && !keyWasDown) {
+            keyHidden = !keyHidden;
+        }
+        keyWasDown = down;
     }
 
     /** Rysowanie z uwzglednieniem pozycji i skali. preview=true w edytorze HUD (pokazuje przyklad). */
