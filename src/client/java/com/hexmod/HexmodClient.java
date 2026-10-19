@@ -2,6 +2,8 @@ package com.hexmod;
 
 import com.hexmod.gui.HexmodScreen;
 import com.hexmod.module.AlliesManager;
+import com.hexmod.module.ChatCommands;
+import com.hexmod.module.MacroManager;
 import com.hexmod.module.CombatTracker;
 import com.hexmod.module.DamageDealtModule;
 import com.hexmod.module.Module;
@@ -10,6 +12,7 @@ import com.hexmod.module.Remote;
 import com.hexmod.module.ShieldBreakModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -35,6 +38,7 @@ public class HexmodClient implements ClientModInitializer {
         ModuleManager.init();
         ModuleManager.load();
         AlliesManager.load();
+        MacroManager.load();
         Remote.refresh();
 
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -60,6 +64,7 @@ public class HexmodClient implements ClientModInitializer {
             }
             if (++refreshTicks % 6000 == 0) Remote.refresh();
             if (Remote.isLocked()) return;
+            MacroManager.tick();
             CombatTracker.tick();
             for (Module m : ModuleManager.all()) {
                 if (m.isEnabled()) m.tick();
@@ -78,6 +83,8 @@ public class HexmodClient implements ClientModInitializer {
             }
             return ActionResult.PASS;
         });
+
+        ClientSendMessageEvents.ALLOW_CHAT.register(message -> !ChatCommands.handle(message));
 
         HudElementRegistry.attachElementAfter(
                 VanillaHudElements.MISC_OVERLAYS,
