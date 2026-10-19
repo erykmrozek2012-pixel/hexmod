@@ -3,6 +3,7 @@ package com.hexmod;
 import com.hexmod.gui.HexmodScreen;
 import com.hexmod.module.AlliesManager;
 import com.hexmod.module.CombatTracker;
+import com.hexmod.module.DamageDealtModule;
 import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
 import com.hexmod.module.Remote;
@@ -23,8 +24,10 @@ import org.lwjgl.glfw.GLFW;
 
 public class HexmodClient implements ClientModInitializer {
     public static final String MOD_ID = "hexmod";
+    private static final KeyBinding.Category CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID, "main"));
 
     private static KeyBinding openMenuKey;
+    private static KeyBinding hideExtrasKey;
     private static int refreshTicks = 0;
 
     @Override
@@ -38,12 +41,22 @@ public class HexmodClient implements ClientModInitializer {
                 "key.hexmod.open_menu",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                KeyBinding.Category.create(Identifier.of(MOD_ID, "main"))
+                CATEGORY
+        ));
+
+        hideExtrasKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.hexmod.hide_extras",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenuKey.wasPressed()) {
                 client.setScreen(new HexmodScreen());
+            }
+            while (hideExtrasKey.wasPressed()) {
+                Module.extrasHidden = !Module.extrasHidden;
             }
             if (++refreshTicks % 6000 == 0) Remote.refresh();
             if (Remote.isLocked()) return;
@@ -56,6 +69,7 @@ public class HexmodClient implements ClientModInitializer {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (world.isClient() && !Remote.isLocked()) {
                 CombatTracker.markCombat();
+                if (entity instanceof PlayerEntity victim) DamageDealtModule.onAttack(victim);
                 if (entity instanceof PlayerEntity target
                         && target.isBlocking()
                         && player.getStackInHand(hand).isIn(ItemTags.AXES)) {
