@@ -5,6 +5,9 @@ import com.hexmod.module.AlliesManager;
 import com.hexmod.module.ChatCommands;
 import com.hexmod.module.MacroManager;
 import com.hexmod.module.CombatTracker;
+import com.hexmod.module.ItemLockModule;
+import com.hexmod.module.WaypointManager;
+import com.hexmod.module.WaypointsModule;
 import com.hexmod.module.DamageDealtModule;
 import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
@@ -39,6 +42,7 @@ public class HexmodClient implements ClientModInitializer {
         ModuleManager.load();
         AlliesManager.load();
         MacroManager.load();
+        WaypointManager.load();
         Remote.refresh();
 
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -54,6 +58,8 @@ public class HexmodClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_UNKNOWN,
                 CATEGORY
         ));
+
+        ClientTickEvents.START_CLIENT_TICK.register(ItemLockModule::beforeInput);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenuKey.wasPressed()) {
@@ -93,6 +99,7 @@ public class HexmodClient implements ClientModInitializer {
                     for (Module m : ModuleManager.all()) {
                         if (m.isEnabled()) m.render(ctx);
                     }
+                    WaypointsModule.renderMarkers(ctx);
                 });
     }
 }
