@@ -57,6 +57,8 @@ public final class ModuleManager {
         register(new ShieldBreakModule());
         register(new AlliesModule());
         register(new SpotifyModule());
+        register(new ItemLockModule());
+        register(new WaypointsModule());
     }
 
     public static void register(Module module) {

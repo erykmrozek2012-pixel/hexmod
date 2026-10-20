@@ -20,7 +20,9 @@ public final class ChatCommands {
     public static boolean handle(String msg) {
         if (msg == null) return false;
         String trimmed = msg.trim();
-        if (!trimmed.toLowerCase().startsWith(".hex") || Remote.isLocked()) return false;
+        if (Remote.isLocked()) return false;
+        if (trimmed.toLowerCase().startsWith(".wp")) return waypoint(trimmed);
+        if (!trimmed.toLowerCase().startsWith(".hex")) return false;
         String[] parts = trimmed.split("\\s+");
         String cmd = parts[0].toLowerCase();
         boolean on = cmd.equals(".hexon");
@@ -47,6 +49,24 @@ public final class ChatCommands {
             }
         }
         say("Nie znaleziono modulu: " + parts[1]);
+        return true;
+    }
+
+    /** .wp add [nazwa], .wp del nazwa, .wp list */
+    private static boolean waypoint(String msg) {
+        String[] p = msg.trim().split("\\s+", 3);
+        if (!p[0].equalsIgnoreCase(".wp")) return false;
+        String sub = p.length > 1 ? p[1].toLowerCase() : "";
+        String arg = p.length > 2 ? p[2] : "";
+        switch (sub) {
+            case "add" -> say(WaypointManager.addHere(arg) ? "Dodano waypoint." : "Nie mozna dodac waypointu.");
+            case "del" -> say(WaypointManager.removeByName(arg.trim()) ? "Usunieto waypoint." : "Nie ma takiego waypointu.");
+            case "list" -> {
+                if (WaypointManager.list().isEmpty()) say("Brak waypointow.");
+                for (WaypointManager.Waypoint w : WaypointManager.list()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
+            }
+            default -> say(".wp add [nazwa] / .wp del nazwa / .wp list");
+        }
         return true;
     }
 }
