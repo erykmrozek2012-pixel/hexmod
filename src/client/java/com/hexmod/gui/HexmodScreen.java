@@ -64,7 +64,7 @@ public class HexmodScreen extends Screen {
 
         List<Module> modules = ModuleManager.all();
         panelX = (width - PANEL_W) / 2;
-        panelH = tab == 0 ? HEADER_H + rows() * ROW_H + FOOTER_H : HEADER_H + 4 * 26 + 10;
+        panelH = tab == 0 ? HEADER_H + rows() * ROW_H + FOOTER_H : HEADER_H + 5 * 26 + 10;
         panelY = Math.max(2, (height - panelH) / 2);
 
         String[] tabs = {"Moduly", "Narzedzia"};
@@ -100,7 +100,8 @@ public class HexmodScreen extends Screen {
             tool("Spotify", 4, new SpotifyScreen(this));
             tool("Edytor tekstur", 5, new TexturePackScreen(this));
             tool("Makra", 6, new MacroScreen(this));
-            if (Remote.isAdmin()) tool("Panel admina", 7, new AdminScreen(this));
+            tool("Waypointy", 7, new WaypointScreen(this));
+            if (Remote.isAdmin()) tool("Panel admina", 8, new AdminScreen(this));
         }
     }
 
