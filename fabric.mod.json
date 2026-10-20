@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "hexmod",
+  "version": "${version}",
+  "name": "Hexmod",
+  "description": "Mod PvP z konfigurowalnym HUD, widgetami i kosmetykami.",
+  "authors": ["er__is"],
+  "environment": "client",
+  "mixins": [
+    { "config": "hexmod.client.mixins.json", "environment": "client" }
+  ],
+  "entrypoints": {
+    "client": ["com.hexmod.HexmodClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
