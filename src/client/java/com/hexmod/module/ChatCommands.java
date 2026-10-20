@@ -22,6 +22,8 @@ public final class ChatCommands {
         String trimmed = msg.trim();
         if (Remote.isLocked()) return false;
         if (trimmed.toLowerCase().startsWith(".wp")) return waypoint(trimmed);
+        if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
+        if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
         if (!trimmed.toLowerCase().startsWith(".hex")) return false;
         String[] parts = trimmed.split("\\s+");
         String cmd = parts[0].toLowerCase();
@@ -67,6 +69,60 @@ public final class ChatCommands {
             }
             default -> say(".wp add [nazwa] / .wp del nazwa / .wp list");
         }
+        return true;
+    }
+
+    /** .lock add (item z reki), .lock del (item z reki), .lock list */
+    private static boolean lock(String msg) {
+        String[] p = msg.trim().split("\\s+");
+        if (!p[0].equalsIgnoreCase(".lock")) return false;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        String sub = p.length > 1 ? p[1].toLowerCase() : "";
+        switch (sub) {
+            case "add" -> say(mc.player != null && ItemLockManager.add(mc.player.getMainHandStack())
+                    ? "Zablokowano ten typ itemu." : "Trzymaj item w rece (albo jest juz zablokowany).");
+            case "del" -> say(mc.player != null && ItemLockManager.remove(mc.player.getMainHandStack())
+                    ? "Odblokowano ten typ itemu." : "Trzymaj zablokowany item w rece.");
+            case "list" -> {
+                if (ItemLockManager.list().isEmpty()) say("Twoja lista blokad jest pusta.");
+                for (String id : ItemLockManager.list()) say(id);
+            }
+            default -> say(".lock add / .lock del (item w rece) / .lock list");
+        }
+        return true;
+    }
+
+    /** .lock (przedmiot w rece), .lock nazwa (np. ender_pearl), .lock list, .lock clear */
+    private static boolean lock(String msg) {
+        String[] p = msg.trim().split("\\s+", 2);
+        if (!p[0].equalsIgnoreCase(".lock")) return false;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        String arg = p.length > 1 ? p[1].trim() : "";
+        if (arg.equalsIgnoreCase("list")) {
+            var ids = ItemLockManager.list();
+            say(ids.isEmpty() ? "Brak zablokowanych przedmiotow (poza totemem i gapple z opcji)." : "Zablokowane: " + String.join(", ", ids));
+            return true;
+        }
+        if (arg.equalsIgnoreCase("clear")) {
+            ItemLockManager.clear();
+            say("Wyczyszczono liste zablokowanych przedmiotow.");
+            return true;
+        }
+        String id;
+        if (arg.isEmpty()) {
+            if (mc.player == null || mc.player.getMainHandStack().isEmpty()) {
+                say("Trzymaj przedmiot w rece albo wpisz: .lock nazwa (np. .lock ender_pearl).");
+                return true;
+            }
+            id = ItemLockManager.idOf(mc.player.getMainHandStack());
+        } else {
+            id = ItemLockManager.resolve(arg);
+            if (id == null) {
+                say("Nie ma takiego przedmiotu: " + arg);
+                return true;
+            }
+        }
+        say((ItemLockManager.toggleId(id) ? "Zablokowano: " : "Odblokowano: ") + id);
         return true;
     }
 }
