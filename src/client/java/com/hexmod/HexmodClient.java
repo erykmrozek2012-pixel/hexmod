@@ -8,7 +8,8 @@ import com.hexmod.module.CombatTracker;
 import com.hexmod.module.ItemLockManager;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
-import com.hexmod.module.RefCounterModule;
+import com.hexmod.module.ComboModule;
+import com.hexmod.module.ReachModule;
 import com.hexmod.module.WaypointsModule;
 import com.hexmod.module.DamageDealtModule;
 import com.hexmod.module.Module;
@@ -83,7 +84,11 @@ public class HexmodClient implements ClientModInitializer {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (world.isClient() && !Remote.isLocked()) {
                 CombatTracker.markCombat();
-                if (entity instanceof PlayerEntity victim) DamageDealtModule.onAttack(victim);
+                if (entity instanceof PlayerEntity victim) {
+                    DamageDealtModule.onAttack(victim);
+                    ComboModule.onAttack();
+                    ReachModule.onAttack(player, entity);
+                }
                 if (entity instanceof PlayerEntity target
                         && target.isBlocking()
                         && player.getStackInHand(hand).isIn(ItemTags.AXES)) {
@@ -103,7 +108,6 @@ public class HexmodClient implements ClientModInitializer {
                         if (m.isEnabled()) m.render(ctx);
                     }
                     WaypointsModule.renderMarkers(ctx);
-                    RefCounterModule.renderMarkers(ctx);
                 });
     }
 }
