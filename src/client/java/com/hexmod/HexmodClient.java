@@ -8,6 +8,7 @@ import com.hexmod.module.CombatTracker;
 import com.hexmod.module.ItemLockManager;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
+import com.hexmod.module.RefCounterModule;
 import com.hexmod.module.WaypointsModule;
 import com.hexmod.module.DamageDealtModule;
 import com.hexmod.module.Module;
@@ -102,6 +103,7 @@ public class HexmodClient implements ClientModInitializer {
                         if (m.isEnabled()) m.render(ctx);
                     }
                     WaypointsModule.renderMarkers(ctx);
+                    RefCounterModule.renderMarkers(ctx);
                 });
     }
 }
