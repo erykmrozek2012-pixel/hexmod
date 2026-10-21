@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -30,7 +31,7 @@ public class AdminScreen extends Screen {
     private TextFieldWidget fieldA, fieldB;
 
     public AdminScreen(Screen parent) {
-        super(Text.literal("Panel admina"));
+        super(Text.literal(L.t("Admin Panel")));
         this.parent = parent;
     }
 
@@ -48,46 +49,46 @@ public class AdminScreen extends Screen {
         }
         int cx = width / 2;
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Blokady"), b -> { mode = 0; status = ""; clearAndInit(); })
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Blocks")), b -> { mode = 0; status = ""; clearAndInit(); })
                 .dimensions(cx - 140, 28, 135, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Katalog modow"), b -> { mode = 1; status = ""; clearAndInit(); })
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Mod Catalog")), b -> { mode = 1; status = ""; clearAndInit(); })
                 .dimensions(cx + 5, 28, 135, 20).build());
 
         if (mode == 0) {
             fieldA = new TextFieldWidget(textRenderer, cx - 140, 56, 180, 20, Text.literal("Nick"));
-            fieldA.setPlaceholder(Text.literal("Nick do zablokowania"));
+            fieldA.setPlaceholder(Text.literal(L.t("Nick to block")));
             fieldA.setMaxLength(16);
             addDrawableChild(fieldA);
-            addDrawableChild(ButtonWidget.builder(Text.literal("Zablokuj"), b -> block(fieldA.getText().trim()))
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Block")), b -> block(fieldA.getText().trim()))
                     .dimensions(cx + 46, 56, 94, 20).build());
 
             int y = 84;
             for (int i = 0; i < Math.min(6, blocks.size()); i++) {
                 final Remote.BlockedEntry e = blocks.get(i);
-                addDrawableChild(ButtonWidget.builder(Text.literal("Odblokuj"), b -> {
+                addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Unblock")), b -> {
                     blocks.remove(e);
                     clearAndInit();
                 }).dimensions(cx + 70, y, 70, 20).build());
                 y += 24;
             }
-            addDrawableChild(ButtonWidget.builder(Text.literal("Kopiuj blocklist.json"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Copy blocklist.json")), b -> {
                 Remote.Blocklist out = new Remote.Blocklist();
                 out.blocked = List.copyOf(blocks);
                 client.keyboard.setClipboard(new GsonBuilder().setPrettyPrinting().create().toJson(out));
-                status = "Skopiowano. Wklej do blocklist.json w repozytorium hexmod-data.";
+                status = L.t("Copied. Paste it into blocklist.json in the hexmod-data repository.");
             }).dimensions(cx - 140, height - 54, 280, 20).build());
         } else {
             fieldA = new TextFieldWidget(textRenderer, cx - 140, 56, 120, 20, Text.literal("Modrinth"));
-            fieldA.setPlaceholder(Text.literal("Nazwa na Modrinth"));
+            fieldA.setPlaceholder(Text.literal(L.t("Name on Modrinth")));
             fieldA.setMaxLength(48);
             addDrawableChild(fieldA);
-            fieldB = new TextFieldWidget(textRenderer, cx - 16, 56, 96, 20, Text.literal("Nazwa"));
-            fieldB.setPlaceholder(Text.literal("Nazwa w menu"));
+            fieldB = new TextFieldWidget(textRenderer, cx - 16, 56, 96, 20, Text.literal(L.t("Name")));
+            fieldB.setPlaceholder(Text.literal(L.t("Name in menu")));
             fieldB.setMaxLength(24);
             addDrawableChild(fieldB);
-            addDrawableChild(ButtonWidget.builder(Text.literal("Dodaj"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Add")), b -> {
                 String slug = fieldA.getText().trim();
-                if (slug.isEmpty()) { status = "Wpisz nazwe moda z Modrinth (z adresu strony)."; return; }
+                if (slug.isEmpty()) { status = L.t("Enter the mod name from Modrinth (from the page URL)."); return; }
                 Remote.CatalogEntry e = new Remote.CatalogEntry();
                 e.modrinth = slug;
                 e.id = slug;
@@ -99,28 +100,28 @@ public class AdminScreen extends Screen {
             int y = 84;
             for (int i = 0; i < Math.min(6, mods.size()); i++) {
                 final Remote.CatalogEntry e = mods.get(i);
-                addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+                addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
                     mods.remove(e);
                     clearAndInit();
                 }).dimensions(cx + 84, y, 56, 20).build());
                 y += 24;
             }
-            addDrawableChild(ButtonWidget.builder(Text.literal("Kopiuj catalog.json"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Copy catalog.json")), b -> {
                 Remote.Catalog out = new Remote.Catalog();
                 out.mods = List.copyOf(mods);
                 client.keyboard.setClipboard(new GsonBuilder().setPrettyPrinting().create().toJson(out));
-                status = "Skopiowano. Wklej do catalog.json w repozytorium hexmod-data.";
+                status = L.t("Copied. Paste it into catalog.json in the hexmod-data repository.");
             }).dimensions(cx - 140, height - 54, 280, 20).build());
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 30, 100, 20).build());
     }
 
     private void block(String nick) {
-        if (nick.isEmpty()) { status = "Wpisz nick."; return; }
-        if (nick.equalsIgnoreCase(Remote.username())) { status = "Nie mozesz zablokowac siebie."; return; }
-        status = "Szukam gracza " + nick + "...";
+        if (nick.isEmpty()) { status = L.t("Enter a nick."); return; }
+        if (nick.equalsIgnoreCase(Remote.username())) { status = L.t("You cannot block yourself."); return; }
+        status = L.t("Looking up player ") + nick + "...";
         CompletableFuture.runAsync(() -> {
             try {
                 JsonObject o = JsonParser.parseString(
@@ -129,9 +130,9 @@ public class AdminScreen extends Screen {
                 e.uuid = dashed(o.get("id").getAsString());
                 e.nick = o.get("name").getAsString();
                 blocks.add(e);
-                status = "Dodano do listy: " + e.nick;
+                status = L.t("Added to the list: ") + e.nick;
             } catch (IOException | RuntimeException ex) {
-                status = "Nie znaleziono gracza (" + nick + ").";
+                status = L.t("Player not found (") + nick + ").";
             }
             needsInit = true;
         });
@@ -156,21 +157,21 @@ public class AdminScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
-        ctx.drawTextWithShadow(textRenderer, "PANEL ADMINA", cx - 140, 14, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("ADMIN PANEL"), cx - 140, 14, HexTheme.RED);
         int y = 84;
         if (mode == 0) {
             for (int i = 0; i < Math.min(6, blocks.size()); i++) {
                 ctx.drawTextWithShadow(textRenderer, blocks.get(i).nick, cx - 140, y + 6, HexTheme.TEXT);
                 y += 24;
             }
-            if (blocks.isEmpty()) ctx.drawTextWithShadow(textRenderer, "Nikt nie jest zablokowany.", cx - 140, 90, HexTheme.TEXT_DIM);
+            if (blocks.isEmpty()) ctx.drawTextWithShadow(textRenderer, L.t("Nobody is blocked."), cx - 140, 90, HexTheme.TEXT_DIM);
         } else {
             for (int i = 0; i < Math.min(6, mods.size()); i++) {
                 Remote.CatalogEntry e = mods.get(i);
                 ctx.drawTextWithShadow(textRenderer, e.name + " (" + e.modrinth + ")", cx - 140, y + 6, HexTheme.TEXT);
                 y += 24;
             }
-            if (mods.isEmpty()) ctx.drawTextWithShadow(textRenderer, "Katalog jest pusty.", cx - 140, 90, HexTheme.TEXT_DIM);
+            if (mods.isEmpty()) ctx.drawTextWithShadow(textRenderer, L.t("The catalog is empty."), cx - 140, 90, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, cx, height - 68, HexTheme.TEXT);

@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.ModuleManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -18,7 +19,7 @@ public class ConfigScreen extends Screen {
     private String filter = "";
 
     public ConfigScreen(Screen parent) {
-        super(Text.literal("Configi"));
+        super(Text.literal(L.t("Configs")));
         this.parent = parent;
     }
 
@@ -26,14 +27,14 @@ public class ConfigScreen extends Screen {
     protected void init() {
         int cx = width / 2;
 
-        nameField = new TextFieldWidget(textRenderer, cx - 140, 40, 180, 20, Text.literal("Nazwa"));
-        nameField.setPlaceholder(Text.literal("Nazwa configu"));
+        nameField = new TextFieldWidget(textRenderer, cx - 140, 40, 180, 20, Text.literal(L.t("Name")));
+        nameField.setPlaceholder(Text.literal(L.t("Config name")));
         nameField.setMaxLength(24);
         addDrawableChild(nameField);
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Save")), b -> {
             status = ModuleManager.saveConfig(nameField.getText())
-                    ? "Zapisano config." : "Wpisz nazwe (litery, cyfry, - i _).";
+                    ? L.t("Config saved.") : L.t("Enter a name (letters, digits, - and _).");
             clearAndInit();
         }).dimensions(cx + 46, 40, 94, 20).build());
 
@@ -43,34 +44,34 @@ public class ConfigScreen extends Screen {
             names = names.stream().filter(n -> n.toLowerCase().contains(f)).toList();
         }
         addDrawableChild(ButtonWidget.builder(
-                Text.literal(filter.isEmpty() ? "Szukaj (z pola nazwy)" : "Filtr: " + filter + " [x]"), b -> {
+                Text.literal(filter.isEmpty() ? L.t("Search (uses the name field)") : L.t("Filter: ") + filter + " [x]"), b -> {
             filter = filter.isEmpty() ? nameField.getText().trim() : "";
             clearAndInit();
         }).dimensions(cx - 20, 16, 160, 16).build());
         int y = 72;
         for (int i = 0; i < Math.min(7, names.size()); i++) {
             final String n = names.get(i);
-            addDrawableChild(ButtonWidget.builder(Text.literal("Wczytaj"), b -> {
-                status = ModuleManager.loadConfig(n) ? "Wczytano: " + n : "Nie udalo sie wczytac.";
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Load")), b -> {
+                status = ModuleManager.loadConfig(n) ? L.t("Loaded: ") + n : L.t("Could not load.");
             }).dimensions(cx + 10, y, 70, 20).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
                 ModuleManager.deleteConfig(n);
-                status = "Usunieto: " + n;
+                status = L.t("Removed: ") + n;
                 clearAndInit();
             }).dimensions(cx + 84, y, 56, 20).build());
             y += 24;
         }
 
         int by = height - 52;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Kopiuj do schowka"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Copy to clipboard")), b -> {
             client.keyboard.setClipboard(ModuleManager.exportJson());
-            status = "Skopiowano config do schowka. Wyslij go znajomemu.";
+            status = L.t("Config copied to the clipboard. Send it to a friend.");
         }).dimensions(cx - 140, by, 135, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wklej ze schowka"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Paste from clipboard")), b -> {
             status = ModuleManager.importJson(client.keyboard.getClipboard())
-                    ? "Zaimportowano config ze schowka." : "Schowek nie zawiera poprawnego configu.";
+                    ? L.t("Config imported from the clipboard.") : L.t("The clipboard does not contain a valid config.");
         }).dimensions(cx + 5, by, 135, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, by + 26, 100, 20).build());
     }
 
@@ -93,7 +94,7 @@ public class ConfigScreen extends Screen {
             y += 24;
         }
         if (names.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Brak zapisanych configow.", cx - 140, 78, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("No saved configs."), cx - 140, 78, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, cx, height - 66, HexTheme.TEXT);

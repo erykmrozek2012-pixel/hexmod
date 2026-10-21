@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.PackTools;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -30,7 +31,7 @@ public class TextureBrowserScreen extends Screen {
     private List<Path> items = List.of();
 
     public TextureBrowserScreen(Screen parent, Path root) {
-        super(Text.literal("Tekstury"));
+        super(Text.literal(L.t("Textures")));
         this.parent = parent;
         this.root = root;
         this.dir = root;
@@ -50,8 +51,8 @@ public class TextureBrowserScreen extends Screen {
     protected void init() {
         int cx = width / 2;
         if (search == null) {
-            search = new TextFieldWidget(textRenderer, cx - 140, 34, 250, 18, Text.literal("Szukaj"));
-            search.setPlaceholder(Text.literal("Szukaj tekstury (np. shield, sword)"));
+            search = new TextFieldWidget(textRenderer, cx - 140, 34, 250, 18, Text.literal(L.t("Search")));
+            search.setPlaceholder(Text.literal(L.t("Search textures (e.g. shield, sword)")));
             search.setMaxLength(40);
             search.setChangedListener(s -> {
                 query = s.trim().toLowerCase(Locale.ROOT);
@@ -70,7 +71,7 @@ public class TextureBrowserScreen extends Screen {
             if (offset + ROWS < items.size()) offset += ROWS;
             refreshRows();
         }).dimensions(cx + 116, 56, 24, 18).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
 
         rowButtons.clear();
@@ -95,7 +96,7 @@ public class TextureBrowserScreen extends Screen {
         items = searching ? searchAll() : PackTools.listEntries(dir);
         int y = 58;
         if (!searching && !dir.equals(root)) {
-            addRow("[..] wstecz", y, () -> {
+            addRow(L.t("[..] back"), y, () -> {
                 dir = dir.getParent();
                 offset = 0;
                 refreshRows();
@@ -144,10 +145,10 @@ public class TextureBrowserScreen extends Screen {
         ctx.drawTextWithShadow(textRenderer, "TEKSTURY", x, 14, HexTheme.RED);
         String where = query.isEmpty()
                 ? "/textures/" + root.relativize(dir).toString().replace('\\', '/')
-                : "Wyniki wyszukiwania: " + items.size();
+                : L.t("Search results: ") + items.size();
         ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(where, 150), x + 80, 14, HexTheme.TEXT_DIM);
         if (items.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, query.isEmpty() ? "Pusty folder." : "Brak wynikow.", x, 80, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, query.isEmpty() ? L.t("Empty folder.") : L.t("No results."), x, 80, HexTheme.TEXT_DIM);
         }
     }
 

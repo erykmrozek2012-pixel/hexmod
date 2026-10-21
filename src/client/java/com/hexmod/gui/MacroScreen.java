@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.MacroManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -19,7 +20,7 @@ public class MacroScreen extends Screen {
     private String status = "";
 
     public MacroScreen(Screen parent) {
-        super(Text.literal("Makra"));
+        super(Text.literal(L.t("Macros")));
         this.parent = parent;
     }
 
@@ -29,7 +30,7 @@ public class MacroScreen extends Screen {
         List<MacroManager.Macro> list = MacroManager.list();
         int y = 44;
         for (MacroManager.Macro m : list) {
-            String keyLabel = m == listening ? "Nacisnij..." : HudEditorScreen.keyName(m.key);
+            String keyLabel = m == listening ? L.t("Press...") : HudEditorScreen.keyName(m.key);
             addDrawableChild(ButtonWidget.builder(Text.literal(textRenderer.trimToWidth(keyLabel, 80)), b -> {
                 listening = listening == m ? null : m;
                 long win = client.getWindow().getHandle();
@@ -37,14 +38,14 @@ public class MacroScreen extends Screen {
                 needsInit = true;
             }).dimensions(cx - 140, y, 86, 18).build());
 
-            TextFieldWidget tf = new TextFieldWidget(textRenderer, cx - 50, y, 146, 18, Text.literal("Tekst"));
+            TextFieldWidget tf = new TextFieldWidget(textRenderer, cx - 50, y, 146, 18, Text.literal(L.t("Text")));
             tf.setMaxLength(100);
-            tf.setPlaceholder(Text.literal("Komenda (/...) lub tekst"));
+            tf.setPlaceholder(Text.literal(L.t("Command (/...) or text")));
             tf.setText(m.text);
             tf.setChangedListener(s -> m.text = s);
             addDrawableChild(tf);
 
-            addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
                 MacroManager.list().remove(m);
                 MacroManager.save();
                 needsInit = true;
@@ -52,16 +53,16 @@ public class MacroScreen extends Screen {
             y += 22;
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Dodaj makro"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Add macro")), b -> {
             if (MacroManager.list().size() >= MacroManager.MAX) {
-                status = "Maksymalnie " + MacroManager.MAX + " makr.";
+                status = L.t("Maximum ") + MacroManager.MAX + L.t(" macros.");
             } else {
                 MacroManager.list().add(new MacroManager.Macro());
                 MacroManager.save();
                 needsInit = true;
             }
         }).dimensions(cx - 140, height - 54, 138, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx + 2, height - 54, 138, 20).build());
     }
 
@@ -101,9 +102,9 @@ public class MacroScreen extends Screen {
         pollListening();
         int x = width / 2 - 140;
         ctx.drawTextWithShadow(textRenderer, "MAKRA", x, 14, HexTheme.RED);
-        ctx.drawTextWithShadow(textRenderer, "Klawisz wysyla komende albo tekst na czacie.", x, 27, HexTheme.TEXT_DIM);
+        ctx.drawTextWithShadow(textRenderer, L.t("The key sends a command or text in chat."), x, 27, HexTheme.TEXT_DIM);
         if (MacroManager.list().isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Brak makr. Kliknij 'Dodaj makro'.", x, 50, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("No macros. Click 'Add macro'."), x, 50, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, width / 2, height - 68, HexTheme.TEXT);

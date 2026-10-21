@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.AlliesManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -19,7 +20,7 @@ public class AlliesScreen extends Screen {
     private String status = "";
 
     public AlliesScreen(Screen parent) {
-        super(Text.literal("Sojusznicy"));
+        super(Text.literal(L.t("Friends")));
         this.parent = parent;
     }
 
@@ -27,21 +28,21 @@ public class AlliesScreen extends Screen {
     protected void init() {
         int cx = width / 2;
         nameField = new TextFieldWidget(textRenderer, cx - 140, 40, 180, 20, Text.literal("Nick"));
-        nameField.setPlaceholder(Text.literal("Nick gracza"));
+        nameField.setPlaceholder(Text.literal(L.t("Player nick")));
         nameField.setMaxLength(16);
         addDrawableChild(nameField);
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Dodaj"), b -> {
-            status = AlliesManager.add(nameField.getText()) ? "Dodano sojusznika." : "Wpisz nick (lub juz jest na liscie).";
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Add")), b -> {
+            status = AlliesManager.add(nameField.getText()) ? L.t("Friend added.") : L.t("Enter a nick (or it is already on the list).");
             clearAndInit();
         }).dimensions(cx + 46, 40, 94, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Dodaj gracza z celownika"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Add player from crosshair")), b -> {
             Entity t = client.targetedEntity;
             if (t instanceof PlayerEntity p) {
-                status = AlliesManager.add(p.getName().getString()) ? "Dodano: " + p.getName().getString() : "Juz jest na liscie.";
+                status = AlliesManager.add(p.getName().getString()) ? L.t("Added: ") + p.getName().getString() : L.t("Already on the list.");
             } else {
-                status = "Nie patrzysz na gracza.";
+                status = L.t("You are not looking at a player.");
             }
             clearAndInit();
         }).dimensions(cx - 140, 66, 280, 20).build());
@@ -50,15 +51,15 @@ public class AlliesScreen extends Screen {
         int y = 96;
         for (int i = 0; i < Math.min(7, names.size()); i++) {
             final String n = names.get(i);
-            addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
                 AlliesManager.remove(n);
-                status = "Usunieto: " + n;
+                status = L.t("Removed: ") + n;
                 clearAndInit();
             }).dimensions(cx + 84, y, 56, 20).build());
             y += 24;
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 30, 100, 20).build());
     }
 
@@ -80,7 +81,7 @@ public class AlliesScreen extends Screen {
             y += 24;
         }
         if (names.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Brak sojusznikow.", cx - 140, 102, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("No friends yet."), cx - 140, 102, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, cx, height - 44, HexTheme.TEXT);

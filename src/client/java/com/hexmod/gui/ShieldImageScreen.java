@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.Browser;
 import com.hexmod.module.PackTools;
 import net.minecraft.client.gui.DrawContext;
@@ -25,7 +26,7 @@ public class ShieldImageScreen extends Screen {
     private String status = "";
 
     public ShieldImageScreen(Screen parent, Path packFolder) {
-        super(Text.literal("Obraz na tarcze"));
+        super(Text.literal(L.t("Shield Image")));
         this.parent = parent;
         this.packFolder = packFolder;
     }
@@ -48,36 +49,36 @@ public class ShieldImageScreen extends Screen {
         int y = 76;
         for (int i = 0; i < Math.min(4, images.size()); i++) {
             final Path p = images.get(i);
-            String label = textRenderer.trimToWidth("Uzyj: " + p.getFileName(), 270);
+            String label = textRenderer.trimToWidth(L.t("Use: ") + p.getFileName(), 270);
             addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
                 status = PackTools.applyShield(packFolder, p, quality, flip);
             }).dimensions(cx - 140, y, 280, 18).build());
             y += 20;
         }
         int by = height - 74;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Jakosc: " + quality + "x (" + (64 * quality) + "px)"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Quality: ") + quality + "x (" + (64 * quality) + "px)"), b -> {
             quality = quality >= 16 ? 2 : quality * 2;
             clearAndInit();
         }).dimensions(cx - 140, by - 24, 138, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Odbicie poziome: " + (flip ? "ON" : "OFF")), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Mirror horizontally: ") + (flip ? L.t("ON") : L.t("OFF"))), b -> {
             flip = !flip;
             clearAndInit();
         }).dimensions(cx + 2, by - 24, 138, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Otworz folder"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Open folder")), b -> {
             try {
                 Files.createDirectories(PackTools.shieldDir());
             } catch (IOException ignored) {}
             if (!Browser.open(PackTools.shieldDir().toAbsolutePath().toString())) {
-                status = "Nie moge otworzyc folderu: " + PackTools.shieldDir().toAbsolutePath();
+                status = L.t("Cannot open the folder: ") + PackTools.shieldDir().toAbsolutePath();
             }
         }).dimensions(cx - 140, by, 138, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Odswiez liste"), b -> clearAndInit())
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Refresh list")), b -> clearAndInit())
                 .dimensions(cx + 2, by, 138, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Przeladuj tekstury w grze"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Reload textures in game")), b -> {
             client.reloadResources();
-            status = "Przeladowuje tekstury...";
+            status = L.t("Reloading textures...");
         }).dimensions(cx - 140, by + 24, 280, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
     }
 
@@ -100,11 +101,11 @@ public class ShieldImageScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int x = width / 2 - 140;
-        ctx.drawTextWithShadow(textRenderer, "OBRAZ NA TARCZE", x, 14, HexTheme.RED);
-        wrapped(ctx, "1. Kliknij 'Otworz folder' i wrzuc tam swoj plik PNG.  2. Kliknij 'Odswiez liste'.  "
-                + "3. Kliknij 'Uzyj' przy obrazku.", x, 28, 280, HexTheme.TEXT_DIM);
+        ctx.drawTextWithShadow(textRenderer, L.t("SHIELD IMAGE"), x, 14, HexTheme.RED);
+        wrapped(ctx, L.t("1. Click 'Open folder' and put your PNG file there.  2. Click 'Refresh list'.  ")
+                + L.t("3. Click 'Use' next to the image."), x, 28, 280, HexTheme.TEXT_DIM);
         if (images.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Brak obrazow PNG w folderze.", x, 80, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("No PNG images in the folder."), x, 80, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             wrapped(ctx, status, x, height - 124, 280, HexTheme.TEXT);

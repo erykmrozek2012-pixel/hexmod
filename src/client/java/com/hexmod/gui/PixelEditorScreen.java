@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.PackTools;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.DrawContext;
@@ -53,7 +54,7 @@ public class PixelEditorScreen extends Screen {
     private float cacheHue = -1f;
 
     public PixelEditorScreen(Screen parent, Path file) {
-        super(Text.literal("Edytor pikseli"));
+        super(Text.literal(L.t("Pixel Editor")));
         this.parent = parent;
         this.file = file;
         loadFavs();
@@ -64,9 +65,9 @@ public class PixelEditorScreen extends Screen {
             h = img.h();
             px = img.px();
             loaded = w <= MAX && h <= MAX;
-            if (!loaded) status = "Obraz " + w + "x" + h + " jest za duzy (maksymalnie " + MAX + "x" + MAX + ").";
+            if (!loaded) status = L.t("Image ") + w + "x" + h + L.t(" is too large (maximum ") + MAX + "x" + MAX + ").";
         } catch (IOException | RuntimeException e) {
-            status = "Nie udalo sie wczytac: " + e.getMessage();
+            status = L.t("Could not load: ") + e.getMessage();
         }
     }
 
@@ -74,35 +75,35 @@ public class PixelEditorScreen extends Screen {
 
     @Override
     protected void init() {
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(6, height - 26, 84, 20).build());
         if (!loaded) return;
 
-        String[] names = {"Olowek", "Gumka", "Wypelnij", "Pipeta"};
+        String[] names = {L.t("Pencil"), L.t("Eraser"), L.t("Fill"), L.t("Picker")};
         Tool[] tools = Tool.values();
         for (int i = 0; i < 4; i++) {
             final Tool t = tools[i];
             addDrawableChild(ButtonWidget.builder(Text.literal(names[i]), b -> tool = t)
                     .dimensions(10, 20 + i * 22, 80, 20).build());
         }
-        addDrawableChild(ButtonWidget.builder(Text.literal("Cofnij"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Undo")), b -> {
             if (!undo.isEmpty()) px = undo.pop();
         }).dimensions(10, 114, 80, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz"), b -> save(false))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Save")), b -> save(false))
                 .dimensions(10, 140, 80, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz+reload"), b -> save(true))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Save+reload")), b -> save(true))
                 .dimensions(10, 162, 80, 20).build());
 
-        hexField = new TextFieldWidget(textRenderer, 96, height - 28, 70, 18, Text.literal("Kolor"));
+        hexField = new TextFieldWidget(textRenderer, 96, height - 28, 70, 18, Text.literal(L.t("Color")));
         hexField.setPlaceholder(Text.literal("#RRGGBB"));
         hexField.setMaxLength(9);
         addDrawableChild(hexField);
-        addDrawableChild(ButtonWidget.builder(Text.literal("Ustaw"), b -> setHex())
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Set")), b -> setHex())
                 .dimensions(168, height - 28, 44, 18).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz kolor"), b -> addFav())
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Save color")), b -> addFav())
                 .dimensions(sbX(), 144, 76, 18).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> removeFav())
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> removeFav())
                 .dimensions(sbX() + 80, 144, 40, 18).build());
 
         int areaX = 96, areaW = width - 96 - 8 - SB_W, areaH = height - 70;
@@ -120,23 +121,23 @@ public class PixelEditorScreen extends Screen {
                 long v = Long.parseLong(s, 16);
                 setColor((int) (((v & 0xFF) << 24) | (v >> 8)));
             } else {
-                status = "Wpisz kolor jako #RRGGBB.";
+                status = L.t("Enter a color as #RRGGBB.");
             }
         } catch (NumberFormatException e) {
-            status = "Zly kolor. Przyklad: #FF0000";
+            status = L.t("Invalid color. Example: #FF0000");
         }
     }
 
     private void save(boolean reload) {
         try {
             PackTools.writeImage(file, new PackTools.Img(w, h, px));
-            status = "Zapisano: " + file.getFileName();
+            status = L.t("Saved: ") + file.getFileName();
             if (reload) {
                 client.reloadResources();
-                status += " (przeladowuje tekstury)";
+                status += L.t(" (reloading textures)");
             }
         } catch (IOException | RuntimeException e) {
-            status = "Blad zapisu: " + e.getMessage();
+            status = L.t("Save error: ") + e.getMessage();
         }
     }
 
@@ -353,7 +354,7 @@ public class PixelEditorScreen extends Screen {
         ctx.fill(hx - 2, hy - 1, hx + HUE_W + 2, hy + 2, 0xFF000000);
         ctx.fill(hx - 1, hy, hx + HUE_W + 1, hy + 1, 0xFFFFFFFF);
 
-        ctx.drawTextWithShadow(textRenderer, "Wlasne kolory", sx0, 100, HexTheme.TEXT_DIM);
+        ctx.drawTextWithShadow(textRenderer, L.t("Custom colors"), sx0, 100, HexTheme.TEXT_DIM);
         for (int i = 0; i < MAX_FAV; i++) {
             int fx = sx0 + (i % 8) * 15, fy = 112 + (i / 8) * 14;
             ctx.fill(fx, fy, fx + 13, fy + 12, 0xFF000000);
@@ -394,22 +395,22 @@ public class PixelEditorScreen extends Screen {
     private void addFav() {
         int c = color | 0xFF000000;
         if (FAV.contains(c)) {
-            status = "Ten kolor jest juz zapisany.";
+            status = L.t("This color is already saved.");
         } else if (FAV.size() >= MAX_FAV) {
-            status = "Maksymalnie " + MAX_FAV + " wlasnych kolorow. Usun jakis.";
+            status = L.t("Maximum ") + MAX_FAV + L.t(" custom colors. Remove one.");
         } else {
             FAV.add(c);
             saveFavs();
-            status = "Zapisano kolor " + String.format("#%06X", c & 0xFFFFFF);
+            status = L.t("Saved color ") + String.format("#%06X", c & 0xFFFFFF);
         }
     }
 
     private void removeFav() {
         if (FAV.remove(Integer.valueOf(color | 0xFF000000))) {
             saveFavs();
-            status = "Usunieto kolor z listy.";
+            status = L.t("Color removed from the list.");
         } else {
-            status = "Tego koloru nie ma na liscie.";
+            status = L.t("This color is not in the list.");
         }
     }
 

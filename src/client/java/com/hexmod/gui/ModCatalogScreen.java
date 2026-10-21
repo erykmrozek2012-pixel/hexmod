@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.ModCatalog;
 import com.hexmod.module.Remote;
 import net.minecraft.client.gui.DrawContext;
@@ -22,7 +23,7 @@ public class ModCatalogScreen extends Screen {
     private List<Remote.CatalogEntry> entries = List.of();
 
     public ModCatalogScreen(Screen parent) {
-        super(Text.literal("Katalog modow"));
+        super(Text.literal(L.t("Mod Catalog")));
         this.parent = parent;
     }
 
@@ -37,39 +38,39 @@ public class ModCatalogScreen extends Screen {
             if (busy.contains(slug)) { y += 26; continue; }
             ModCatalog.State st = ModCatalog.state(slug);
             if (st == ModCatalog.State.NOT_INSTALLED) {
-                addDrawableChild(ButtonWidget.builder(Text.literal("Pobierz"), b -> download(slug))
+                addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Download")), b -> download(slug))
                         .dimensions(cx + 70, y, 70, 20).build());
             } else {
                 addDrawableChild(new ToggleSwitch(cx + 104, y + 1, st == ModCatalog.State.ENABLED, on -> {
                     try {
                         ModCatalog.setEnabled(slug, on);
-                        status = "Zmiana zadziala po ponownym uruchomieniu gry.";
+                        status = L.t("The change takes effect after restarting the game.");
                     } catch (IOException ex) {
-                        status = "Blad: " + ex.getMessage();
+                        status = L.t("Error: ") + ex.getMessage();
                     }
                 }));
             }
             y += 26;
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Odswiez katalog"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Refresh catalog")), b -> {
             Remote.refresh();
-            status = "Odswiezam... wejdz ponownie za chwile.";
+            status = L.t("Refreshing... come back in a moment.");
         }).dimensions(cx - 140, height - 54, 135, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx + 5, height - 54, 135, 20).build());
     }
 
     private void download(String slug) {
         busy.add(slug);
-        status = "Pobieranie: " + slug + "...";
+        status = L.t("Downloading: ") + slug + "...";
         needsInit = true;
         CompletableFuture.runAsync(() -> {
             try {
                 ModCatalog.install(slug);
-                status = "Pobrano. Uruchom gre ponownie, aby mod zadzialal.";
+                status = L.t("Downloaded. Restart the game to activate the mod.");
             } catch (IOException | RuntimeException ex) {
-                status = "Blad pobierania: " + ex.getMessage();
+                status = L.t("Download error: ") + ex.getMessage();
             } finally {
                 busy.remove(slug);
                 needsInit = true;
@@ -96,18 +97,18 @@ public class ModCatalogScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
-        ctx.drawTextWithShadow(textRenderer, "KATALOG MODOW", cx - 140, 22, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("MOD CATALOG"), cx - 140, 22, HexTheme.RED);
         int y = 44;
         for (int i = 0; i < Math.min(7, entries.size()); i++) {
             Remote.CatalogEntry e = entries.get(i);
             ctx.drawTextWithShadow(textRenderer, e.name.isEmpty() ? e.modrinth : e.name, cx - 140, y + 6, HexTheme.TEXT);
             if (busy.contains(e.modrinth)) {
-                ctx.drawTextWithShadow(textRenderer, "Pobieranie...", cx + 60, y + 6, HexTheme.TEXT_DIM);
+                ctx.drawTextWithShadow(textRenderer, L.t("Downloading..."), cx + 60, y + 6, HexTheme.TEXT_DIM);
             }
             y += 26;
         }
         if (entries.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, "Katalog jest pusty albo nie udalo sie go pobrac.", cx - 140, 50, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("The catalog is empty or could not be downloaded."), cx - 140, 50, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, cx, height - 68, HexTheme.TEXT);

@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
 import net.minecraft.client.gui.DrawContext;
@@ -25,21 +26,35 @@ public class HudEditorScreen extends Screen {
     private final boolean[] heldAtStart = new boolean[349];
 
     public HudEditorScreen(Screen parent) {
-        super(Text.literal("Edytor HUD"));
+        super(Text.literal(L.t("HUD Editor")));
         this.parent = parent;
     }
 
     @Override
     protected void init() {
         int cx = width / 2;
-        int perRow = Math.max(1, (width - 16) / 70);
-        int optCount = selected == null ? 0 : selected.options.size();
-        int optRows = Math.max(1, (optCount + perRow - 1) / perRow);
-        panelH = 82 + (optRows - 1) * 22;
+        java.util.List<String> keys = selected == null ? java.util.List.of() : new java.util.ArrayList<>(selected.options.keySet());
+        int n = keys.size();
+        String[] labels = new String[n];
+        int[] bw = new int[n];
+        int[] rowOf = new int[n];
+        int rows = 1, cur = 0, maxW = width - 16;
+        for (int i = 0; i < n; i++) {
+            String k = keys.get(i);
+            labels[i] = L.t(selected.optionLabels.getOrDefault(k, k)) + ": " + (selected.option(k) ? L.t("ON") : L.t("OFF"));
+            bw[i] = Math.max(60, textRenderer.getWidth(labels[i]) + 12);
+            if (cur > 0 && cur + bw[i] + 4 > maxW) {
+                rows++;
+                cur = 0;
+            }
+            rowOf[i] = rows - 1;
+            cur += bw[i] + 4;
+        }
+        panelH = 82 + (rows - 1) * 22;
         int y0 = height - panelH;
 
         if (selected == null) {
-            addDrawableChild(ButtonWidget.builder(Text.literal("Gotowe"), b -> client.setScreen(parent))
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Done")), b -> client.setScreen(parent))
                     .dimensions(cx - 30, y0 + 20, 60, 20).build());
             return;
         }
@@ -49,49 +64,48 @@ public class HudEditorScreen extends Screen {
                 .dimensions(x, y0 + 6, 24, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("+"), b -> changeScale(0.1f))
                 .dimensions(x + 28, y0 + 6, 24, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Kolor"), b -> paletteOpen = !paletteOpen)
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Color")), b -> paletteOpen = !paletteOpen)
                 .dimensions(x + 56, y0 + 6, 56, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal(selected.hidden ? "Pokaz" : "Ukryj"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(selected.hidden ? L.t("Show") : L.t("Hide")), b -> {
             selected.hidden = !selected.hidden;
             ModuleManager.save();
             needsInit = true;
         }).dimensions(x + 116, y0 + 6, 70, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Gotowe"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Done")), b -> client.setScreen(parent))
                 .dimensions(x + 190, y0 + 6, 60, 20).build());
 
         String keyLabel = listening == selected
-                ? "Nacisnij klawisz..." : "Klawisz: " + keyName(selected.bindKey);
+                ? L.t("Press a key...") : L.t("Key: ") + keyName(selected.bindKey);
         addDrawableChild(ButtonWidget.builder(Text.literal(keyLabel), b -> {
             listening = listening == selected ? null : selected;
             resetHeld();
             needsInit = true;
         }).dimensions(cx - 125, y0 + 30, 130, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Tryb: " + (selected.bindHold ? "trzymaj" : "przelacz")), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Mode: ") + (selected.bindHold ? L.t("hold") : L.t("toggle"))), b -> {
             selected.bindHold = !selected.bindHold;
             ModuleManager.save();
             needsInit = true;
         }).dimensions(cx + 9, y0 + 30, 96, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
             selected.bindKey = -1;
             listening = null;
             ModuleManager.save();
             needsInit = true;
         }).dimensions(cx + 109, y0 + 30, 36, 20).build());
 
-        int idx = 0;
-        for (String key : selected.options.keySet()) {
-            int row = idx / perRow;
-            int inRow = Math.min(perRow, optCount - row * perRow);
-            int ox = cx - (inRow * 70) / 2 + (idx % perRow) * 70;
-            String label = selected.optionLabels.getOrDefault(key, key)
-                    + ": " + (selected.option(key) ? "ON" : "OFF");
-            final String k = key;
-            addDrawableChild(ButtonWidget.builder(Text.literal(textRenderer.trimToWidth(label, 62)), b -> {
+        int[] rowX = new int[rows];
+        int[] rowW = new int[rows];
+        for (int i = 0; i < n; i++) rowW[rowOf[i]] += bw[i] + 4;
+        for (int r = 0; r < rows; r++) rowX[r] = cx - (rowW[r] - 4) / 2;
+        for (int i = 0; i < n; i++) {
+            final String k = keys.get(i);
+            int ox = rowX[rowOf[i]];
+            rowX[rowOf[i]] += bw[i] + 4;
+            addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> {
                 selected.options.put(k, !selected.option(k));
                 ModuleManager.save();
                 needsInit = true;
-            }).dimensions(ox, y0 + 54 + row * 22, 66, 20).build());
-            idx++;
+            }).dimensions(ox, y0 + 54 + rowOf[i] * 22, bw[i], 20).build());
         }
     }
 
@@ -130,33 +144,33 @@ public class HudEditorScreen extends Screen {
     }
 
     static String keyName(int k) {
-        if (k <= 0) return "brak";
+        if (k <= 0) return L.t("none");
         switch (k) {
-            case 32: return "Spacja";
+            case 32: return L.t("Space");
             case 257: return "Enter";
             case 258: return "Tab";
             case 260: return "Insert";
             case 261: return "Delete";
-            case 262: return "Strzalka w prawo";
-            case 263: return "Strzalka w lewo";
-            case 264: return "Strzalka w dol";
-            case 265: return "Strzalka w gore";
+            case 262: return L.t("Right arrow");
+            case 263: return L.t("Left arrow");
+            case 264: return L.t("Down arrow");
+            case 265: return L.t("Up arrow");
             case 266: return "Page Up";
             case 267: return "Page Down";
             case 268: return "Home";
             case 269: return "End";
             case 280: return "Caps Lock";
-            case 340: return "Lewy Shift";
-            case 341: return "Lewy Ctrl";
-            case 342: return "Lewy Alt";
-            case 345: return "Prawy Ctrl";
-            case 346: return "Prawy Alt";
+            case 340: return L.t("Left Shift");
+            case 341: return L.t("Left Ctrl");
+            case 342: return L.t("Left Alt");
+            case 345: return L.t("Right Ctrl");
+            case 346: return L.t("Right Alt");
             default: break;
         }
         if (k >= 290 && k <= 301) return "F" + (k - 289);
         if (k >= 320 && k <= 329) return "Num " + (k - 320);
         String n = GLFW.glfwGetKeyName(k, 0);
-        return n == null ? "Klawisz " + k : n.toUpperCase();
+        return n == null ? L.t("Key ") + k : n.toUpperCase();
     }
 
     private void changeScale(float d) {
@@ -279,7 +293,7 @@ public class HudEditorScreen extends Screen {
                     outline(ctx, b[0] - 2, b[1] - 2, b[2] + 2, b[3] + 2, m == selected ? HexTheme.RED : HexTheme.TEXT_DIM);
                 }
                 ctx.drawCenteredTextWithShadow(textRenderer,
-                        m.hidden ? "Wskazniki wroga (ukryte)" : "\u25BC glowa wroga", ax, ay + 3, HexTheme.TEXT_DIM);
+                        m.hidden ? L.t("Enemy Tags (hidden)") : "\u25BC " + L.t("enemy head"), ax, ay + 3, HexTheme.TEXT_DIM);
                 continue;
             }
             if (m.isOverlay()) continue;
@@ -290,7 +304,7 @@ public class HudEditorScreen extends Screen {
             int x2 = m.x + Math.round(m.w() * m.scale) + 2, y2 = m.y + Math.round(m.h() * m.scale) + 2;
             outline(ctx, x1, y1, x2, y2, sel ? HexTheme.RED : HexTheme.TEXT_DIM);
             if (m.hidden) {
-                ctx.drawTextWithShadow(textRenderer, m.name + " (ukryty)", m.x, m.y, HexTheme.TEXT_DIM);
+                ctx.drawTextWithShadow(textRenderer, L.t(m.name) + L.t(" (hidden)"), m.x, m.y, HexTheme.TEXT_DIM);
             }
         }
 
@@ -306,12 +320,12 @@ public class HudEditorScreen extends Screen {
         }
 
         String hint = any
-                ? "Przeciagnij widget myszka. Kliknij widget, aby ustawic skale, kolor i opcje."
-                : "Brak wlaczonych modulow. Wlacz je w menu Hexmoda (Prawy Shift).";
+                ? L.t("Drag a widget with the mouse. Click a widget to set scale, color and options.")
+                : L.t("No modules enabled. Enable them in the Hex Client menu (Right Shift).");
         ctx.drawCenteredTextWithShadow(textRenderer, hint, width / 2, 8, HexTheme.TEXT);
 
         if (selected != null) {
-            String info = selected.name + "  |  skala " + String.format(java.util.Locale.ROOT, "%.1f", selected.scale);
+            String info = L.t(selected.name) + L.t("  |  scale ") + String.format(java.util.Locale.ROOT, "%.1f", selected.scale);
             ctx.drawCenteredTextWithShadow(textRenderer, info, width / 2, height - panelH - 12, HexTheme.RED);
         }
     }

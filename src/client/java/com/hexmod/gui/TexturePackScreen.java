@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.PackTools;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,7 +28,7 @@ public class TexturePackScreen extends Screen {
     private String status = "";
 
     public TexturePackScreen(Screen parent) {
-        super(Text.literal("Edytor tekstur"));
+        super(Text.literal(L.t("Texture Editor")));
         this.parent = parent;
     }
 
@@ -37,9 +38,9 @@ public class TexturePackScreen extends Screen {
             packName = p.getFileName().toString();
             lastFolder = folder;
             lastName = packName;
-            status = Files.isDirectory(p) ? "" : "Pakiet .zip rozpakowano do kopii: " + folder.getFileName();
+            status = Files.isDirectory(p) ? "" : L.t("The .zip pack was extracted to a copy: ") + folder.getFileName();
         } catch (IOException e) {
-            status = "Blad: " + e.getMessage();
+            status = L.t("Error: ") + e.getMessage();
         }
         clearAndInit();
     }
@@ -66,29 +67,29 @@ public class TexturePackScreen extends Screen {
                 clearAndInit();
             }).dimensions(cx + 116, 72, 24, 20).build());
         } else {
-            addDrawableChild(ButtonWidget.builder(Text.literal("Itemy PvP (szybki wybor)"),
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("PvP items (quick pick)")),
                     b -> client.setScreen(new PvpItemsScreen(this, folder)))
                     .dimensions(cx - 140, 50, 280, 24).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Wszystkie tekstury (foldery i szukanie)"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("All textures (folders and search)")), b -> {
                 Path tex = PackTools.texturesDir(folder);
                 if (Files.isDirectory(tex)) client.setScreen(new TextureBrowserScreen(this, tex));
-                else status = "Ten pakiet nie ma jeszcze folderu tekstur. Najpierw edytuj item w 'Itemy PvP'.";
+                else status = L.t("This pack has no textures folder yet. First edit an item in 'PvP items'.");
             }).dimensions(cx - 140, 78, 280, 22).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Obraz na tarcze"),
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Shield Image")),
                     b -> client.setScreen(new ShieldImageScreen(this, folder)))
                     .dimensions(cx - 140, 104, 280, 22).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Przeladuj tekstury w grze"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Reload textures in game")), b -> {
                 client.reloadResources();
-                status = "Przeladowuje tekstury...";
+                status = L.t("Reloading textures...");
             }).dimensions(cx - 140, 130, 280, 22).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Zmien pakiet"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Change pack")), b -> {
                 folder = null;
                 lastFolder = null;
                 status = "";
                 clearAndInit();
             }).dimensions(cx - 140, 156, 280, 22).build());
         }
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
     }
 
@@ -112,15 +113,15 @@ public class TexturePackScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
         int x = cx - 140;
-        ctx.drawTextWithShadow(textRenderer, "EDYTOR TEKSTUR", x, 14, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("TEXTURE EDITOR"), x, 14, HexTheme.RED);
         if (folder == null) {
-            ctx.drawTextWithShadow(textRenderer, "Wybierz pakiet tekstur do edycji:", x, 32, HexTheme.TEXT);
+            ctx.drawTextWithShadow(textRenderer, L.t("Choose a texture pack to edit:"), x, 32, HexTheme.TEXT);
             if (packs.isEmpty()) {
-                wrapped(ctx, "Nie znaleziono pakietow w folderze resourcepacks.", x, 54, 280, HexTheme.TEXT_DIM);
+                wrapped(ctx, L.t("No packs found in the resourcepacks folder."), x, 54, 280, HexTheme.TEXT_DIM);
             }
         } else {
-            ctx.drawTextWithShadow(textRenderer, "Pakiet: " + textRenderer.trimToWidth(packName, 230), x, 32, HexTheme.TEXT);
-            wrapped(ctx, "Aby zobaczyc zmiany, pakiet musi byc wlaczony w ustawieniach gry (Pakiety zasobow).",
+            ctx.drawTextWithShadow(textRenderer, L.t("Pack: ") + textRenderer.trimToWidth(packName, 230), x, 32, HexTheme.TEXT);
+            wrapped(ctx, L.t("To see the changes, the pack must be enabled in the game settings (Resource Packs)."),
                     x, 184, 280, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {

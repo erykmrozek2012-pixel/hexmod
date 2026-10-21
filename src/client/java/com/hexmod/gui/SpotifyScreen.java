@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.L;
 import com.hexmod.module.SpotifyClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -30,26 +31,26 @@ public class SpotifyScreen extends Screen {
     protected void init() {
         int cx = width / 2;
         tab("Status", cx - 140, 90, MAIN);
-        tab("Poradnik", cx - 46, 90, GUIDE);
-        tab("Zaawansowane", cx + 48, 92, ADVANCED);
+        tab(L.t("Guide"), cx - 46, 90, GUIDE);
+        tab(L.t("Advanced"), cx + 48, 92, ADVANCED);
 
         if (mode == ADVANCED) {
             idField = new TextFieldWidget(textRenderer, cx - 140, 76, 200, 20, Text.literal("Client ID"));
-            idField.setPlaceholder(Text.literal("Wlasny Client ID (opcjonalnie)"));
+            idField.setPlaceholder(Text.literal(L.t("Custom Client ID (optional)")));
             idField.setMaxLength(64);
             idField.setText(SpotifyClient.clientId());
             addDrawableChild(idField);
-            addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Save")), b -> {
                 SpotifyClient.setClientId(idField.getText());
-                SpotifyClient.status = "Zapisano Client ID.";
+                SpotifyClient.status = L.t("Client ID saved.");
             }).dimensions(cx + 66, 76, 74, 20).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Zaloguj (dokladna synchronizacja)"),
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Log in (exact sync)")),
                     b -> SpotifyClient.startAutoLogin()).dimensions(cx - 140, 102, 280, 20).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("Wyloguj"), b -> SpotifyClient.logout())
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Log out")), b -> SpotifyClient.logout())
                     .dimensions(cx - 140, 126, 280, 20).build());
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
     }
 
@@ -77,29 +78,29 @@ public class SpotifyScreen extends Screen {
 
         if (mode == MAIN) {
             int y = 54;
-            y = wrapped(ctx, "Nic nie musisz robic. Uruchom aplikacje Spotify na komputerze i wlacz muzyke. "
-                    + "Widget pokaze utwor i tekst sam.", x, y, 280, HexTheme.TEXT_DIM) + 6;
-            String info = SpotifyClient.localInfo.isEmpty() ? "Czekam na dane z aplikacji Spotify..." : SpotifyClient.localInfo;
-            ctx.drawTextWithShadow(textRenderer, "Wykryto:", x, y, HexTheme.TEXT);
+            y = wrapped(ctx, L.t("You do not need to do anything. Start the Spotify app on your computer and play music. ")
+                    + L.t("The widget will show the track and lyrics by itself."), x, y, 280, HexTheme.TEXT_DIM) + 6;
+            String info = SpotifyClient.localInfo.isEmpty() ? L.t("Waiting for data from the Spotify app...") : SpotifyClient.localInfo;
+            ctx.drawTextWithShadow(textRenderer, L.t("Detected:"), x, y, HexTheme.TEXT);
             wrapped(ctx, info, x, y + 12, 280, HexTheme.RED);
-            wrapped(ctx, "Pamietaj, aby wlaczyc modul 'Spotify' w zakladce Moduly.", x, y + 40, 280, HexTheme.TEXT_DIM);
+            wrapped(ctx, L.t("Remember to enable the 'Spotify' module in the Modules tab."), x, y + 40, 280, HexTheme.TEXT_DIM);
         } else if (mode == GUIDE) {
             int y = 54;
             String[] steps = {
-                    "1. Uruchom aplikacje Spotify na komputerze i wlacz muzyke.",
-                    "2. W menu Hexmoda (Prawy Shift), zakladka Moduly, wlacz 'Spotify'.",
-                    "3. Utwor i tekst piosenki pojawia sie na ekranie. Nie trzeba sie logowac.",
-                    "4. Pozycje, wielkosc i kolor widgetu ustawisz w 'Edytuj HUD'.",
-                    "Tekst synchronizuje sie od poczatku utworu, wiec po przewinieciu piosenki moze sie rozjechac. "
-                            + "Dla dokladnej synchronizacji zaloguj sie w zakladce Zaawansowane."
+                    L.t("1. Start the Spotify app on your computer and play music."),
+                    L.t("2. In the Hex Client menu (Right Shift), Modules tab, enable 'Spotify'."),
+                    L.t("3. The track and lyrics appear on screen. No login needed."),
+                    L.t("4. Set the widget position, size and color in the 'HUD Editor'."),
+                    L.t("The lyrics sync from the start of the track, so after seeking they may drift. ")
+                            + L.t("For exact sync, log in on the Advanced tab.")
             };
             for (String step : steps) {
                 y = wrapped(ctx, step, x, y, 280, HexTheme.TEXT) + 3;
             }
         } else {
             int y = 152;
-            y = wrapped(ctx, "Opcjonalnie: logowanie do Spotify daje dokladny czas utworu i tekst zsynchronizowany "
-                    + "nawet po przewinieciu. Client ID ustawia admin w pliku config.json (repozytorium hexmod-data).",
+            y = wrapped(ctx, L.t("Optional: logging in to Spotify gives the exact track time and synced lyrics ")
+                    + L.t("even after seeking. The Client ID is set by the admin in config.json (hexmod-data repository)."),
                     x, y, 280, HexTheme.TEXT_DIM);
         }
 
