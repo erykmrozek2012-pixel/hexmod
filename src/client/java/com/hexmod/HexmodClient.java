@@ -5,6 +5,7 @@ import com.hexmod.module.AlliesManager;
 import com.hexmod.module.ChatCommands;
 import com.hexmod.module.MacroManager;
 import com.hexmod.module.CombatTracker;
+import com.hexmod.module.ItemLockManager;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
 import com.hexmod.module.WaypointsModule;
@@ -43,6 +44,7 @@ public class HexmodClient implements ClientModInitializer {
         AlliesManager.load();
         MacroManager.load();
         WaypointManager.load();
+        ItemLockManager.load();
         Remote.refresh();
 
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
