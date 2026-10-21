@@ -15,11 +15,15 @@ public class HelpScreen extends Screen {
             {".hexoff nazwa", "Wylacza jeden modul. .hexon nazwa wlacza go z powrotem."},
             {".wp add [nazwa]", "Zapisuje waypoint w miejscu, w ktorym stoisz."},
             {".wp del nazwa", "Usuwa waypoint. .wp list pokazuje wszystkie."},
+            {".wp death", "Wlacza albo wylacza automatyczny punkt smierci."},
             {".lock", "Blokuje przedmiot z reki. .lock nazwa (np. ender_pearl) blokuje po nazwie."},
+            {".lock offhand", "Blokuje albo odblokowuje druga reke (domyslnie wolna)."},
             {".lock list / clear", "Pokazuje albo czysci liste zablokowanych przedmiotow."},
     };
 
+    private static final int PER_PAGE = 5;
     private final Screen parent;
+    private int page = 0;
 
     public HelpScreen(Screen parent) {
         super(Text.literal("Komendy i pomoc"));
@@ -28,8 +32,15 @@ public class HelpScreen extends Screen {
 
     @Override
     protected void init() {
+        int pages = (LINES.length + PER_PAGE - 1) / PER_PAGE;
+        addDrawableChild(ButtonWidget.builder(Text.literal("<"), b -> {
+            page = (page + pages - 1) % pages;
+        }).dimensions(width / 2 - 110, height - 28, 50, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Wstecz"), b -> client.setScreen(parent))
                 .dimensions(width / 2 - 50, height - 28, 100, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(">"), b -> {
+            page = (page + 1) % pages;
+        }).dimensions(width / 2 + 60, height - 28, 50, 20).build());
     }
 
     @Override
@@ -44,14 +55,17 @@ public class HelpScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         int x = width / 2 - 160;
         ctx.drawTextWithShadow(textRenderer, "KOMENDY I POMOC", x, 14, HexTheme.RED);
+        int pages = (LINES.length + PER_PAGE - 1) / PER_PAGE;
+        ctx.drawTextWithShadow(textRenderer, "Strona " + (page + 1) + "/" + pages, x + 240, 14, HexTheme.TEXT_DIM);
         int y = 30;
-        for (String[] l : LINES) {
+        for (int i = page * PER_PAGE; i < Math.min(LINES.length, (page + 1) * PER_PAGE); i++) {
+            String[] l = LINES[i];
             ctx.drawTextWithShadow(textRenderer, l[0], x, y, HexTheme.RED);
             for (var line : textRenderer.wrapLines(Text.literal(l[1]), 320)) {
                 ctx.drawTextWithShadow(textRenderer, line, x, y + 10, HexTheme.TEXT);
                 y += 10;
             }
-            y += 16;
+            y += 18;
         }
     }
 
