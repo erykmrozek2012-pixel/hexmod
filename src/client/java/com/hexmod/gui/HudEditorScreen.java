@@ -12,7 +12,7 @@ import java.util.List;
 
 /** Edytor HUD: przeciagnij widget myszka, a na dole ustaw skale, kolor, ukrywanie i opcje. */
 public class HudEditorScreen extends Screen {
-    private static final int PANEL_H = 82;
+    private int panelH = 82;
 
     private final Screen parent;
     private Module selected;
@@ -32,7 +32,11 @@ public class HudEditorScreen extends Screen {
     @Override
     protected void init() {
         int cx = width / 2;
-        int y0 = height - PANEL_H;
+        int perRow = Math.max(1, (width - 16) / 70);
+        int optCount = selected == null ? 0 : selected.options.size();
+        int optRows = Math.max(1, (optCount + perRow - 1) / perRow);
+        panelH = 82 + (optRows - 1) * 22;
+        int y0 = height - panelH;
 
         addDrawableChild(ButtonWidget.builder(
                 Text.literal("Ukryj dodatkowe: " + (Module.extrasHidden ? "ON" : "OFF")), b -> {
@@ -80,17 +84,20 @@ public class HudEditorScreen extends Screen {
             needsInit = true;
         }).dimensions(cx + 109, y0 + 30, 36, 20).build());
 
-        int ox = cx - (selected.options.size() * 70) / 2;
+        int idx = 0;
         for (String key : selected.options.keySet()) {
+            int row = idx / perRow;
+            int inRow = Math.min(perRow, optCount - row * perRow);
+            int ox = cx - (inRow * 70) / 2 + (idx % perRow) * 70;
             String label = selected.optionLabels.getOrDefault(key, key)
                     + ": " + (selected.option(key) ? "ON" : "OFF");
             final String k = key;
-            addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal(textRenderer.trimToWidth(label, 62)), b -> {
                 selected.options.put(k, !selected.option(k));
                 ModuleManager.save();
                 needsInit = true;
-            }).dimensions(ox, y0 + 54, 66, 20).build());
-            ox += 70;
+            }).dimensions(ox, y0 + 54 + row * 22, 66, 20).build());
+            idx++;
         }
     }
 
@@ -102,7 +109,7 @@ public class HudEditorScreen extends Screen {
 
     private int paletteX() { return width / 2 - 105; }
 
-    private int paletteY() { return height - PANEL_H - 70; }
+    private int paletteY() { return height - panelH - 70; }
 
     private void resetHeld() {
         long win = client.getWindow().getHandle();
@@ -183,8 +190,8 @@ public class HudEditorScreen extends Screen {
     @Override
     public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
         ctx.fill(0, 0, width, height, 0x70000000);
-        ctx.fill(0, height - PANEL_H, width, height, HexTheme.PANEL);
-        ctx.fill(0, height - PANEL_H, width, height - PANEL_H + 2, HexTheme.RED);
+        ctx.fill(0, height - panelH, width, height, HexTheme.PANEL);
+        ctx.fill(0, height - panelH, width, height - panelH + 2, HexTheme.RED);
     }
 
     private boolean previewHit(Module m, int mx, int my) {
@@ -232,7 +239,7 @@ public class HudEditorScreen extends Screen {
                 dragging = true;
                 dragDx = mx - hit.x;
                 dragDy = my - hit.y;
-            } else if (selected != null && my < height - PANEL_H) {
+            } else if (selected != null && my < height - panelH) {
                 selected = null;
                 needsInit = true;
             }
@@ -311,7 +318,7 @@ public class HudEditorScreen extends Screen {
 
         if (selected != null) {
             String info = selected.name + "  |  skala " + String.format(java.util.Locale.ROOT, "%.1f", selected.scale);
-            ctx.drawCenteredTextWithShadow(textRenderer, info, width / 2, height - PANEL_H - 12, HexTheme.RED);
+            ctx.drawCenteredTextWithShadow(textRenderer, info, width / 2, height - panelH - 12, HexTheme.RED);
         }
     }
 

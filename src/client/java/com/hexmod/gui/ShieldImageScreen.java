@@ -16,6 +16,9 @@ import java.util.stream.Stream;
 
 /** Obraz na tarczy: wybierz PNG z folderu hexmod/shield, a mod wstawi go na przod tarczy w pakiecie. */
 public class ShieldImageScreen extends Screen {
+    private static int quality = 4;
+    private static boolean flip = false;
+
     private final Screen parent;
     private final Path packFolder;
     private List<Path> images = List.of();
@@ -43,15 +46,23 @@ public class ShieldImageScreen extends Screen {
         int cx = width / 2;
         images = listImages();
         int y = 76;
-        for (int i = 0; i < Math.min(5, images.size()); i++) {
+        for (int i = 0; i < Math.min(4, images.size()); i++) {
             final Path p = images.get(i);
             String label = textRenderer.trimToWidth("Uzyj: " + p.getFileName(), 270);
             addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
-                status = PackTools.applyShield(packFolder, p);
+                status = PackTools.applyShield(packFolder, p, quality, flip);
             }).dimensions(cx - 140, y, 280, 18).build());
             y += 20;
         }
         int by = height - 74;
+        addDrawableChild(ButtonWidget.builder(Text.literal("Jakosc: " + quality + "x (" + (64 * quality) + "px)"), b -> {
+            quality = quality >= 8 ? 1 : quality * 2;
+            clearAndInit();
+        }).dimensions(cx - 140, by - 24, 138, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Odbicie poziome: " + (flip ? "ON" : "OFF")), b -> {
+            flip = !flip;
+            clearAndInit();
+        }).dimensions(cx + 2, by - 24, 138, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Otworz folder"), b -> {
             try {
                 Files.createDirectories(PackTools.shieldDir());
@@ -96,7 +107,7 @@ public class ShieldImageScreen extends Screen {
             ctx.drawTextWithShadow(textRenderer, "Brak obrazow PNG w folderze.", x, 80, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
-            wrapped(ctx, status, x, height - 108, 280, HexTheme.TEXT);
+            wrapped(ctx, status, x, height - 124, 280, HexTheme.TEXT);
         }
     }
 

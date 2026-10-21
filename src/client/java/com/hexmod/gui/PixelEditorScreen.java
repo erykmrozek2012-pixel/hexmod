@@ -1,6 +1,7 @@
 package com.hexmod.gui;
 
 import com.hexmod.module.PackTools;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -9,9 +10,12 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 /** Prosty edytor pikseli PNG: olowek, gumka, wypelnienie, pipeta, cofanie i zapis do pakietu. */
 public class PixelEditorScreen extends Screen {
@@ -37,10 +41,23 @@ public class PixelEditorScreen extends Screen {
     private String status = "";
     private TextFieldWidget hexField;
 
+    // --- wybor koloru jak w Paincie: kwadrat nasycenie/jasnosc + pasek odcienia + wlasne kolory ---
+    private static final int SB_W = 128;
+    private static final int SV_W = 100, SV_H = 80, HUE_W = 14;
+    private static final int MAX_FAV = 16;
+    private static final List<Integer> FAV = new ArrayList<>();
+    private static boolean favLoaded = false;
+    private float hue = 0f, sat = 1f, val = 1f;
+    private int drag = 0; // 0 nic, 1 kwadrat, 2 pasek odcienia
+    private final int[] svCache = new int[50 * 40];
+    private float cacheHue = -1f;
+
     public PixelEditorScreen(Screen parent, Path file) {
         super(Text.literal("Edytor pikseli"));
         this.parent = parent;
         this.file = file;
+        loadFavs();
+        setColor(color);
         try {
             PackTools.Img img = PackTools.readImage(file);
             w = img.w();
@@ -83,7 +100,12 @@ public class PixelEditorScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Ustaw"), b -> setHex())
                 .dimensions(168, height - 28, 44, 18).build());
 
-        int areaX = 96, areaW = width - 96 - 8, areaH = height - 70;
+        addDrawableChild(ButtonWidget.builder(Text.literal("Zapisz kolor"), b -> addFav())
+                .dimensions(sbX(), 144, 76, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Usun"), b -> removeFav())
+                .dimensions(sbX() + 80, 144, 40, 18).build());
+
+        int areaX = 96, areaW = width - 96 - 8 - SB_W, areaH = height - 70;
         zoom = Math.max(1, Math.min(areaW / w, areaH / h));
         ox = areaX + (areaW - w * zoom) / 2;
         oy = 14 + (areaH - h * zoom) / 2;
@@ -93,10 +115,10 @@ public class PixelEditorScreen extends Screen {
         String s = hexField.getText().trim().replace("#", "");
         try {
             if (s.length() == 6) {
-                color = 0xFF000000 | Integer.parseInt(s, 16);
+                setColor(0xFF000000 | Integer.parseInt(s, 16));
             } else if (s.length() == 8) {
                 long v = Long.parseLong(s, 16);
-                color = (int) (((v & 0xFF) << 24) | (v >> 8));
+                setColor((int) (((v & 0xFF) << 24) | (v >> 8)));
             } else {
                 status = "Wpisz kolor jako #RRGGBB.";
             }
@@ -159,6 +181,34 @@ public class PixelEditorScreen extends Screen {
         int cx = Math.floorDiv(mx - ox, zoom), cy = Math.floorDiv(my - oy, zoom);
         boolean inside = cx >= 0 && cy >= 0 && cx < w && cy < h;
 
+        int sx0 = sbX(), sy0 = 16;
+        if (down && !wasDown && !inside) {
+            if (mx >= sx0 && mx < sx0 + SV_W && my >= sy0 && my < sy0 + SV_H) {
+                drag = 1;
+            } else if (mx >= sx0 + SV_W + 6 && mx < sx0 + SV_W + 6 + HUE_W && my >= sy0 && my < sy0 + SV_H) {
+                drag = 2;
+            } else {
+                for (int i = 0; i < FAV.size(); i++) {
+                    int fx = sx0 + (i % 8) * 15, fy = 112 + (i / 8) * 14;
+                    if (mx >= fx && mx < fx + 13 && my >= fy && my < fy + 12) setColor(FAV.get(i));
+                }
+            }
+        }
+        if (!down) drag = 0;
+        if (down && drag != 0) {
+            if (drag == 1) {
+                sat = clamp01((mx - sx0) / (float) (SV_W - 1));
+                val = 1f - clamp01((my - sy0) / (float) (SV_H - 1));
+            } else {
+                hue = clamp01((my - sy0) / (float) (SV_H - 1)) * 0.9999f;
+            }
+            color = hsv(hue, sat, val);
+            lastX = -1;
+            lastY = -1;
+            wasDown = true;
+            return;
+        }
+
         if (down && !wasDown) {
             if (inside) {
                 pushUndo();
@@ -168,7 +218,7 @@ public class PixelEditorScreen extends Screen {
                     case FILL -> fill(cx, cy, color);
                     case PICK -> {
                         int c = px[cy * w + cx];
-                        if ((c >>> 24) != 0) color = c;
+                        if ((c >>> 24) != 0) setColor(c);
                         tool = Tool.PENCIL;
                     }
                 }
@@ -176,7 +226,7 @@ public class PixelEditorScreen extends Screen {
                 lastY = cy;
             } else {
                 int gx = Math.floorDiv(mx - 10, 10), gy = Math.floorDiv(my - palY(), 10);
-                if (gx >= 0 && gx < 8 && gy >= 0 && gy < 4) color = PALETTE[gy * 8 + gx];
+                if (gx >= 0 && gx < 8 && gy >= 0 && gy < 4) setColor(PALETTE[gy * 8 + gx]);
             }
         } else if (down && inside && lastX >= 0) {
             if (tool == Tool.PENCIL) line(lastX, lastY, cx, cy, color);
@@ -231,6 +281,136 @@ public class PixelEditorScreen extends Screen {
         }
         ctx.fill(96, 6 + 0, 108, 18, 0xFF000000);
         ctx.fill(97, 7, 107, 17, color);
+        ctx.drawTextWithShadow(textRenderer, String.format("#%06X", color & 0xFFFFFF), 112, 8, HexTheme.TEXT_DIM);
+        drawPicker(ctx);
+    }
+
+    private int sbX() { return width - SB_W; }
+
+    private static float clamp01(float v) { return v < 0f ? 0f : Math.min(v, 1f); }
+
+    private static int hsv(float h, float sa, float v) {
+        h = h - (float) Math.floor(h);
+        float c = v * sa;
+        float hp = h * 6f;
+        float x = c * (1f - Math.abs(hp % 2f - 1f));
+        float r = 0, g = 0, b = 0;
+        switch ((int) hp) {
+            case 0 -> { r = c; g = x; }
+            case 1 -> { r = x; g = c; }
+            case 2 -> { g = c; b = x; }
+            case 3 -> { g = x; b = c; }
+            case 4 -> { r = x; b = c; }
+            default -> { r = c; b = x; }
+        }
+        float m = v - c;
+        int ri = Math.round((r + m) * 255f), gi = Math.round((g + m) * 255f), bi = Math.round((b + m) * 255f);
+        return 0xFF000000 | (ri << 16) | (gi << 8) | bi;
+    }
+
+    /** Ustawia kolor i dopasowuje do niego kwadrat i pasek odcienia. */
+    private void setColor(int argb) {
+        color = argb;
+        float r = ((argb >> 16) & 255) / 255f, g = ((argb >> 8) & 255) / 255f, b = (argb & 255) / 255f;
+        float max = Math.max(r, Math.max(g, b)), min = Math.min(r, Math.min(g, b));
+        float d = max - min;
+        val = max;
+        sat = max == 0f ? 0f : d / max;
+        if (d > 0f) {
+            float hh;
+            if (max == r) hh = ((g - b) / d) % 6f;
+            else if (max == g) hh = (b - r) / d + 2f;
+            else hh = (r - g) / d + 4f;
+            hue = hh / 6f;
+            if (hue < 0f) hue += 1f;
+        }
+    }
+
+    private void drawPicker(DrawContext ctx) {
+        int sx0 = sbX(), sy0 = 16;
+        if (cacheHue != hue) {
+            cacheHue = hue;
+            for (int yy = 0; yy < 40; yy++) {
+                for (int xx = 0; xx < 50; xx++) svCache[yy * 50 + xx] = hsv(hue, xx / 49f, 1f - yy / 39f);
+            }
+        }
+        ctx.fill(sx0 - 1, sy0 - 1, sx0 + SV_W + 1, sy0 + SV_H + 1, 0xFF000000);
+        for (int yy = 0; yy < 40; yy++) {
+            for (int xx = 0; xx < 50; xx++) {
+                int px0 = sx0 + xx * 2, py0 = sy0 + yy * 2;
+                ctx.fill(px0, py0, px0 + 2, py0 + 2, svCache[yy * 50 + xx]);
+            }
+        }
+        int mx = sx0 + Math.round(sat * (SV_W - 1)), my = sy0 + Math.round((1f - val) * (SV_H - 1));
+        ctx.fill(mx - 3, my - 3, mx + 4, my + 4, 0xFF000000);
+        ctx.fill(mx - 2, my - 2, mx + 3, my + 3, 0xFFFFFFFF);
+        ctx.fill(mx - 1, my - 1, mx + 2, my + 2, color);
+
+        int hx = sx0 + SV_W + 6;
+        ctx.fill(hx - 1, sy0 - 1, hx + HUE_W + 1, sy0 + SV_H + 1, 0xFF000000);
+        for (int i = 0; i < 40; i++) ctx.fill(hx, sy0 + i * 2, hx + HUE_W, sy0 + i * 2 + 2, hsv(i / 40f, 1f, 1f));
+        int hy = sy0 + Math.round(hue * (SV_H - 1));
+        ctx.fill(hx - 2, hy - 1, hx + HUE_W + 2, hy + 2, 0xFF000000);
+        ctx.fill(hx - 1, hy, hx + HUE_W + 1, hy + 1, 0xFFFFFFFF);
+
+        ctx.drawTextWithShadow(textRenderer, "Wlasne kolory", sx0, 100, HexTheme.TEXT_DIM);
+        for (int i = 0; i < MAX_FAV; i++) {
+            int fx = sx0 + (i % 8) * 15, fy = 112 + (i / 8) * 14;
+            ctx.fill(fx, fy, fx + 13, fy + 12, 0xFF000000);
+            if (i < FAV.size()) {
+                ctx.fill(fx + 1, fy + 1, fx + 12, fy + 11, FAV.get(i));
+                if (FAV.get(i) == color) ctx.fill(fx, fy + 12, fx + 13, fy + 13, HexTheme.RED);
+            } else {
+                ctx.fill(fx + 1, fy + 1, fx + 12, fy + 11, 0xFF2A2A2E);
+            }
+        }
+    }
+
+    private static Path favFile() {
+        return FabricLoader.getInstance().getConfigDir().resolve("hexmod").resolve("colors.txt");
+    }
+
+    private static void loadFavs() {
+        if (favLoaded) return;
+        favLoaded = true;
+        try {
+            if (!Files.exists(favFile())) return;
+            for (String line : Files.readAllLines(favFile())) {
+                String t = line.trim().replace("#", "");
+                if (t.length() == 6 && FAV.size() < MAX_FAV) FAV.add(0xFF000000 | Integer.parseInt(t, 16));
+            }
+        } catch (IOException | RuntimeException ignored) {}
+    }
+
+    private static void saveFavs() {
+        try {
+            Files.createDirectories(favFile().getParent());
+            List<String> lines = new ArrayList<>();
+            for (int c : FAV) lines.add(String.format("%06X", c & 0xFFFFFF));
+            Files.write(favFile(), lines);
+        } catch (IOException ignored) {}
+    }
+
+    private void addFav() {
+        int c = color | 0xFF000000;
+        if (FAV.contains(c)) {
+            status = "Ten kolor jest juz zapisany.";
+        } else if (FAV.size() >= MAX_FAV) {
+            status = "Maksymalnie " + MAX_FAV + " wlasnych kolorow. Usun jakis.";
+        } else {
+            FAV.add(c);
+            saveFavs();
+            status = "Zapisano kolor " + String.format("#%06X", c & 0xFFFFFF);
+        }
+    }
+
+    private void removeFav() {
+        if (FAV.remove(Integer.valueOf(color | 0xFF000000))) {
+            saveFavs();
+            status = "Usunieto kolor z listy.";
+        } else {
+            status = "Tego koloru nie ma na liscie.";
+        }
     }
 
     @Override
