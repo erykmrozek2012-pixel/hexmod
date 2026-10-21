@@ -37,7 +37,6 @@ public class HexmodClient implements ClientModInitializer {
     private static final KeyBinding.Category CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID, "main"));
 
     private static KeyBinding openMenuKey;
-    private static KeyBinding hideExtrasKey;
     private static int refreshTicks = 0;
 
     @Override
@@ -57,21 +56,11 @@ public class HexmodClient implements ClientModInitializer {
                 CATEGORY
         ));
 
-        hideExtrasKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.hexmod.hide_extras",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                CATEGORY
-        ));
-
         ClientTickEvents.START_CLIENT_TICK.register(ItemLockModule::beforeInput);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenuKey.wasPressed()) {
                 client.setScreen(new HexmodScreen());
-            }
-            while (hideExtrasKey.wasPressed()) {
-                Module.extrasHidden = !Module.extrasHidden;
             }
             if (++refreshTicks % 6000 == 0) Remote.refresh();
             if (Remote.isLocked()) return;
