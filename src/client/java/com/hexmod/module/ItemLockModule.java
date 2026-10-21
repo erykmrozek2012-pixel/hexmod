@@ -24,7 +24,7 @@ public class ItemLockModule extends Module {
         for (int i = 1; i <= 9; i++) option("slot" + i, "Slot " + i, false);
         option("totem", "Totem", true);
         option("gapple", "Gapple", true);
-        option("offhand", "Druga reka", true);
+        option("lockoffhand", "Blokuj druga reke", false);
     }
 
     @Override public int w() { return 100; }
@@ -67,8 +67,8 @@ public class ItemLockModule extends Module {
             while (mc.options.dropKey.wasPressed()) blocked = true;
             if (blocked) notice(mc, "Item lock: nie mozna wyrzucic.");
         }
-        boolean lockedSwap = (m.option("offhand") && !mc.player.getOffHandStack().isEmpty() && stackLocked(m, mc.player.getOffHandStack()))
-                || lockedHeld;
+        boolean lockedSwap = m.option("lockoffhand")
+                && (lockedHeld || stackLocked(m, mc.player.getOffHandStack()));
         if (lockedSwap) {
             boolean blocked = false;
             while (mc.options.swapHandsKey.wasPressed()) blocked = true;
@@ -114,9 +114,17 @@ public class ItemLockModule extends Module {
             return stackLocked(m, h.getCursorStack()) && deny("Item lock: zablokowany przedmiot.");
         }
 
+        boolean offhandFree = !m.option("lockoffhand");
+        // Zamiana z druga reka (klawisz F nad slotem) jest dozwolona, chyba ze slot paska jest zamrozony.
+        if (type == SlotActionType.SWAP && button == 40 && offhandFree && !(ownSlot(player, slot) && slotFrozen(m, player, slot))) {
+            return false;
+        }
         if (ownSlot(player, slot)) {
+            boolean isOffhandSlot = slot.getIndex() == 40;
             if (slotFrozen(m, player, slot)) return deny("Item lock: ten slot jest zablokowany.");
-            if (stackLocked(m, slot.getStack())) return deny("Item lock: ten przedmiot jest zablokowany.");
+            if (!(isOffhandSlot && offhandFree) && stackLocked(m, slot.getStack())) {
+                return deny("Item lock: ten przedmiot jest zablokowany.");
+            }
         }
 
         // Klawisze 1-9 / F nad slotem: zamiana z paskiem. Sprawdzamy tez slot docelowy.
@@ -126,7 +134,7 @@ public class ItemLockModule extends Module {
             if (button >= 0 && button < 9) {
                 target = player.getInventory().getStack(button);
                 frozen = m.option("slot" + (button + 1));
-            } else if (button == 40) {
+            } else if (button == 40 && !offhandFree) {
                 target = player.getOffHandStack();
             }
             if (frozen || stackLocked(m, target)) return deny("Item lock: zamiana zablokowana.");
