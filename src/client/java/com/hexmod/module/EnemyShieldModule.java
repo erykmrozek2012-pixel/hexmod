@@ -13,7 +13,7 @@ public class EnemyShieldModule extends Module {
     private static final double RANGE = 20.0;
 
     public EnemyShieldModule() {
-        super("enemy_shield", "Enemy Shield", "Czy wrog ma uniesiona tarcze");
+        super("enemy_shield", "Enemy Shield", "Whether the enemy is blocking with a shield");
         centered(34);
     }
 
@@ -44,7 +44,7 @@ public class EnemyShieldModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Tarcza wroga: UNIESIONA", 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Enemy shield: UP"), 0, 0, rgb());
             return;
         }
         PlayerEntity target = findTarget(mc);
@@ -54,13 +54,13 @@ public class EnemyShieldModule extends Module {
         String text;
         int color;
         if (target.isBlocking()) {
-            text = "Tarcza wroga: UNIESIONA";
+            text = L.t("Enemy shield: UP");
             color = 0xFFD10A0A;
         } else if (holds) {
-            text = "Tarcza wroga: opuszczona";
+            text = L.t("Enemy shield: down");
             color = rgb();
         } else {
-            text = "Tarcza wroga: brak";
+            text = L.t("Enemy shield: none");
             color = 0xFF9A9A9A;
         }
         ctx.drawTextWithShadow(mc.textRenderer, text, 0, 0, color);

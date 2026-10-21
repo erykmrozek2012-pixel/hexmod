@@ -14,22 +14,22 @@ public class ItemCountModule extends Module {
     private record Entry(String key, String label, Item item, boolean def) {}
 
     private static final List<Entry> ENTRIES = List.of(
-            new Entry("crystal", "Krysztaly", Items.END_CRYSTAL, true),
-            new Entry("obsidian", "Obsydian", Items.OBSIDIAN, true),
-            new Entry("pearl", "Perly", Items.ENDER_PEARL, true),
-            new Entry("anchor", "Kotwice", Items.RESPAWN_ANCHOR, false),
+            new Entry("crystal", "Crystals", Items.END_CRYSTAL, true),
+            new Entry("obsidian", "Obsidian", Items.OBSIDIAN, true),
+            new Entry("pearl", "Pearls", Items.ENDER_PEARL, true),
+            new Entry("anchor", "Anchors", Items.RESPAWN_ANCHOR, false),
             new Entry("glowstone", "Glowstone", Items.GLOWSTONE, false),
-            new Entry("pots", "Miotane mikstury", Items.SPLASH_POTION, false),
-            new Entry("xp", "Butelki XP", Items.EXPERIENCE_BOTTLE, false),
-            new Entry("wind", "Wind charge", Items.WIND_CHARGE, false),
-            new Entry("arrow", "Strzaly", Items.ARROW, false),
-            new Entry("rocket", "Rakiety", Items.FIREWORK_ROCKET, false));
+            new Entry("pots", "Splash potions", Items.SPLASH_POTION, false),
+            new Entry("xp", "XP bottles", Items.EXPERIENCE_BOTTLE, false),
+            new Entry("wind", "Wind charges", Items.WIND_CHARGE, false),
+            new Entry("arrow", "Arrows", Items.ARROW, false),
+            new Entry("rocket", "Rockets", Items.FIREWORK_ROCKET, false));
 
     public ItemCountModule() {
-        super("item_count", "PvP Items", "Liczba krysztalow, obsydianu, perel i innych przedmiotow w ekwipunku");
+        super("item_count", "PvP Items", "Counts of crystals, obsidian, pearls and other items");
         at(10, 308);
         for (Entry e : ENTRIES) option(e.key(), e.label(), e.def());
-        option("hide0", "Ukryj zera", false);
+        option("hide0", "Hide zeros", false);
     }
 
     private List<Entry> enabled() {

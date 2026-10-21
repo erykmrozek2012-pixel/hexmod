@@ -19,12 +19,12 @@ public class ItemLockModule extends Module {
     private static long lastNotice = 0;
 
     public ItemLockModule() {
-        super("item_lock", "Item Lock", "Blokada wyrzucenia i przenoszenia zablokowanych slotow/przedmiotow");
+        super("item_lock", "Item Lock", "Protects locked slots and items from being dropped or moved");
         at(10, 190);
         for (int i = 1; i <= 9; i++) option("slot" + i, "Slot " + i, false);
         option("totem", "Totem", true);
         option("gapple", "Gapple", true);
-        option("lockoffhand", "Blokuj druga reke", false);
+        option("lockoffhand", "Block offhand", false);
     }
 
     @Override public int w() { return 150; }
@@ -57,9 +57,9 @@ public class ItemLockModule extends Module {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= 9; i++) if (option("slot" + i)) sb.append(i).append(' ');
         int extra = ItemLockManager.list().size();
-        String t = sb.length() == 0 ? "Lock: itemy" : "Lock: " + sb.toString().trim();
+        String t = sb.length() == 0 ? L.t("Lock: items") : "Lock: " + sb.toString().trim();
         if (extra > 0) t += " +" + extra;
-        t += option("lockoffhand") ? " | reka2: LOCK" : " | reka2: wolna";
+        t += option("lockoffhand") ? L.t(" | offhand: LOCKED") : L.t(" | offhand: free");
         ctx.drawTextWithShadow(mc.textRenderer, t, 0, 0, rgb());
     }
 
@@ -76,14 +76,14 @@ public class ItemLockModule extends Module {
         if (lockedHeld && !held.isEmpty()) {
             boolean blocked = false;
             while (mc.options.dropKey.wasPressed()) blocked = true;
-            if (blocked) notice(mc, "Item lock: nie mozna wyrzucic.");
+            if (blocked) notice(mc, L.t("Item lock: cannot drop."));
         }
         boolean lockedSwap = m.option("lockoffhand")
                 && (lockedHeld || stackLocked(m, mc.player.getOffHandStack()));
         if (lockedSwap) {
             boolean blocked = false;
             while (mc.options.swapHandsKey.wasPressed()) blocked = true;
-            if (blocked) notice(mc, "Item lock: zamiana zablokowana.");
+            if (blocked) notice(mc, L.t("Item lock: swap blocked."));
         }
     }
 
@@ -116,13 +116,13 @@ public class ItemLockModule extends Module {
         // Klikniecie poza oknem z zablokowanym przedmiotem na kursorze = wyrzucenie.
         if (slotId < 0 || slotId >= h.slots.size()) {
             boolean drop = slotId == -999 && (type == SlotActionType.PICKUP || type == SlotActionType.THROW);
-            if (drop && stackLocked(m, h.getCursorStack())) return deny("Item lock: nie mozna wyrzucic.");
+            if (drop && stackLocked(m, h.getCursorStack())) return deny(L.t("Item lock: cannot drop."));
             return false;
         }
 
         Slot slot = h.slots.get(slotId);
         if (type == SlotActionType.PICKUP_ALL) {
-            return stackLocked(m, h.getCursorStack()) && deny("Item lock: zablokowany przedmiot.");
+            return stackLocked(m, h.getCursorStack()) && deny(L.t("Item lock: item is locked."));
         }
 
         boolean offhandFree = !m.option("lockoffhand");
@@ -132,9 +132,9 @@ public class ItemLockModule extends Module {
         }
         if (ownSlot(player, slot)) {
             boolean isOffhandSlot = slot.getIndex() == 40;
-            if (slotFrozen(m, player, slot)) return deny("Item lock: ten slot jest zablokowany.");
+            if (slotFrozen(m, player, slot)) return deny(L.t("Item lock: this slot is locked."));
             if (!(isOffhandSlot && offhandFree) && stackLocked(m, slot.getStack())) {
-                return deny("Item lock: ten przedmiot jest zablokowany.");
+                return deny(L.t("Item lock: this item is locked."));
             }
         }
 
@@ -148,7 +148,7 @@ public class ItemLockModule extends Module {
             } else if (button == 40 && !offhandFree) {
                 target = player.getOffHandStack();
             }
-            if (frozen || stackLocked(m, target)) return deny("Item lock: zamiana zablokowana.");
+            if (frozen || stackLocked(m, target)) return deny(L.t("Item lock: swap blocked."));
         }
         return false;
     }

@@ -6,8 +6,8 @@ import net.minecraft.client.gui.DrawContext;
 /** Zuzycie pamieci RAM przez gre. */
 public class MemoryModule extends Module {
     public MemoryModule() {
-        super("memory", "Pamiec RAM", "Zuzycie pamieci przez gre");
-        at(10, 280);
+        super("memory", "RAM Usage", "Memory used by the game");
+        at(10, 34);
     }
 
     @Override public int w() { return 110; }

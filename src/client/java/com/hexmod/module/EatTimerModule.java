@@ -9,10 +9,10 @@ import java.util.Locale;
 
 public class EatTimerModule extends Module {
     public EatTimerModule() {
-        super("eat_timer", "Eat Timer", "Odliczanie jedzenia z ulamkami sekundy");
+        super("eat_timer", "Eat Timer", "Eating countdown with fractions of a second");
         at(10, 58);
-        option("bar", "Pasek", true);
-        option("pct", "Procenty", false);
+        option("bar", "Bar", true);
+        option("pct", "Percent", false);
     }
 
     private int total = 0;
@@ -27,7 +27,7 @@ public class EatTimerModule extends Module {
         String text;
         if (preview) {
             frac = 0.66f;
-            text = "Jedzenie: 1.32s";
+            text = L.t("Eating: 1.32s");
         } else {
             PlayerEntity p = mc.player;
             if (p == null || !p.isUsingItem() || !p.getActiveItem().contains(DataComponentTypes.FOOD)) {
@@ -37,7 +37,7 @@ public class EatTimerModule extends Module {
             int left = p.getItemUseTimeLeft();
             total = Math.max(total, left);
             frac = total > 0 ? (float) left / total : 0f;
-            text = String.format(Locale.ROOT, "Jedzenie: %.2fs", left / 20.0);
+            text = String.format(Locale.ROOT, L.t("Eating: %.2fs"), left / 20.0);
         }
         if (option("pct")) text += " (" + Math.round(frac * 100f) + "%)";
         ctx.drawTextWithShadow(mc.textRenderer, text, 0, 0, rgb());

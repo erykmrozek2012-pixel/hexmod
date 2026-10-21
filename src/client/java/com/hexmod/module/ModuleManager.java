@@ -58,6 +58,7 @@ public final class ModuleManager {
         register(new SpotifyModule());
         register(new ItemLockModule());
         register(new WaypointsModule());
+        register(new MemoryModule());
         register(new ComboModule());
         register(new ReachModule());
         register(new AppleCountModule());
@@ -125,7 +126,7 @@ public final class ModuleManager {
             Map<String, State> map = GSON.fromJson(Files.readString(FILE), STATE_MAP);
             if (map != null) apply(map);
         } catch (IOException | RuntimeException e) {
-            System.err.println("[Hexmod] Nie udalo sie wczytac configu: " + e.getMessage());
+            System.err.println("[Hex Client] Could not load config: " + e.getMessage());
         }
     }
 
@@ -133,7 +134,7 @@ public final class ModuleManager {
         try {
             Files.writeString(FILE, GSON.toJson(snapshot()));
         } catch (IOException e) {
-            System.err.println("[Hexmod] Nie udalo sie zapisac configu: " + e.getMessage());
+            System.err.println("[Hex Client] Could not save config: " + e.getMessage());
         }
     }
 

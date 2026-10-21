@@ -14,7 +14,7 @@ public class ShieldBreakModule extends Module {
     private static String enemyName = "";
 
     public ShieldBreakModule() {
-        super("shield_break", "Shield Break", "Komunikat po zlamaniu tarczy toporem");
+        super("shield_break", "Shield Break", "Message after an axe breaks a shield");
         centered(52);
     }
 
@@ -32,20 +32,20 @@ public class ShieldBreakModule extends Module {
         PlayerEntity p = mc.player;
         if (p == null) return;
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Tarcza break: Wrog 4.2s", 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Shield break: Enemy 4.2s"), 0, 0, rgb());
             return;
         }
         int line = 0;
         long left = enemyUntil - System.currentTimeMillis();
         if (left > 0) {
             ctx.drawTextWithShadow(mc.textRenderer,
-                    String.format(Locale.ROOT, "Tarcza break: %s %.1fs", enemyName, left / 1000.0), 0, line, rgb());
+                    String.format(Locale.ROOT, L.t("Shield break: %s %.1fs"), enemyName, left / 1000.0), 0, line, rgb());
             line += 12;
         }
         float progress = p.getItemCooldownManager().getCooldownProgress(Items.SHIELD.getDefaultStack(), 0f);
         if (progress > 0f) {
             ctx.drawTextWithShadow(mc.textRenderer,
-                    String.format(Locale.ROOT, "Twoja tarcza: break %.1fs", progress * 5f), 0, line, 0xFFD10A0A);
+                    String.format(Locale.ROOT, L.t("Your shield: broken %.1fs"), progress * 5f), 0, line, 0xFFD10A0A);
         }
     }
 }

@@ -10,7 +10,7 @@ public class SpotifyModule extends Module {
     private int ticks = 0;
 
     public SpotifyModule() {
-        super("spotify", "Spotify", "Aktualny utwor i tekst piosenki");
+        super("spotify", "Spotify", "Current song and lyrics");
         at(10, 150);
     }
 
@@ -27,15 +27,15 @@ public class SpotifyModule extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
             ctx.drawTextWithShadow(mc.textRenderer, "\u266A Artysta - Tytul", 0, 0, rgb());
-            ctx.drawTextWithShadow(mc.textRenderer, "Tu bedzie aktualna linijka tekstu", 0, 12, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("The current lyric line appears here"), 0, 12, rgb());
             return;
         }
         SpotifyClient.Track t = SpotifyClient.current();
         if (t == null) {
             String msg;
-            if (!SpotifyClient.isLoggedIn()) msg = SpotifyClient.localInfo.isEmpty() ? "Spotify: wlacz muzyke w aplikacji" : SpotifyClient.localInfo;
+            if (!SpotifyClient.isLoggedIn()) msg = SpotifyClient.localInfo.isEmpty() ? L.t("Spotify: start music in the app") : SpotifyClient.localInfo;
             else if (SpotifyClient.status.startsWith("Spotify")) msg = SpotifyClient.status;
-            else msg = "Spotify: nic nie gra (wlacz muzyke w aplikacji)";
+            else msg = L.t("Spotify: nothing playing (start music in the app)");
             ctx.drawTextWithShadow(mc.textRenderer, mc.textRenderer.trimToWidth(msg, 200), 0, 0, 0xFF9A9A9A);
             return;
         }

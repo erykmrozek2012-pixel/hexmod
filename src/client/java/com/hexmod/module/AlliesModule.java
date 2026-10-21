@@ -9,7 +9,7 @@ public class AlliesModule extends Module {
     public static final String ICON = "\u2605";
 
     public AlliesModule() {
-        super("allies", "Allies", "Sojusznicy w poblizu z ikona przy nicku");
+        super("allies", "Friends", "Friends nearby with an icon next to the nick");
         at(230, 10);
     }
 
@@ -21,8 +21,8 @@ public class AlliesModule extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null) return;
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, ICON + " Przyjaciel 12m", 0, 0, rgb());
-            ctx.drawTextWithShadow(mc.textRenderer, ICON + " Kumpel 30m", 0, 12, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, ICON + L.t(" Friend 12m"), 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, ICON + L.t(" Buddy 30m"), 0, 12, rgb());
             return;
         }
         int line = 0;

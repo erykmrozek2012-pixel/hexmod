@@ -12,10 +12,10 @@ public class SaturationModule extends Module {
     private float rate = 0f;
 
     public SaturationModule() {
-        super("saturation", "Saturation", "Poziom i szacowany czas saturacji w walce");
+        super("saturation", "Saturation", "Saturation level and estimated time in combat");
         at(10, 46);
-        option("bar", "Pasek", true);
-        option("pct", "Procenty", true);
+        option("bar", "Bar", true);
+        option("pct", "Percent", true);
     }
 
     @Override public int w() { return 140; }
@@ -42,7 +42,7 @@ public class SaturationModule extends Module {
         float sat = preview ? 5f : mc.player.getHungerManager().getSaturationLevel();
         float frac = Math.min(1f, sat / 20f);
         boolean empty = !preview && sat <= 0.01f;
-        String text = empty ? "Saturacja: BRAK" : String.format(Locale.ROOT, "Saturacja: %.1f", sat);
+        String text = empty ? L.t("Saturation: EMPTY") : String.format(Locale.ROOT, L.t("Saturation: %.1f"), sat);
         if (!empty && option("pct")) text += " (" + Math.round(frac * 100f) + "%)";
         if (!empty) {
             float secs = preview ? 12f : (rate > 0.01f ? sat / rate : -1f);

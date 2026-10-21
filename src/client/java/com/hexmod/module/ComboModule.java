@@ -9,7 +9,7 @@ public class ComboModule extends Module {
     private static long lastHit = 0;
 
     public ComboModule() {
-        super("combo", "Combo", "Liczba trafien z rzedu bez otrzymania obrazen");
+        super("combo", "Combo", "Hits in a row without taking damage");
         at(10, 210);
     }
 

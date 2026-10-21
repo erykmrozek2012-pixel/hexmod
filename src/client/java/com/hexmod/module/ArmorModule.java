@@ -9,10 +9,10 @@ import net.minecraft.item.ItemStack;
 public class ArmorModule extends Module {
     private static final EquipmentSlot[] SLOTS = {
             EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-    private static final String[] LABELS = {"Helm", "Napiersnik", "Spodnie", "Buty"};
+    private static final String[] LABELS = {"Helmet", "Chestplate", "Leggings", "Boots"};
 
     public ArmorModule() {
-        super("armor", "Armor Status", "Wytrzymalosc zbroi w procentach");
+        super("armor", "Armor Status", "Armor durability in percent");
         at(120, 22);
     }
 
@@ -27,12 +27,12 @@ public class ArmorModule extends Module {
         for (int i = 0; i < SLOTS.length; i++) {
             String t;
             if (preview) {
-                t = LABELS[i] + ": 87%";
+                t = L.t(LABELS[i]) + ": 87%";
             } else {
                 ItemStack s = mc.player.getEquippedStack(SLOTS[i]);
                 if (s.isEmpty() || !s.isDamageable()) continue;
                 int pct = Math.round(100f * (s.getMaxDamage() - s.getDamage()) / s.getMaxDamage());
-                t = LABELS[i] + ": " + pct + "%";
+                t = L.t(LABELS[i]) + ": " + pct + "%";
             }
             ctx.drawTextWithShadow(mc.textRenderer, t, 0, line, rgb());
             line += 12;

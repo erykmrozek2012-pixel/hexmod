@@ -17,13 +17,13 @@ public class AppleCountModule extends Module {
     private static final int KOX_COLOR = 0xBF5AF2;
 
     public AppleCountModule() {
-        super("apples", "Gapple Count", "Liczba refow (zlote jablka) i koxow (zaczarowane) w rece wroga i w ekwipunku");
+        super("apples", "Gapple Count", "Gapples and enchanted gapples held by enemies, and your own count");
         at(10, 294);
-        option("ref", "Ref", true);
-        option("kox", "Kox", true);
-        option("enemy", "Nad wrogiem", true);
-        option("own", "Moje", true);
-        option("walls", "Przez sciany", false);
+        option("ref", "Gapple", true);
+        option("kox", "E-Gapple", true);
+        option("enemy", "Above enemies", true);
+        option("own", "Own count", true);
+        option("walls", "Through walls", false);
     }
 
     @Override public int w() { return 90; }
@@ -55,11 +55,11 @@ public class AppleCountModule extends Module {
         }
         int y = 0;
         if (option("ref")) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Ref: " + refs, 0, y, 0xFF000000 | REF_COLOR);
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Gapple: ") + refs, 0, y, 0xFF000000 | REF_COLOR);
             y += 12;
         }
         if (option("kox")) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Kox: " + koxes, 0, y, 0xFF000000 | KOX_COLOR);
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("E-Gapple: ") + koxes, 0, y, 0xFF000000 | KOX_COLOR);
         }
     }
 
@@ -86,7 +86,7 @@ public class AppleCountModule extends Module {
         int sw = ctx.getScaledWindowWidth(), sh = ctx.getScaledWindowHeight();
         int px = Math.round(p[0]), py = Math.round(p[1]);
         if (px < 4 || px > sw - 40 || py < 4 || py > sh - 12) return;
-        String t = (ref ? "Ref x" : "Kox x") + s.getCount();
+        String t = (ref ? L.t("Gapple x") : L.t("E-Gapple x")) + s.getCount();
         int tw = mc.textRenderer.getWidth(t);
         // Stala wielkosc na ekranie: nie zalezy od odleglosci, tylko od skali widgetu (edytor HUD).
         var m = ctx.getMatrices();

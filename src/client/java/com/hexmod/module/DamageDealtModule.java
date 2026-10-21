@@ -20,7 +20,7 @@ public class DamageDealtModule extends Module {
     private static long lastHitAt = 0;
 
     public DamageDealtModule() {
-        super("damage_dealt", "Damage Dealt", "Ile HP zadales przeciwnikowi");
+        super("damage_dealt", "Damage Dealt", "How much HP you dealt to the opponent");
         at(120, 146);
     }
 
@@ -59,13 +59,13 @@ public class DamageDealtModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Zadano: 6.0 HP", 0, 0, rgb());
-            ctx.drawTextWithShadow(mc.textRenderer, "Razem: 12.5 (Wrog)", 0, 12, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Dealt: 6.0 HP"), 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Total: 12.5 (Enemy)"), 0, 12, rgb());
             return;
         }
         if (System.currentTimeMillis() - lastHitAt > 10_000) return;
-        ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, "Zadano: %.1f HP", lastHit), 0, 0, rgb());
+        ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, L.t("Dealt: %.1f HP"), lastHit), 0, 0, rgb());
         ctx.drawTextWithShadow(mc.textRenderer,
-                String.format(Locale.ROOT, "Razem: %.1f (%s)", total, targetName), 0, 12, rgb());
+                String.format(Locale.ROOT, L.t("Total: %.1f (%s)"), total, targetName), 0, 12, rgb());
     }
 }

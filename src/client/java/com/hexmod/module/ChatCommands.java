@@ -5,8 +5,8 @@ import net.minecraft.text.Text;
 
 /**
  * Komendy wpisywane na czacie (nie sa wysylane na serwer):
- * .hexoff - ukryj dodatkowe widgety,  .hexon - pokaz je,
- * .hexoff nazwa - wylacz modul,  .hexon nazwa - wlacz modul.
+ * .hexoff - chowa wszystko, co moze byc zakazane przy sprawdzaniu (zostaja tylko bezpieczne widgety),
+ * .hexon - przywraca. Dzialaja zawsze, niezaleznie od tego, ktore moduly sa wlaczone.
  */
 public final class ChatCommands {
     private ChatCommands() {}
@@ -20,40 +20,22 @@ public final class ChatCommands {
     public static boolean handle(String msg) {
         if (msg == null) return false;
         String trimmed = msg.trim();
-        if (Remote.isLocked()) return false;
         String low = trimmed.toLowerCase();
+        String first = low.split("\\s+")[0];
+        // .hexoff / .hexon maja pierwszenstwo nad wszystkim (takze gdy dostep jest zablokowany) i nigdy nie ida na serwer.
+        if (first.equals(".hexoff") || first.equals(".hexon")) {
+            boolean off = first.equals(".hexoff");
+            Module.extrasHidden = off;
+            say(off ? L.t("Extra widgets hidden.") : L.t("Extra widgets visible."));
+            return true;
+        }
+        if (first.equals(".hex")) return true;
+        if (Remote.isLocked()) return false;
         // Po .hexoff dodatkowe komendy sa ukryte: nic nie robia i nie wysylaja sie na serwer.
         if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock"))) return true;
         if (low.startsWith(".wp")) return waypoint(trimmed);
-        if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
-        if (!trimmed.toLowerCase().startsWith(".hex")) return false;
-        String[] parts = trimmed.split("\\s+");
-        String cmd = parts[0].toLowerCase();
-        boolean on = cmd.equals(".hexon");
-        boolean off = cmd.equals(".hexoff");
-        if (!on && !off) {
-            if (cmd.equals(".hex")) {
-                say(".hexoff / .hexon - ukryj / pokaz dodatkowe widgety. "
-                        + ".hexoff <modul> / .hexon <modul> - wylacz / wlacz modul.");
-                return true;
-            }
-            return false;
-        }
-        if (parts.length == 1) {
-            Module.extrasHidden = off;
-            say(off ? "Dodatkowe widgety ukryte." : "Dodatkowe widgety widoczne.");
-            return true;
-        }
-        String q = parts[1].toLowerCase();
-        for (Module m : ModuleManager.all()) {
-            if (m.id.equalsIgnoreCase(q) || m.name.toLowerCase().replace(' ', '_').equals(q)) {
-                m.setEnabled(on);
-                say(m.name + (on ? ": wlaczony." : ": wylaczony."));
-                return true;
-            }
-        }
-        say("Nie znaleziono modulu: " + parts[1]);
-        return true;
+        if (low.startsWith(".lock")) return lock(trimmed);
+        return false;
     }
 
     /** .wp add [nazwa], .wp del nazwa, .wp list */
@@ -63,15 +45,15 @@ public final class ChatCommands {
         String sub = p.length > 1 ? p[1].toLowerCase() : "";
         String arg = p.length > 2 ? p[2] : "";
         switch (sub) {
-            case "add" -> say(WaypointManager.addHere(arg) ? "Dodano waypoint." : "Nie mozna dodac waypointu.");
-            case "del" -> say(WaypointManager.removeByName(arg.trim()) ? "Usunieto waypoint." : "Nie ma takiego waypointu.");
+            case "add" -> say(WaypointManager.addHere(arg) ? L.t("Waypoint added.") : L.t("Cannot add waypoint."));
+            case "del" -> say(WaypointManager.removeByName(arg.trim()) ? L.t("Waypoint removed.") : L.t("No such waypoint."));
             case "list" -> {
-                if (WaypointManager.list().isEmpty()) say("Brak waypointow.");
+                if (WaypointManager.list().isEmpty()) say(L.t("No waypoints."));
                 for (WaypointManager.Waypoint w : WaypointManager.list()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
             }
             case "death" -> say(WaypointsModule.toggleDeath()
-                    ? "Punkt smierci: WLACZONY (waypoint Smierc po kazdej smierci)." : "Punkt smierci: wylaczony.");
-            default -> say(".wp add [nazwa] / .wp del nazwa / .wp list / .wp death");
+                    ? L.t("Death point: ON (a Death waypoint after every death).") : L.t("Death point: off."));
+            default -> say(L.t(".wp add [name] / .wp del name / .wp list / .wp death"));
         }
         return true;
     }
@@ -84,35 +66,35 @@ public final class ChatCommands {
         String arg = p.length > 1 ? p[1].trim() : "";
         if (arg.equalsIgnoreCase("list")) {
             var ids = ItemLockManager.list();
-            say(ids.isEmpty() ? "Brak zablokowanych przedmiotow (poza totemem i gapple z opcji)." : "Zablokowane: " + String.join(", ", ids));
+            say(ids.isEmpty() ? L.t("No locked items (besides the totem and gapple from the options).") : L.t("Locked: ") + String.join(", ", ids));
             return true;
         }
         if (arg.equalsIgnoreCase("offhand")) {
             say(ItemLockModule.toggleOffhandLock()
-                    ? "Druga reka: ZABLOKOWANA (F i zamiana w ekwipunku nie dzialaja)."
-                    : "Druga reka: odblokowana, mozna zmieniac item.");
+                    ? L.t("Offhand: LOCKED (F and inventory swaps are blocked).")
+                    : L.t("Offhand: unlocked, you can change the item."));
             return true;
         }
         if (arg.equalsIgnoreCase("clear")) {
             ItemLockManager.clear();
-            say("Wyczyszczono liste zablokowanych przedmiotow.");
+            say(L.t("Locked items list cleared."));
             return true;
         }
         String id;
         if (arg.isEmpty()) {
             if (mc.player == null || mc.player.getMainHandStack().isEmpty()) {
-                say("Trzymaj przedmiot w rece albo wpisz: .lock nazwa (np. .lock ender_pearl).");
+                say(L.t("Hold an item or type: .lock name (e.g. .lock ender_pearl)."));
                 return true;
             }
             id = ItemLockManager.idOf(mc.player.getMainHandStack());
         } else {
             id = ItemLockManager.resolve(arg);
             if (id == null) {
-                say("Nie ma takiego przedmiotu: " + arg);
+                say(L.t("No such item: ") + arg);
                 return true;
             }
         }
-        say((ItemLockManager.toggleId(id) ? "Zablokowano: " : "Odblokowano: ") + id);
+        say((ItemLockManager.toggleId(id) ? L.t("Locked: ") : L.t("Unlocked: ")) + id);
         return true;
     }
 }

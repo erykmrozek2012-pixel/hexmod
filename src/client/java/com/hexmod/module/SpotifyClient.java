@@ -129,7 +129,7 @@ public final class SpotifyClient {
         cfg.expiresAt = 0;
         track = null;
         save();
-        status = "Wylogowano.";
+        status = L.t("Logged out.");
     }
 
     public static Track current() {
@@ -227,21 +227,21 @@ public final class SpotifyClient {
         if (q >= 0) {
             for (String part : text.substring(q + 1).split("&")) {
                 if (part.startsWith("code=")) code = part.substring(5);
-                if (part.startsWith("error=")) { status = "Spotify odrzucil logowanie."; return; }
+                if (part.startsWith("error=")) { status = L.t("Spotify rejected the login."); return; }
             }
         }
         if (code == null || code.isEmpty()) {
-            status = "W schowku nie ma adresu z kodem. Skopiuj caly adres z przegladarki.";
+            status = L.t("The clipboard has no address with a code. Copy the whole address from the browser.");
             return;
         }
         final String c = code;
-        status = "Loguje...";
+        status = L.t("Logging in...");
         CompletableFuture.runAsync(() -> {
             try {
                 exchangeCode(c);
-                status = "Zalogowano do Spotify.";
+                status = L.t("Logged in to Spotify.");
             } catch (IOException | RuntimeException e) {
-                status = "Blad logowania: " + e.getMessage() + ". Sprawdz Client ID i Redirect URI.";
+                status = L.t("Login error: ") + e.getMessage() + L.t(". Check the Client ID and Redirect URI.");
             }
         });
     }
@@ -266,19 +266,19 @@ public final class SpotifyClient {
         ensureLoaded();
         String url = loginUrl();
         if (url == null) {
-            status = "Brak Client ID. Poproś admina o ustawienie go (zakladka Zaawansowane).";
+            status = L.t("No Client ID. Ask the admin to set it (Advanced tab).");
             return;
         }
         if (!autoRunning.compareAndSet(false, true)) {
-            status = "Logowanie juz trwa. Dokoncz je w przegladarce.";
+            status = L.t("Login is already in progress. Finish it in the browser.");
             return;
         }
-        status = "Otwieram przegladarke... zaloguj sie i wroc do gry.";
+        status = L.t("Opening the browser... log in and come back to the game.");
         CompletableFuture.runAsync(() -> {
             try (ServerSocket server = new ServerSocket(8888, 5, InetAddress.getByName("127.0.0.1"))) {
                 server.setSoTimeout(15_000);
                 if (!Browser.open(url)) {
-                    status = "Nie moge otworzyc przegladarki. Uzyj logowania recznego (Zaawansowane).";
+                    status = L.t("Cannot open the browser. Use manual login (Advanced).");
                 }
                 long deadline = System.currentTimeMillis() + 180_000;
                 while (System.currentTimeMillis() < deadline) {
@@ -303,26 +303,26 @@ public final class SpotifyClient {
                             }
                         }
                         if (code == null || denied) {
-                            reply(s, 200, page("Nie udalo sie", "Spotify odrzucil logowanie. Wroc do Minecrafta i sprobuj ponownie."));
-                            status = "Spotify odrzucil logowanie.";
+                            reply(s, 200, page("Login failed", "Spotify rejected the login. Return to Minecraft and try again."));
+                            status = L.t("Spotify rejected the login.");
                             return;
                         }
-                        reply(s, 200, page("Zalogowano!", "Mozesz zamknac te karte i wrocic do Minecrafta."));
-                        status = "Loguje...";
+                        reply(s, 200, page("Logged in!", "You can close this tab and return to Minecraft."));
+                        status = L.t("Logging in...");
                         try {
                             exchangeCode(code);
-                            status = "Zalogowano do Spotify.";
+                            status = L.t("Logged in to Spotify.");
                         } catch (IOException | RuntimeException e) {
-                            status = "Blad logowania: " + e.getMessage();
+                            status = L.t("Login error: ") + e.getMessage();
                         }
                         return;
                     } catch (SocketTimeoutException ignored) {
                         // brak polaczenia w tej chwili - czekaj dalej do konca limitu czasu
                     }
                 }
-                status = "Czas na logowanie minal. Sprobuj ponownie.";
+                status = L.t("The login timed out. Try again.");
             } catch (IOException e) {
-                status = "Nie moge uruchomic logowania (port 8888 zajety?). Uzyj logowania recznego.";
+                status = L.t("Cannot start the login (port 8888 busy?). Use manual login.");
             } finally {
                 autoRunning.set(false);
             }
@@ -481,7 +481,7 @@ public final class SpotifyClient {
         long now = System.currentTimeMillis();
         if (state == 0) {
             localTrack = null;
-            localInfo = "Spotify nie jest uruchomiony";
+            localInfo = L.t("Spotify is not running");
             return;
         }
         if (state == 1) {
@@ -489,7 +489,7 @@ public final class SpotifyClient {
                 t.progressMs = progressNow(t);
                 t.playing = false;
             }
-            localInfo = "Spotify: pauza";
+            localInfo = L.t("Spotify: paused");
             return;
         }
         String full = r[1];
@@ -509,7 +509,7 @@ public final class SpotifyClient {
             t.sampledAt = now;
             t.playing = true;
         }
-        localInfo = "Gra: " + full;
+        localInfo = L.t("Playing: ") + full;
     }
 
     private static void pollLocalAsync() {

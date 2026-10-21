@@ -14,7 +14,7 @@ public class CpsModule extends Module {
     private boolean prevLeft, prevRight;
 
     public CpsModule() {
-        super("cps", "CPS", "Kliki na sekunde");
+        super("cps", "CPS", "Clicks per second");
         at(120, 10);
     }
 

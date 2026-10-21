@@ -15,12 +15,12 @@ import java.util.Locale;
  */
 public class WaypointsModule extends Module {
     public WaypointsModule() {
-        super("waypoints", "Waypoints", "Znaczniki zapisanych miejsc w swiecie i lista najblizszych");
+        super("waypoints", "Waypoints", "Saved places as markers in the world and a list of the nearest");
         at(10, 130);
-        option("world", "Znaczniki", true);
-        option("list", "Lista", true);
-        option("dist", "Odleglosc", true);
-        option("death", "Punkt smierci", true);
+        option("world", "Markers", true);
+        option("list", "List", true);
+        option("dist", "Distance", true);
+        option("death", "Death point", true);
     }
 
     private boolean wasDead = false;
@@ -38,7 +38,7 @@ public class WaypointsModule extends Module {
         return false;
     }
 
-    /** Po smierci zapisuje waypoint "Smierc" w miejscu, gdzie zginales (poprzedni taki punkt jest zastepowany). */
+    /** Po smierci zapisuje waypoint "Death" w miejscu, gdzie zginales (poprzedni taki punkt jest zastepowany). */
     @Override
     public void tick() {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -48,8 +48,8 @@ public class WaypointsModule extends Module {
         }
         boolean dead = mc.player.isDead();
         if (dead && !wasDead && option("death")) {
-            WaypointManager.removeByName("Smierc");
-            WaypointManager.addHere("Smierc");
+            WaypointManager.removeByName("Death");
+            WaypointManager.addHere("Death");
         }
         wasDead = dead;
     }
@@ -82,8 +82,8 @@ public class WaypointsModule extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (!option("list")) return;
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Dom: 120m", 0, 0, rgb());
-            ctx.drawTextWithShadow(mc.textRenderer, "Baza: 340m", 0, 12, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Home: 120m"), 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Base: 340m"), 0, 12, rgb());
             return;
         }
         if (mc.player == null) return;

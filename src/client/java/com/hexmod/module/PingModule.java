@@ -6,7 +6,7 @@ import net.minecraft.client.network.PlayerListEntry;
 
 public class PingModule extends Module {
     public PingModule() {
-        super("ping", "Ping", "Opoznienie do serwera");
+        super("ping", "Ping", "Latency to the server");
         at(10, 22);
     }
 

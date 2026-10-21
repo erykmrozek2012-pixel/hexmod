@@ -9,7 +9,7 @@ import java.util.Locale;
 /** Najblizszy wrog (gracz niebedacy sojusznikiem): nick, odleglosc i HP. */
 public class NearestEnemyModule extends Module {
     public NearestEnemyModule() {
-        super("nearest_enemy", "Target Info", "Nick, odleglosc i HP najblizszego gracza");
+        super("nearest_enemy", "Target Info", "Nick, distance and HP of the nearest player");
         at(10, 372);
         option("hp", "HP", true);
     }
@@ -20,7 +20,7 @@ public class NearestEnemyModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Wrog: 4.2m" + (option("hp") ? "  HP 18.0" : ""), 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Enemy: 4.2m") + (option("hp") ? "  HP 18.0" : ""), 0, 0, rgb());
             return;
         }
         if (mc.player == null || mc.world == null) return;
@@ -36,7 +36,7 @@ public class NearestEnemyModule extends Module {
             }
         }
         if (best == null) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Wrog: brak", 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Enemy: none"), 0, 0, rgb());
             return;
         }
         String t = best.getName().getString() + ": " + String.format(Locale.ROOT, "%.1fm", bd);

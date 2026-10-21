@@ -36,14 +36,14 @@ public class EnemyTagsModule extends Module {
     private Object lastWorld = null;
 
     public EnemyTagsModule() {
-        super("enemy_tags", "Enemy Tags", "HP, zbroja z ikonami, zbite totemy i tarcza nad glowa wroga");
+        super("enemy_tags", "Enemy Tags", "HP, armor icons, popped totems and shield above the enemy head");
         at(0, -2); // przesuniecie wzgledem domyslnej pozycji nad glowa
         option("hp", "HP", true);
-        option("armor", "Zbroja", true);
-        option("pops", "Totemy", true);
-        option("shield", "Tarcza", true);
+        option("armor", "Armor", true);
+        option("pops", "Totems", true);
+        option("shield", "Shield", true);
         option("ping", "Ping", true);
-        option("pct", "Procenty", false);
+        option("pct", "Percent", false);
     }
 
     @Override
@@ -135,8 +135,8 @@ public class EnemyTagsModule extends Module {
 
     private List<Row> rows(TagData d) {
         List<Row> rows = new ArrayList<>();
-        if (option("shield") && d.blocking()) rows.add(new Row("Tarcza!", 0xD10A0A, null));
-        if (option("pops") && d.pops() > 0) rows.add(new Row("Totemy zbite: " + d.pops(), color, null));
+        if (option("shield") && d.blocking()) rows.add(new Row(L.t("Shield!"), 0xD10A0A, null));
+        if (option("pops") && d.pops() > 0) rows.add(new Row(L.t("Totems popped: ") + d.pops(), color, null));
         if (option("armor") && !d.armor().isEmpty()) rows.add(new Row(null, color, d.armor()));
         if (option("ping") && d.ping() >= 0) {
             int pc = d.ping() < 80 ? 0x30D158 : d.ping() < 150 ? 0xFFD60A : 0xD10A0A;

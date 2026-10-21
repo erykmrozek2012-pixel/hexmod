@@ -9,7 +9,7 @@ import net.minecraft.item.Items;
 /** Licznik totemow nieśmiertelności w ekwipunku i drugiej rece. */
 public class TotemModule extends Module {
     public TotemModule() {
-        super("totems", "Totem Count", "Ile totemow masz przy sobie");
+        super("totems", "Totem Count", "How many totems you carry");
         at(10, 124);
     }
 
@@ -31,6 +31,6 @@ public class TotemModule extends Module {
             }
             if (inv.size() <= 36 && p.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING)) n++;
         }
-        ctx.drawTextWithShadow(mc.textRenderer, "Totemy: " + n, 0, 0, n == 0 ? 0xFFD10A0A : rgb());
+        ctx.drawTextWithShadow(mc.textRenderer, L.t("Totems: ") + n, 0, 0, n == 0 ? 0xFFD10A0A : rgb());
     }
 }

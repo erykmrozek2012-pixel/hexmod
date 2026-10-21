@@ -5,7 +5,7 @@ import net.minecraft.client.gui.DrawContext;
 
 public class FpsModule extends Module {
     public FpsModule() {
-        super("fps", "FPS", "Licznik klatek na sekunde");
+        super("fps", "FPS", "Frames per second counter");
         at(10, 10);
     }
 

@@ -14,14 +14,19 @@ public class Module {
 
     /** Globalny przelacznik: gdy true, widoczne sa tylko podstawowe widgety. */
     public static boolean extrasHidden = false;
-    private static final Set<String> OTHER = Set.of("fps", "ping", "coords", "spotify", "waypoints");
+    private static final Set<String> CAT_PVP = Set.of("enemy_tags", "enemy_shield", "nearest_enemy", "reach", "combo",
+            "damage_dealt", "shield_break", "apples", "allies", "cps");
+    private static final Set<String> CAT_OTHER = Set.of("fps", "ping", "coords", "memory", "waypoints", "spotify");
     private static final Set<String> BASIC = Set.of("fps", "cps", "cooldowns", "effects", "spotify");
     public static final int[] PALETTE = {0xD10A0A, 0xFFFFFF, 0xFFD60A, 0x30D158, 0x64D2FF, 0x0A84FF, 0xBF5AF2};
 
     public final String id;
 
-    /** Kategoria w menu: PvP albo Inne. */
-    public String category() { return OTHER.contains(id) ? "Inne" : "PvP"; }
+    /** Kategoria w menu: PvP (walka), Status (Ty i Twoje zasoby) albo Other (reszta). */
+    public String category() {
+        if (CAT_PVP.contains(id)) return "PvP";
+        return CAT_OTHER.contains(id) ? "Other" : "Status";
+    }
 
     /** Rysuje pasek postepu (0..1). */
     protected static void drawBar(DrawContext ctx, int x, int y, int w, int h, float frac, int argb) {
@@ -61,8 +66,8 @@ public class Module {
         this.id = id;
         this.name = name;
         this.description = description;
-        option("bg", "Tlo", false);
-        option("stealth", "Ukryj do klawisza", false);
+        option("bg", "Background", false);
+        option("stealth", "Hide until key", false);
     }
 
     public Module at(int x, int y) {

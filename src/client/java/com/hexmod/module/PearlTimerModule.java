@@ -17,7 +17,7 @@ import java.util.Locale;
 /** Ile jeszcze poleci kazda z Twoich pereł enderu (szacunek z fizyki lotu). */
 public class PearlTimerModule extends Module {
     public PearlTimerModule() {
-        super("pearl_timer", "Pearl Timer", "Ile sekund jeszcze poleci Twoja perla");
+        super("pearl_timer", "Pearl Timer", "Seconds left before your pearl lands");
         at(120, 130);
     }
 
@@ -44,8 +44,8 @@ public class PearlTimerModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Perla 1: 1.4s", 0, 0, rgb());
-            ctx.drawTextWithShadow(mc.textRenderer, "Perla 2: 2.1s", 0, 12, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Pearl 1: 1.4s"), 0, 0, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, L.t("Pearl 2: 2.1s"), 0, 12, rgb());
             return;
         }
         if (mc.world == null || mc.player == null) return;
@@ -57,7 +57,7 @@ public class PearlTimerModule extends Module {
         }
         Collections.sort(times);
         for (int i = 0; i < Math.min(4, times.size()); i++) {
-            String label = times.size() == 1 ? "Perla" : "Perla " + (i + 1);
+            String label = times.size() == 1 ? L.t("Pearl") : L.t("Pearl ") + (i + 1);
             ctx.drawTextWithShadow(mc.textRenderer,
                     String.format(Locale.ROOT, "%s: %.1fs", label, times.get(i)), 0, i * 12, rgb());
         }

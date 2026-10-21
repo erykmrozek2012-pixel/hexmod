@@ -252,10 +252,10 @@ public final class PackTools {
                 applied++;
                 lastSize = base.w();
             }
-            if (applied == 0) return "Nie znaleziono tekstury tarczy w tej wersji gry.";
-            return "Zapisano obraz na tarczy (" + lastSize + "x" + lastSize + "). Wlacz pakiet w ustawieniach i przeladuj tekstury.";
+            if (applied == 0) return L.t("Shield texture not found in this game version.");
+            return L.t("Shield image saved (") + lastSize + "x" + lastSize + L.t("). Enable the pack in settings and reload textures.");
         } catch (IOException | RuntimeException e) {
-            return "Blad: " + e.getMessage();
+            return L.t("Error: ") + e.getMessage();
         }
     }
 
@@ -268,7 +268,7 @@ public final class PackTools {
         if (Files.exists(target)) return target;
         var rm = MinecraftClient.getInstance().getResourceManager();
         Optional<Resource> res = rm.getResource(Identifier.ofVanilla(rel));
-        if (res.isEmpty()) throw new IOException("Brak tej tekstury w grze: " + rel);
+        if (res.isEmpty()) throw new IOException(L.t("This texture does not exist in the game: ") + rel);
         Files.createDirectories(target.getParent());
         try (InputStream in = res.get().getInputStream()) {
             Files.copy(in, target);

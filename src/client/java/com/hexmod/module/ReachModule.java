@@ -15,7 +15,7 @@ public class ReachModule extends Module {
     private static long lastAt = 0;
 
     public ReachModule() {
-        super("reach", "Reach", "Odleglosc ostatniego trafienia");
+        super("reach", "Reach", "Distance of your last hit");
         at(10, 224);
     }
 
@@ -36,9 +36,9 @@ public class ReachModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         String t;
-        if (preview) t = "Zasieg: 2.84";
-        else if (lastReach < 0 || System.currentTimeMillis() - lastAt > 5000) t = "Zasieg: -";
-        else t = String.format(Locale.ROOT, "Zasieg: %.2f", lastReach);
+        if (preview) t = L.t("Reach: 2.84");
+        else if (lastReach < 0 || System.currentTimeMillis() - lastAt > 5000) t = L.t("Reach: -");
+        else t = String.format(Locale.ROOT, L.t("Reach: %.2f"), lastReach);
         ctx.drawTextWithShadow(mc.textRenderer, t, 0, 0, rgb());
     }
 }
