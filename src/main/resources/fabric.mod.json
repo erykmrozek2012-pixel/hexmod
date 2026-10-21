@@ -6,6 +6,9 @@
   "description": "Mod PvP z konfigurowalnym HUD, widgetami i kosmetykami.",
   "authors": ["er__is"],
   "environment": "client",
+    "mixins": [
+    { "config": "hexmod.client.mixins.json", "environment": "client" }
+  ],
   "entrypoints": {
     "client": ["com.hexmod.HexmodClient"]
   },
