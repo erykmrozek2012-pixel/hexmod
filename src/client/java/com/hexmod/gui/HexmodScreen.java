@@ -19,6 +19,7 @@ public class HexmodScreen extends Screen {
     private static final int FOOTER_H = 30;
     private static final int TAB_W = 90;
 
+    private static int cat = 0; // 0 = PvP, 1 = Inne
     private static int tab = 0; // zapamietana zakladka: 0 = Moduly, 1 = Narzedzia
 
     private int panelX, panelY, panelH;
@@ -27,8 +28,17 @@ public class HexmodScreen extends Screen {
         super(Text.literal("Hexmod"));
     }
 
+    /** Moduly widoczne w menu: po .hexoff tylko podstawowe (reszta znika takze z listy). */
+    private List<Module> shown() {
+        List<Module> out = new java.util.ArrayList<>();
+        for (Module m : ModuleManager.all()) {
+            if ((!Module.extrasHidden || m.isBasic()) && m.category().equals(cat == 0 ? "PvP" : "Inne")) out.add(m);
+        }
+        return out;
+    }
+
     private int rows() {
-        return (ModuleManager.all().size() + 1) / 2;
+        return (shown().size() + 1) / 2;
     }
 
     private int cellX(int i) {
@@ -37,6 +47,10 @@ public class HexmodScreen extends Screen {
 
     private int cellY(int i) {
         return panelY + HEADER_H + (i / 2) * ROW_H;
+    }
+
+    private int catX(int i) {
+        return panelX + PANEL_W - 140 + i * 70;
     }
 
     private int tabX(int i) {
@@ -62,12 +76,12 @@ public class HexmodScreen extends Screen {
             return;
         }
 
-        List<Module> modules = ModuleManager.all();
+        List<Module> modules = shown();
         panelX = (width - PANEL_W) / 2;
         panelH = tab == 0 ? HEADER_H + rows() * ROW_H + FOOTER_H : HEADER_H + 5 * 26 + 10;
         panelY = Math.max(2, (height - panelH) / 2);
 
-        String[] tabs = {"Moduly", "Narzedzia"};
+        String[] tabs = {"Modules", "Tools"};
         for (int i = 0; i < tabs.length; i++) {
             final int target = i;
             addDrawableChild(ButtonWidget.builder(Text.literal(tabs[i]), b -> {
@@ -77,32 +91,36 @@ public class HexmodScreen extends Screen {
         }
 
         if (tab == 0) {
+            String[] cats = {"PvP", "Other"};
+            for (int i = 0; i < cats.length; i++) {
+                final int c = i;
+                addDrawableChild(ButtonWidget.builder(Text.literal(cats[i]), b -> {
+                    cat = c;
+                    clearAndInit();
+                }).dimensions(catX(i), panelY + 18, 66, 16).build());
+            }
             for (int i = 0; i < modules.size(); i++) {
                 Module m = modules.get(i);
                 addDrawableChild(new ToggleSwitch(cellX(i) + CELL_W - 36 - 2, cellY(i), m.isEnabled(), m::setEnabled));
             }
             int by = panelY + panelH - FOOTER_H + 6;
-            int half = (PANEL_W - 20) / 2;
-            addDrawableChild(ButtonWidget.builder(Text.literal("Wylacz wszystkie moduly"), b -> {
+            addDrawableChild(ButtonWidget.builder(Text.literal("Disable all modules"), b -> {
                 ModuleManager.disableAll();
                 clearAndInit();
-            }).dimensions(panelX + 8, by, half, 18).build());
-            addDrawableChild(ButtonWidget.builder(
-                    Text.literal("Ukryj dodatkowe: " + (Module.extrasHidden ? "ON" : "OFF")), b -> {
-                Module.extrasHidden = !Module.extrasHidden;
-                clearAndInit();
-            }).dimensions(panelX + 12 + half, by, half, 18).build());
+            }).dimensions(panelX + 8, by, PANEL_W - 16, 18).build());
         } else {
-            tool("Edytuj HUD", 0, new HudEditorScreen(this));
-            tool("Configi", 1, new ConfigScreen(this));
-            tool("Sojusznicy", 2, new AlliesScreen(this));
-            tool("Katalog modow", 3, new ModCatalogScreen(this));
-            tool("Spotify", 4, new SpotifyScreen(this));
-            tool("Edytor tekstur", 5, new TexturePackScreen(this));
-            tool("Makra", 6, new MacroScreen(this));
-            tool("Waypointy", 7, new WaypointScreen(this));
-            tool("Komendy i pomoc", 8, new HelpScreen(this));
-            if (Remote.isAdmin()) tool("Panel admina", 9, new AdminScreen(this));
+            boolean full = !Module.extrasHidden;
+            int n = 0;
+            tool("HUD Editor", n++, new HudEditorScreen(this));
+            tool("Configs", n++, new ConfigScreen(this));
+            if (full) tool("Allies", n++, new AlliesScreen(this));
+            if (full) tool("Mod Catalog", n++, new ModCatalogScreen(this));
+            tool("Spotify", n++, new SpotifyScreen(this));
+            if (full) tool("Texture Editor", n++, new TexturePackScreen(this));
+            if (full) tool("Macros", n++, new MacroScreen(this));
+            if (full) tool("Waypoints", n++, new WaypointScreen(this));
+            if (full) tool("Commands & Help", n++, new HelpScreen(this));
+            if (full && Remote.isAdmin()) tool("Admin Panel", n++, new AdminScreen(this));
         }
     }
 
@@ -114,7 +132,8 @@ public class HexmodScreen extends Screen {
         if (Remote.isLocked()) return;
         ctx.fill(tabX(tab), panelY + 34, tabX(tab) + TAB_W, panelY + 37, HexTheme.RED);
         if (tab == 0) {
-            for (int i = 0; i < ModuleManager.all().size(); i++) {
+            ctx.fill(catX(cat), panelY + 34, catX(cat) + 66, panelY + 37, HexTheme.RED);
+            for (int i = 0; i < shown().size(); i++) {
                 ctx.fill(cellX(i), cellY(i), cellX(i) + CELL_W, cellY(i) + ROW_H - 1, HexTheme.PANEL_ROW);
             }
         }
@@ -134,9 +153,9 @@ public class HexmodScreen extends Screen {
             }
             return;
         }
-        ctx.drawTextWithShadow(textRenderer, "HEXMOD", panelX + 10, panelY + 6, HexTheme.RED);
+        HexLogo.draw(ctx, textRenderer, panelX + 8, panelY + 5);
         if (tab == 0) {
-            List<Module> modules = ModuleManager.all();
+            List<Module> modules = shown();
             for (int i = 0; i < modules.size(); i++) {
                 ctx.drawTextWithShadow(textRenderer, modules.get(i).name, cellX(i) + 6, cellY(i) + 5, HexTheme.TEXT);
             }

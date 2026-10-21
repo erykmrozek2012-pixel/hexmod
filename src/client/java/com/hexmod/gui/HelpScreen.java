@@ -8,10 +8,10 @@ import net.minecraft.text.Text;
 /** Krotka sciaga: komendy czatu i skroty Hexmoda. */
 public class HelpScreen extends Screen {
     private static final String[][] LINES = {
-            {"MENU", "Prawy Shift otwiera menu. Zmiana w Sterowaniu."},
+            {"MENU", "Prawy Shift otwiera menu Hex Client. Zmiana w Sterowaniu. Moduly sa w kategoriach PvP i Other."},
             {"HUD", "Edytuj HUD: przeciagaj widgety, kliknij widget = skala, kolor, opcje, klawisz."},
-            {"STREAM", "Opcja 'Ukryj do klawisza': widget jest niewidoczny, dopoki nie wcisniesz jego klawisza."},
-            {".hexoff", "Wylacza wszystkie widgety (awaryjnie, np. na streamie). .hexon przywraca."},
+            {"STREAM", "Opcja 'Ukryj do klawisza': widget jest niewidoczny, dopoki nie wcisniesz jego klawisza. Ukrywanie dodatkowych: tylko komendy .hexoff i .hexon."},
+            {".hexoff", "Chowa dodatkowe widgety, ich przelaczniki w menu, narzedzia i komendy (.wp, .lock). Zostaje FPS, CPS, cooldowny, efekty, Spotify. .hexon przywraca."},
             {".hexoff nazwa", "Wylacza jeden modul. .hexon nazwa wlacza go z powrotem."},
             {".wp add [nazwa]", "Zapisuje waypoint w miejscu, w ktorym stoisz."},
             {".wp del nazwa", "Usuwa waypoint. .wp list pokazuje wszystkie."},

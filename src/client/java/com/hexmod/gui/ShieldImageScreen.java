@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 /** Obraz na tarczy: wybierz PNG z folderu hexmod/shield, a mod wstawi go na przod tarczy w pakiecie. */
 public class ShieldImageScreen extends Screen {
-    private static int quality = 4;
+    private static int quality = 8;
     private static boolean flip = false;
 
     private final Screen parent;
@@ -56,7 +56,7 @@ public class ShieldImageScreen extends Screen {
         }
         int by = height - 74;
         addDrawableChild(ButtonWidget.builder(Text.literal("Jakosc: " + quality + "x (" + (64 * quality) + "px)"), b -> {
-            quality = quality >= 8 ? 1 : quality * 2;
+            quality = quality >= 16 ? 2 : quality * 2;
             clearAndInit();
         }).dimensions(cx - 140, by - 24, 138, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Odbicie poziome: " + (flip ? "ON" : "OFF")), b -> {

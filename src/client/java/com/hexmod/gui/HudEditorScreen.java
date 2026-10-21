@@ -38,12 +38,6 @@ public class HudEditorScreen extends Screen {
         panelH = 82 + (optRows - 1) * 22;
         int y0 = height - panelH;
 
-        addDrawableChild(ButtonWidget.builder(
-                Text.literal("Ukryj dodatkowe: " + (Module.extrasHidden ? "ON" : "OFF")), b -> {
-            Module.extrasHidden = !Module.extrasHidden;
-            needsInit = true;
-        }).dimensions(width - 140, 20, 136, 18).build());
-
         if (selected == null) {
             addDrawableChild(ButtonWidget.builder(Text.literal("Gotowe"), b -> client.setScreen(parent))
                     .dimensions(cx - 30, y0 + 20, 60, 20).build());
@@ -230,7 +224,7 @@ public class HudEditorScreen extends Screen {
             Module hit = null;
             for (int i = all.size() - 1; i >= 0; i--) {
                 Module m = all.get(i);
-                if (!m.isEnabled()) continue;
+                if (!m.isEnabled() || (Module.extrasHidden && !m.isBasic())) continue;
                 boolean inside = m.hasOverlayPreview() ? previewHit(m, mx, my) : (!m.isOverlay() && m.contains(mx, my));
                 if (inside) { hit = m; break; }
             }
@@ -275,7 +269,7 @@ public class HudEditorScreen extends Screen {
 
         boolean any = false;
         for (Module m : ModuleManager.all()) {
-            if (!m.isEnabled()) continue;
+            if (!m.isEnabled() || (Module.extrasHidden && !m.isBasic())) continue;
             any = true;
             if (m.hasOverlayPreview()) {
                 int ax = width / 2, ay = height / 3;
