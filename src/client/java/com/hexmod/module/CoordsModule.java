@@ -5,7 +5,7 @@ import net.minecraft.client.gui.DrawContext;
 
 public class CoordsModule extends Module {
     public CoordsModule() {
-        super("coords", "Koordynaty", "Pozycja X Y Z");
+        super("coords", "Coords", "Pozycja X Y Z");
         at(10, 34);
     }
 

@@ -20,7 +20,7 @@ public class DamageDealtModule extends Module {
     private static long lastHitAt = 0;
 
     public DamageDealtModule() {
-        super("damage_dealt", "Zadane obrazenia", "Ile HP zadales przeciwnikowi");
+        super("damage_dealt", "Damage Dealt", "Ile HP zadales przeciwnikowi");
         at(120, 146);
     }
 

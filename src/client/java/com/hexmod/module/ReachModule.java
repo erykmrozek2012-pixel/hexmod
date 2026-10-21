@@ -15,7 +15,7 @@ public class ReachModule extends Module {
     private static long lastAt = 0;
 
     public ReachModule() {
-        super("reach", "Zasieg", "Odleglosc ostatniego trafienia");
+        super("reach", "Reach", "Odleglosc ostatniego trafienia");
         at(10, 224);
     }
 

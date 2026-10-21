@@ -9,7 +9,7 @@ import java.util.Locale;
 /** Aktywne efekty (potiony) z czasem. */
 public class EffectsModule extends Module {
     public EffectsModule() {
-        super("effects", "Efekty", "Aktywne efekty z pozostalym czasem");
+        super("effects", "Potion Effects", "Aktywne efekty z pozostalym czasem");
         at(120, 74);
     }
 

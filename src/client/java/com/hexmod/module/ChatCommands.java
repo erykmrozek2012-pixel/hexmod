@@ -21,7 +21,10 @@ public final class ChatCommands {
         if (msg == null) return false;
         String trimmed = msg.trim();
         if (Remote.isLocked()) return false;
-        if (trimmed.toLowerCase().startsWith(".wp")) return waypoint(trimmed);
+        String low = trimmed.toLowerCase();
+        // Po .hexoff dodatkowe komendy sa ukryte: nic nie robia i nie wysylaja sie na serwer.
+        if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock"))) return true;
+        if (low.startsWith(".wp")) return waypoint(trimmed);
         if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
         if (!trimmed.toLowerCase().startsWith(".hex")) return false;
         String[] parts = trimmed.split("\\s+");

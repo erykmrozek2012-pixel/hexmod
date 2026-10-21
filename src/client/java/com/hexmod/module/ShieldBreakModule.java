@@ -14,7 +14,7 @@ public class ShieldBreakModule extends Module {
     private static String enemyName = "";
 
     public ShieldBreakModule() {
-        super("shield_break", "Tarcza break", "Komunikat po zlamaniu tarczy toporem");
+        super("shield_break", "Shield Break", "Komunikat po zlamaniu tarczy toporem");
         centered(52);
     }
 

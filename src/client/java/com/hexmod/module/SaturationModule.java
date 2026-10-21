@@ -12,11 +12,14 @@ public class SaturationModule extends Module {
     private float rate = 0f;
 
     public SaturationModule() {
-        super("saturation", "Saturacja", "Poziom i szacowany czas saturacji w walce");
+        super("saturation", "Saturation", "Poziom i szacowany czas saturacji w walce");
         at(10, 46);
+        option("bar", "Pasek", true);
+        option("pct", "Procenty", true);
     }
 
-    @Override public int w() { return 130; }
+    @Override public int w() { return 140; }
+    @Override public int h() { return option("bar") ? 18 : 12; }
 
     @Override
     public void tick() {
@@ -35,18 +38,17 @@ public class SaturationModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
-        if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Saturacja: 5.0 (~12s)", 0, 0, rgb());
-            return;
+        if (!preview && !CombatTracker.inCombat()) return;
+        float sat = preview ? 5f : mc.player.getHungerManager().getSaturationLevel();
+        float frac = Math.min(1f, sat / 20f);
+        boolean empty = !preview && sat <= 0.01f;
+        String text = empty ? "Saturacja: BRAK" : String.format(Locale.ROOT, "Saturacja: %.1f", sat);
+        if (!empty && option("pct")) text += " (" + Math.round(frac * 100f) + "%)";
+        if (!empty) {
+            float secs = preview ? 12f : (rate > 0.01f ? sat / rate : -1f);
+            if (secs >= 0f) text += String.format(Locale.ROOT, " ~%.0fs", secs);
         }
-        if (!CombatTracker.inCombat()) return;
-        float sat = mc.player.getHungerManager().getSaturationLevel();
-        if (sat <= 0.01f) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Saturacja: BRAK", 0, 0, 0xFFD10A0A);
-            return;
-        }
-        String text = String.format(Locale.ROOT, "Saturacja: %.1f", sat);
-        if (rate > 0.01f) text += String.format(Locale.ROOT, " (~%.0fs)", sat / rate);
-        ctx.drawTextWithShadow(mc.textRenderer, text, 0, 0, rgb());
+        ctx.drawTextWithShadow(mc.textRenderer, text, 0, 0, empty ? 0xFFD10A0A : rgb());
+        if (option("bar")) drawBar(ctx, 0, 11, w(), 4, frac, empty ? 0xFFD10A0A : (0xFF000000 | rgb()));
     }
 }

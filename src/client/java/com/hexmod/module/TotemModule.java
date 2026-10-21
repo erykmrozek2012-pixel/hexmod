@@ -9,7 +9,7 @@ import net.minecraft.item.Items;
 /** Licznik totemow nieśmiertelności w ekwipunku i drugiej rece. */
 public class TotemModule extends Module {
     public TotemModule() {
-        super("totems", "Licznik totemow", "Ile totemow masz przy sobie");
+        super("totems", "Totem Count", "Ile totemow masz przy sobie");
         at(10, 124);
     }
 

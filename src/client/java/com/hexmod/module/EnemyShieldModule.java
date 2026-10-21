@@ -13,7 +13,7 @@ public class EnemyShieldModule extends Module {
     private static final double RANGE = 20.0;
 
     public EnemyShieldModule() {
-        super("enemy_shield", "Tarcza wroga", "Czy wrog ma uniesiona tarcze");
+        super("enemy_shield", "Enemy Shield", "Czy wrog ma uniesiona tarcze");
         centered(34);
     }
 

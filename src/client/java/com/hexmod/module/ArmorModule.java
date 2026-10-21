@@ -12,7 +12,7 @@ public class ArmorModule extends Module {
     private static final String[] LABELS = {"Helm", "Napiersnik", "Spodnie", "Buty"};
 
     public ArmorModule() {
-        super("armor", "Zbroja", "Wytrzymalosc zbroi w procentach");
+        super("armor", "Armor Status", "Wytrzymalosc zbroi w procentach");
         at(120, 22);
     }
 

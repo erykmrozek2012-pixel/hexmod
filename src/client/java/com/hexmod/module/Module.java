@@ -14,10 +14,25 @@ public class Module {
 
     /** Globalny przelacznik: gdy true, widoczne sa tylko podstawowe widgety. */
     public static boolean extrasHidden = false;
+    private static final Set<String> OTHER = Set.of("fps", "ping", "coords", "spotify", "waypoints");
     private static final Set<String> BASIC = Set.of("fps", "cps", "cooldowns", "effects", "spotify");
     public static final int[] PALETTE = {0xD10A0A, 0xFFFFFF, 0xFFD60A, 0x30D158, 0x64D2FF, 0x0A84FF, 0xBF5AF2};
 
     public final String id;
+
+    /** Kategoria w menu: PvP albo Inne. */
+    public String category() { return OTHER.contains(id) ? "Inne" : "PvP"; }
+
+    /** Rysuje pasek postepu (0..1). */
+    protected static void drawBar(DrawContext ctx, int x, int y, int w, int h, float frac, int argb) {
+        float f = frac < 0f ? 0f : Math.min(frac, 1f);
+        ctx.fill(x, y, x + w, y + h, 0xAA000000);
+        int fw = Math.round((w - 2) * f);
+        if (fw > 0) ctx.fill(x + 1, y + 1, x + 1 + fw, y + h - 1, argb);
+    }
+
+    /** Czy to podstawowy widget, ktory zostaje widoczny po .hexoff. */
+    public boolean isBasic() { return BASIC.contains(id); }
     public final String name;
     public final String description;
 

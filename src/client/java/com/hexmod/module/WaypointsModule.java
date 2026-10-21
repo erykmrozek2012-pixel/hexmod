@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 public class WaypointsModule extends Module {
     public WaypointsModule() {
-        super("waypoints", "Waypointy", "Znaczniki zapisanych miejsc w swiecie i lista najblizszych");
+        super("waypoints", "Waypoints", "Znaczniki zapisanych miejsc w swiecie i lista najblizszych");
         at(10, 130);
         option("world", "Znaczniki", true);
         option("list", "Lista", true);
@@ -114,11 +114,17 @@ public class WaypointsModule extends Module {
             if (p[0] < 4 || p[0] > sw - 4 || p[1] < 4 || p[1] > sh - 14) continue;
             int px = Math.round(p[0]), py = Math.round(p[1]);
             int col = 0xFF000000 | w.color;
-            ctx.fill(px - 3, py - 3, px + 3, py + 3, 0xFF000000);
-            ctx.fill(px - 2, py - 2, px + 2, py + 2, col);
             String label = wm.option("dist") ? w.name + " " + fmt(dist(mc, w)) : w.name;
             int tw = mc.textRenderer.getWidth(label);
-            ctx.drawTextWithShadow(mc.textRenderer, label, px - tw / 2, py - 14, col);
+            // Stala wielkosc na ekranie niezaleznie od odleglosci; rozmiar = skala widgetu w edytorze HUD.
+            var mx = ctx.getMatrices();
+            mx.pushMatrix();
+            mx.translate((float) px, (float) py);
+            mx.scale(wm.scale, wm.scale);
+            ctx.fill(-3, -3, 3, 3, 0xFF000000);
+            ctx.fill(-2, -2, 2, 2, col);
+            ctx.drawTextWithShadow(mc.textRenderer, label, -tw / 2, -14, col);
+            mx.popMatrix();
         }
     }
 }

@@ -17,7 +17,7 @@ import java.util.Locale;
 /** Ile jeszcze poleci kazda z Twoich pereł enderu (szacunek z fizyki lotu). */
 public class PearlTimerModule extends Module {
     public PearlTimerModule() {
-        super("pearl_timer", "Czas perly", "Ile sekund jeszcze poleci Twoja perla");
+        super("pearl_timer", "Pearl Timer", "Ile sekund jeszcze poleci Twoja perla");
         at(120, 130);
     }
 

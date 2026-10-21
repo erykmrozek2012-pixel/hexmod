@@ -47,7 +47,6 @@ public final class ModuleManager {
         register(new CooldownModule());
         register(new TotemModule());
         register(new EnemyTagsModule());
-        register(new ReachCircleModule());
         register(new DamageDealtModule());
         register(new PearlTimerModule());
         register(new CpsModule());
@@ -61,11 +60,9 @@ public final class ModuleManager {
         register(new WaypointsModule());
         register(new ComboModule());
         register(new ReachModule());
-        register(new SpeedModule());
-        register(new DirectionModule());
-        register(new ClockModule());
-        register(new MemoryModule());
         register(new AppleCountModule());
+        register(new ItemCountModule());
+        register(new NearestEnemyModule());
     }
 
     public static void register(Module module) {

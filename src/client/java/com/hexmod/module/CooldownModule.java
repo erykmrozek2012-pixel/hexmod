@@ -21,13 +21,14 @@ public class CooldownModule extends Module {
     );
 
     public CooldownModule() {
-        super("cooldowns", "Cooldowny", "Czasy odnowienia wybranych przedmiotow");
+        super("cooldowns", "Cooldowns", "Czasy odnowienia wybranych przedmiotow");
         at(10, 70);
         for (Tracked t : TRACKED) option(t.key(), t.label(), true);
+        option("bar", "Pasek", true);
     }
 
     @Override public int w() { return 90; }
-    @Override public int h() { return 48; }
+    @Override public int h() { return option("bar") ? 68 : 48; }
 
     @Override
     protected void draw(DrawContext ctx, boolean preview) {
@@ -38,15 +39,22 @@ public class CooldownModule extends Module {
         for (Tracked t : TRACKED) {
             if (!option(t.key())) continue;
             String text;
+            float progress;
             if (preview) {
+                progress = 0.8f;
                 text = t.label() + ": 0.8s";
             } else {
-                float progress = p.getItemCooldownManager().getCooldownProgress(t.item().getDefaultStack(), 0f);
+                progress = p.getItemCooldownManager().getCooldownProgress(t.item().getDefaultStack(), 0f);
                 if (progress <= 0f) continue;
                 text = String.format(Locale.ROOT, "%s: %.1fs", t.label(), progress * t.totalTicks() / 20f);
             }
             ctx.drawTextWithShadow(mc.textRenderer, text, 0, line, rgb());
-            line += 12;
+            if (option("bar")) {
+                drawBar(ctx, 0, line + 10, w(), 3, progress, 0xFF000000 | rgb());
+                line += 17;
+            } else {
+                line += 12;
+            }
         }
     }
 }

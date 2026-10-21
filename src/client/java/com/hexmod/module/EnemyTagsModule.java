@@ -3,6 +3,7 @@ package com.hexmod.module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -27,7 +28,7 @@ public class EnemyTagsModule extends Module {
     private static final int ROW = 10;
 
     private record ArmorEntry(ItemStack stack, String text, int color) {}
-    private record TagData(float hp, float maxHp, List<ArmorEntry> armor, int pops, boolean blocking) {}
+    private record TagData(float hp, float maxHp, List<ArmorEntry> armor, int pops, boolean blocking, int ping) {}
     private record Row(String text, int color, List<ArmorEntry> armor) {}
 
     private static final Map<UUID, Integer> POPS = new HashMap<>();
@@ -35,12 +36,13 @@ public class EnemyTagsModule extends Module {
     private Object lastWorld = null;
 
     public EnemyTagsModule() {
-        super("enemy_tags", "Wskazniki wroga", "HP, zbroja z ikonami, zbite totemy i tarcza nad glowa wroga");
+        super("enemy_tags", "Enemy Tags", "HP, zbroja z ikonami, zbite totemy i tarcza nad glowa wroga");
         at(0, -2); // przesuniecie wzgledem domyslnej pozycji nad glowa
         option("hp", "HP", true);
         option("armor", "Zbroja", true);
         option("pops", "Totemy", true);
         option("shield", "Tarcza", true);
+        option("ping", "Ping", true);
         option("pct", "Procenty", false);
     }
 
@@ -107,8 +109,14 @@ public class EnemyTagsModule extends Module {
             ItemStack s = pl.getEquippedStack(slot);
             if (!s.isEmpty()) armor.add(entry(s));
         }
+        int ping = -1;
+        var handler = MinecraftClient.getInstance().getNetworkHandler();
+        if (handler != null) {
+            PlayerListEntry entry = handler.getPlayerListEntry(pl.getUuid());
+            if (entry != null) ping = entry.getLatency();
+        }
         return new TagData(pl.getHealth() + pl.getAbsorptionAmount(), pl.getMaxHealth(), armor,
-                POPS.getOrDefault(pl.getUuid(), 0), pl.isBlocking());
+                POPS.getOrDefault(pl.getUuid(), 0), pl.isBlocking(), ping);
     }
 
     private TagData sample() {
@@ -122,7 +130,7 @@ public class EnemyTagsModule extends Module {
         for (int i = 0; i < 4; i++) {
             armor.add(new ArmorEntry(stacks[i], option("pct") ? pcts[i] : uses[i], pctColor(fr[i])));
         }
-        return new TagData(14.5f, 20f, armor, 2, true);
+        return new TagData(14.5f, 20f, armor, 2, true, 38);
     }
 
     private List<Row> rows(TagData d) {
@@ -130,6 +138,10 @@ public class EnemyTagsModule extends Module {
         if (option("shield") && d.blocking()) rows.add(new Row("Tarcza!", 0xD10A0A, null));
         if (option("pops") && d.pops() > 0) rows.add(new Row("Totemy zbite: " + d.pops(), color, null));
         if (option("armor") && !d.armor().isEmpty()) rows.add(new Row(null, color, d.armor()));
+        if (option("ping") && d.ping() >= 0) {
+            int pc = d.ping() < 80 ? 0x30D158 : d.ping() < 150 ? 0xFFD60A : 0xD10A0A;
+            rows.add(new Row("Ping: " + d.ping() + "ms", pc, null));
+        }
         if (option("hp")) {
             float ratio = d.hp() / Math.max(1f, d.maxHp());
             int c = ratio > 0.66f ? 0x30D158 : ratio > 0.33f ? 0xFFD60A : 0xD10A0A;

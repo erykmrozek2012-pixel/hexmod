@@ -159,8 +159,33 @@ public final class PackTools {
         return new Img(nw, nh, out);
     }
 
+    private static int clampPx(Img s, int x, int y) {
+        int cx = Math.max(0, Math.min(x, s.w() - 1)), cy = Math.max(0, Math.min(y, s.h() - 1));
+        return s.px()[cy * s.w() + cx];
+    }
+
+    /** Wygladzanie dwuliniowe, gdy obraz zrodlowy jest mniejszy niz obszar docelowy (bez pikseli). */
+    private static int bilinear(Img s, int tx, int ty, int rw, int rh) {
+        float u = (tx + 0.5f) * s.w() / rw - 0.5f, v = (ty + 0.5f) * s.h() / rh - 0.5f;
+        int x0 = (int) Math.floor(u), y0 = (int) Math.floor(v);
+        float fx = u - x0, fy = v - y0;
+        int[] c = {clampPx(s, x0, y0), clampPx(s, x0 + 1, y0), clampPx(s, x0, y0 + 1), clampPx(s, x0 + 1, y0 + 1)};
+        float[] wt = {(1 - fx) * (1 - fy), fx * (1 - fy), (1 - fx) * fy, fx * fy};
+        float a = 0, r = 0, g = 0, b = 0;
+        for (int i = 0; i < 4; i++) {
+            float ca = (c[i] >>> 24) * wt[i];
+            a += ca;
+            r += ((c[i] >> 16) & 255) * ca;
+            g += ((c[i] >> 8) & 255) * ca;
+            b += (c[i] & 255) * ca;
+        }
+        if (a <= 0.5f) return 0;
+        return (Math.round(a) << 24) | (Math.round(r / a) << 16) | (Math.round(g / a) << 8) | Math.round(b / a);
+    }
+
     /** Usrednia fragment obrazu zrodlowego odpowiadajacy jednemu pikselowi docelowemu (ostry obraz po zmniejszeniu). */
     private static int sample(Img s, int tx, int ty, int rw, int rh) {
+        if (s.w() < rw || s.h() < rh) return bilinear(s, tx, ty, rw, rh);
         int x0 = tx * s.w() / rw, x1 = Math.max(x0 + 1, (tx + 1) * s.w() / rw);
         int y0 = ty * s.h() / rh, y1 = Math.max(y0 + 1, (ty + 1) * s.h() / rh);
         x1 = Math.min(x1, s.w());

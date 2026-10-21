@@ -19,7 +19,7 @@ public class ItemLockModule extends Module {
     private static long lastNotice = 0;
 
     public ItemLockModule() {
-        super("item_lock", "Item lock", "Blokada wyrzucenia i przenoszenia zablokowanych slotow/przedmiotow");
+        super("item_lock", "Item Lock", "Blokada wyrzucenia i przenoszenia zablokowanych slotow/przedmiotow");
         at(10, 190);
         for (int i = 1; i <= 9; i++) option("slot" + i, "Slot " + i, false);
         option("totem", "Totem", true);
@@ -160,6 +160,7 @@ public class ItemLockModule extends Module {
     }
 
     private static void notice(MinecraftClient mc, String msg) {
+        if (Module.extrasHidden) return;
         long now = System.currentTimeMillis();
         if (now - lastNotice < 800) return;
         lastNotice = now;

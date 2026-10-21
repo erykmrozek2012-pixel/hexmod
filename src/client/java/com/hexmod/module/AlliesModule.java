@@ -9,7 +9,7 @@ public class AlliesModule extends Module {
     public static final String ICON = "\u2605";
 
     public AlliesModule() {
-        super("allies", "Sojusznicy", "Sojusznicy w poblizu z ikona przy nicku");
+        super("allies", "Allies", "Sojusznicy w poblizu z ikona przy nicku");
         at(230, 10);
     }
 

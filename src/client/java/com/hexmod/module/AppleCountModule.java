@@ -17,7 +17,7 @@ public class AppleCountModule extends Module {
     private static final int KOX_COLOR = 0xBF5AF2;
 
     public AppleCountModule() {
-        super("apples", "Ref i Kox", "Liczba refow (zlote jablka) i koxow (zaczarowane) w rece wroga i w ekwipunku");
+        super("apples", "Gapple Count", "Liczba refow (zlote jablka) i koxow (zaczarowane) w rece wroga i w ekwipunku");
         at(10, 294);
         option("ref", "Ref", true);
         option("kox", "Kox", true);
@@ -76,7 +76,7 @@ public class AppleCountModule extends Module {
     }
 
     private static void label(DrawContext ctx, MinecraftClient mc, PlayerEntity pl, ItemStack s, boolean mainHand,
-                              boolean walls, boolean showRef, boolean showKox) {
+                              boolean walls, boolean showRef, boolean showKox, float sc) {
         boolean ref = showRef && isRef(s), kox = showKox && isKox(s);
         if (!ref && !kox) return;
         Vec3d pos = handPos(pl, mainHand);
@@ -88,8 +88,14 @@ public class AppleCountModule extends Module {
         if (px < 4 || px > sw - 40 || py < 4 || py > sh - 12) return;
         String t = (ref ? "Ref x" : "Kox x") + s.getCount();
         int tw = mc.textRenderer.getWidth(t);
-        ctx.fill(px - tw / 2 - 2, py - 2, px + tw / 2 + 2, py + 10, 0x88000000);
-        ctx.drawTextWithShadow(mc.textRenderer, t, px - tw / 2, py, 0xFF000000 | (ref ? REF_COLOR : KOX_COLOR));
+        // Stala wielkosc na ekranie: nie zalezy od odleglosci, tylko od skali widgetu (edytor HUD).
+        var m = ctx.getMatrices();
+        m.pushMatrix();
+        m.translate((float) px, (float) py);
+        m.scale(sc, sc);
+        ctx.fill(-tw / 2 - 2, -2, tw / 2 + 2, 10, 0x88000000);
+        ctx.drawTextWithShadow(mc.textRenderer, t, -tw / 2, 0, 0xFF000000 | (ref ? REF_COLOR : KOX_COLOR));
+        m.popMatrix();
     }
 
     /** Teksty nad rekami wrogow, rysowane osobnym elementem HUD (wolane z HexmodClient). */
@@ -104,8 +110,8 @@ public class AppleCountModule extends Module {
         for (PlayerEntity pl : mc.world.getPlayers()) {
             if (pl == mc.player || pl.isSpectator()) continue;
             if (mc.player.distanceTo(pl) > 48f) continue;
-            label(ctx, mc, pl, pl.getMainHandStack(), true, walls, showRef, showKox);
-            label(ctx, mc, pl, pl.getOffHandStack(), false, walls, showRef, showKox);
+            label(ctx, mc, pl, pl.getMainHandStack(), true, walls, showRef, showKox, am.scale);
+            label(ctx, mc, pl, pl.getOffHandStack(), false, walls, showRef, showKox, am.scale);
         }
     }
 }

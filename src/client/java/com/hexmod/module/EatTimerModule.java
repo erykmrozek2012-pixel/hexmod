@@ -9,23 +9,38 @@ import java.util.Locale;
 
 public class EatTimerModule extends Module {
     public EatTimerModule() {
-        super("eat_timer", "Czas jedzenia", "Odliczanie jedzenia z ulamkami sekundy");
+        super("eat_timer", "Eat Timer", "Odliczanie jedzenia z ulamkami sekundy");
         at(10, 58);
+        option("bar", "Pasek", true);
+        option("pct", "Procenty", false);
     }
 
-    @Override public int w() { return 90; }
+    private int total = 0;
+
+    @Override public int w() { return 110; }
+    @Override public int h() { return option("bar") ? 18 : 12; }
 
     @Override
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
+        float frac;
+        String text;
         if (preview) {
-            ctx.drawTextWithShadow(mc.textRenderer, "Jedzenie: 1.32s", 0, 0, rgb());
-            return;
+            frac = 0.66f;
+            text = "Jedzenie: 1.32s";
+        } else {
+            PlayerEntity p = mc.player;
+            if (p == null || !p.isUsingItem() || !p.getActiveItem().contains(DataComponentTypes.FOOD)) {
+                total = 0;
+                return;
+            }
+            int left = p.getItemUseTimeLeft();
+            total = Math.max(total, left);
+            frac = total > 0 ? (float) left / total : 0f;
+            text = String.format(Locale.ROOT, "Jedzenie: %.2fs", left / 20.0);
         }
-        PlayerEntity p = mc.player;
-        if (p == null || !p.isUsingItem()) return;
-        if (!p.getActiveItem().contains(DataComponentTypes.FOOD)) return;
-        double left = p.getItemUseTimeLeft() / 20.0;
-        ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, "Jedzenie: %.2fs", left), 0, 0, rgb());
+        if (option("pct")) text += " (" + Math.round(frac * 100f) + "%)";
+        ctx.drawTextWithShadow(mc.textRenderer, text, 0, 0, rgb());
+        if (option("bar")) drawBar(ctx, 0, 11, w(), 4, frac, 0xFF000000 | rgb());
     }
 }
