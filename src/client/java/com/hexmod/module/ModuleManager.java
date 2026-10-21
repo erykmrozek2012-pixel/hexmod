@@ -65,6 +65,7 @@ public final class ModuleManager {
         register(new DirectionModule());
         register(new ClockModule());
         register(new MemoryModule());
+        register(new AppleCountModule());
     }
 
     public static void register(Module module) {

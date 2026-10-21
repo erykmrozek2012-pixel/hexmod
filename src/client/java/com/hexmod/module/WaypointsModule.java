@@ -25,6 +25,19 @@ public class WaypointsModule extends Module {
 
     private boolean wasDead = false;
 
+    /** Przelacza zapisywanie punktu smierci (komenda .wp death). Zwraca nowy stan. */
+    public static boolean toggleDeath() {
+        for (Module x : ModuleManager.all()) {
+            if (x instanceof WaypointsModule m) {
+                boolean v = !m.option("death");
+                m.options.put("death", v);
+                ModuleManager.save();
+                return v;
+            }
+        }
+        return false;
+    }
+
     /** Po smierci zapisuje waypoint "Smierc" w miejscu, gdzie zginales (poprzedni taki punkt jest zastepowany). */
     @Override
     public void tick() {

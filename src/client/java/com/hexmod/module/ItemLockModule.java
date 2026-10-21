@@ -27,13 +27,23 @@ public class ItemLockModule extends Module {
         option("lockoffhand", "Blokuj druga reke", false);
     }
 
-    @Override public int w() { return 100; }
+    @Override public int w() { return 150; }
 
     private static boolean stackLocked(ItemLockModule m, ItemStack s) {
         if (s == null || s.isEmpty()) return false;
         if (m.option("totem") && s.isOf(Items.TOTEM_OF_UNDYING)) return true;
         if (m.option("gapple") && (s.isOf(Items.GOLDEN_APPLE) || s.isOf(Items.ENCHANTED_GOLDEN_APPLE))) return true;
         return ItemLockManager.has(s);
+    }
+
+    /** Przelacza blokade drugiej reki (komenda .lock offhand). Zwraca true, gdy jest teraz zablokowana. */
+    public static boolean toggleOffhandLock() {
+        ItemLockModule m = instance();
+        if (m == null) return false;
+        boolean v = !m.option("lockoffhand");
+        m.options.put("lockoffhand", v);
+        ModuleManager.save();
+        return v;
     }
 
     private static ItemLockModule instance() {
@@ -49,6 +59,7 @@ public class ItemLockModule extends Module {
         int extra = ItemLockManager.list().size();
         String t = sb.length() == 0 ? "Lock: itemy" : "Lock: " + sb.toString().trim();
         if (extra > 0) t += " +" + extra;
+        t += option("lockoffhand") ? " | reka2: LOCK" : " | reka2: wolna";
         ctx.drawTextWithShadow(mc.textRenderer, t, 0, 0, rgb());
     }
 

@@ -66,7 +66,9 @@ public final class ChatCommands {
                 if (WaypointManager.list().isEmpty()) say("Brak waypointow.");
                 for (WaypointManager.Waypoint w : WaypointManager.list()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
             }
-            default -> say(".wp add [nazwa] / .wp del nazwa / .wp list");
+            case "death" -> say(WaypointsModule.toggleDeath()
+                    ? "Punkt smierci: WLACZONY (waypoint Smierc po kazdej smierci)." : "Punkt smierci: wylaczony.");
+            default -> say(".wp add [nazwa] / .wp del nazwa / .wp list / .wp death");
         }
         return true;
     }
@@ -80,6 +82,12 @@ public final class ChatCommands {
         if (arg.equalsIgnoreCase("list")) {
             var ids = ItemLockManager.list();
             say(ids.isEmpty() ? "Brak zablokowanych przedmiotow (poza totemem i gapple z opcji)." : "Zablokowane: " + String.join(", ", ids));
+            return true;
+        }
+        if (arg.equalsIgnoreCase("offhand")) {
+            say(ItemLockModule.toggleOffhandLock()
+                    ? "Druga reka: ZABLOKOWANA (F i zamiana w ekwipunku nie dzialaja)."
+                    : "Druga reka: odblokowana, mozna zmieniac item.");
             return true;
         }
         if (arg.equalsIgnoreCase("clear")) {
