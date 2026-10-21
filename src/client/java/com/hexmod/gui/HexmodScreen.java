@@ -101,7 +101,8 @@ public class HexmodScreen extends Screen {
             tool("Edytor tekstur", 5, new TexturePackScreen(this));
             tool("Makra", 6, new MacroScreen(this));
             tool("Waypointy", 7, new WaypointScreen(this));
-            if (Remote.isAdmin()) tool("Panel admina", 8, new AdminScreen(this));
+            tool("Komendy i pomoc", 8, new HelpScreen(this));
+            if (Remote.isAdmin()) tool("Panel admina", 9, new AdminScreen(this));
         }
     }
 
