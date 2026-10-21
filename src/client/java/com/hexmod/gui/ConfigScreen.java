@@ -15,6 +15,7 @@ public class ConfigScreen extends Screen {
     private TextFieldWidget nameField;
     private List<String> names = List.of();
     private String status = "";
+    private String filter = "";
 
     public ConfigScreen(Screen parent) {
         super(Text.literal("Configi"));
@@ -37,6 +38,15 @@ public class ConfigScreen extends Screen {
         }).dimensions(cx + 46, 40, 94, 20).build());
 
         names = ModuleManager.listConfigs();
+        if (!filter.isEmpty()) {
+            String f = filter.toLowerCase();
+            names = names.stream().filter(n -> n.toLowerCase().contains(f)).toList();
+        }
+        addDrawableChild(ButtonWidget.builder(
+                Text.literal(filter.isEmpty() ? "Szukaj (z pola nazwy)" : "Filtr: " + filter + " [x]"), b -> {
+            filter = filter.isEmpty() ? nameField.getText().trim() : "";
+            clearAndInit();
+        }).dimensions(cx - 20, 16, 160, 16).build());
         int y = 72;
         for (int i = 0; i < Math.min(7, names.size()); i++) {
             final String n = names.get(i);
