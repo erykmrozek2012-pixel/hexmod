@@ -23,7 +23,6 @@ public final class ChatCommands {
         if (Remote.isLocked()) return false;
         if (trimmed.toLowerCase().startsWith(".wp")) return waypoint(trimmed);
         if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
-        if (trimmed.toLowerCase().startsWith(".lock")) return lock(trimmed);
         if (!trimmed.toLowerCase().startsWith(".hex")) return false;
         String[] parts = trimmed.split("\\s+");
         String cmd = parts[0].toLowerCase();
@@ -68,26 +67,6 @@ public final class ChatCommands {
                 for (WaypointManager.Waypoint w : WaypointManager.list()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
             }
             default -> say(".wp add [nazwa] / .wp del nazwa / .wp list");
-        }
-        return true;
-    }
-
-    /** .lock add (item z reki), .lock del (item z reki), .lock list */
-    private static boolean lock(String msg) {
-        String[] p = msg.trim().split("\\s+");
-        if (!p[0].equalsIgnoreCase(".lock")) return false;
-        MinecraftClient mc = MinecraftClient.getInstance();
-        String sub = p.length > 1 ? p[1].toLowerCase() : "";
-        switch (sub) {
-            case "add" -> say(mc.player != null && ItemLockManager.add(mc.player.getMainHandStack())
-                    ? "Zablokowano ten typ itemu." : "Trzymaj item w rece (albo jest juz zablokowany).");
-            case "del" -> say(mc.player != null && ItemLockManager.remove(mc.player.getMainHandStack())
-                    ? "Odblokowano ten typ itemu." : "Trzymaj zablokowany item w rece.");
-            case "list" -> {
-                if (ItemLockManager.list().isEmpty()) say("Twoja lista blokad jest pusta.");
-                for (String id : ItemLockManager.list()) say(id);
-            }
-            default -> say(".lock add / .lock del (item w rece) / .lock list");
         }
         return true;
     }

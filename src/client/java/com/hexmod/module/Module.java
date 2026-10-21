@@ -33,6 +33,8 @@ public class Module {
     public boolean bindHold = false;
     private boolean keyHidden = false;
     private boolean keyWasDown = false;
+    private boolean stealthInit = false;
+    private boolean lastStealth = false;
 
     public final Map<String, Boolean> options = new LinkedHashMap<>();
     public final Map<String, String> optionLabels = new LinkedHashMap<>();
@@ -45,6 +47,7 @@ public class Module {
         this.name = name;
         this.description = description;
         option("bg", "Tlo", false);
+        option("stealth", "Ukryj do klawisza", false);
     }
 
     public Module at(int x, int y) {
@@ -121,9 +124,16 @@ public class Module {
 
     /** Sprawdza klawisz widgetu co klatke (tylko gdy nie ma otwartego ekranu, np. czatu). */
     private void pollKey() {
+        boolean stealth = option("stealth");
         if (bindKey <= 0) {
             keyHidden = false;
+            stealthInit = false;
             return;
+        }
+        if (!stealthInit || stealth != lastStealth) {
+            stealthInit = true;
+            lastStealth = stealth;
+            keyHidden = stealth;
         }
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.currentScreen != null) return;

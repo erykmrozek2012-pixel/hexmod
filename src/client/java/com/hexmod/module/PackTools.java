@@ -148,16 +148,60 @@ public final class PackTools {
             "textures/entity/shield_base.png"
     };
 
-    /**
-     * Wkleja obraz uzytkownika na przednia czesc tarczy (obszar 12x22 w teksturze 64x64) i zapisuje
-     * wynik do pakietu. Baza to aktualna tekstura tarczy z gry. Zwraca komunikat dla uzytkownika.
-     */
+    /** Powieksza obraz k razy (najblizszy sasiad), zeby tarcza mogla miec wyzsza rozdzielczosc. */
+    private static Img upscale(Img im, int k) {
+        if (k <= 1) return im;
+        int nw = im.w() * k, nh = im.h() * k;
+        int[] out = new int[nw * nh];
+        for (int y = 0; y < nh; y++) {
+            for (int x = 0; x < nw; x++) out[y * nw + x] = im.px()[(y / k) * im.w() + (x / k)];
+        }
+        return new Img(nw, nh, out);
+    }
+
+    /** Usrednia fragment obrazu zrodlowego odpowiadajacy jednemu pikselowi docelowemu (ostry obraz po zmniejszeniu). */
+    private static int sample(Img s, int tx, int ty, int rw, int rh) {
+        int x0 = tx * s.w() / rw, x1 = Math.max(x0 + 1, (tx + 1) * s.w() / rw);
+        int y0 = ty * s.h() / rh, y1 = Math.max(y0 + 1, (ty + 1) * s.h() / rh);
+        x1 = Math.min(x1, s.w());
+        y1 = Math.min(y1, s.h());
+        x0 = Math.min(x0, s.w() - 1);
+        y0 = Math.min(y0, s.h() - 1);
+        long a = 0, r = 0, g = 0, b = 0;
+        int n = 0;
+        for (int y = y0; y < y1; y++) {
+            for (int x = x0; x < x1; x++) {
+                int c = s.px()[y * s.w() + x];
+                int ca = c >>> 24;
+                a += ca;
+                r += (long) ((c >> 16) & 255) * ca;
+                g += (long) ((c >> 8) & 255) * ca;
+                b += (long) (c & 255) * ca;
+                n++;
+            }
+        }
+        if (n == 0 || a == 0) return 0;
+        int oa = (int) (a / n);
+        return (oa << 24) | ((int) (r / a) << 16) | ((int) (g / a) << 8) | (int) (b / a);
+    }
+
+    /** Zgodnosc ze starym wywolaniem: jakosc 4x, bez odbicia. */
     public static String applyShield(Path packFolder, Path userImage) {
+        return applyShield(packFolder, userImage, 4, false);
+    }
+
+    /**
+     * Wkleja obraz uzytkownika na przednia czesc tarczy (obszar 12x22 w teksturze 64x64, w wyzszej jakosci
+     * proporcjonalnie wiekszy) i zapisuje wynik do pakietu. quality = 1, 2, 4, 8 (rozdzielczosc 64*quality).
+     * Baza to aktualna tekstura tarczy z gry. Zwraca komunikat dla uzytkownika.
+     */
+    public static String applyShield(Path packFolder, Path userImage, int quality, boolean flip) {
         try {
             Img src = readImage(userImage);
             var rm = MinecraftClient.getInstance().getResourceManager();
             Path root = packRoot(packFolder);
             int applied = 0;
+            int lastSize = 64;
             for (String cand : SHIELD_TEXTURES) {
                 Optional<Resource> res = rm.getResource(Identifier.ofVanilla(cand));
                 if (res.isEmpty()) continue;
@@ -165,22 +209,26 @@ public final class PackTools {
                 try (InputStream in = res.get().getInputStream()) {
                     base = readImage(in);
                 }
+                int bf = Math.max(1, base.w() / 64);
+                if (quality > bf && quality % bf == 0 && base.w() % 64 == 0 && base.w() == base.h()) {
+                    base = upscale(base, quality / bf);
+                }
                 int f = Math.max(1, base.w() / 64);
                 int x0 = f, y0 = f, rw = 12 * f, rh = 22 * f;
                 int[] px = base.px().clone();
                 for (int ty = 0; ty < rh; ty++) {
                     for (int tx = 0; tx < rw; tx++) {
-                        int sx = Math.min(src.w() - 1, tx * src.w() / rw);
-                        int sy = Math.min(src.h() - 1, ty * src.h() / rh);
+                        int sxp = flip ? rw - 1 - tx : tx;
                         int i = (y0 + ty) * base.w() + (x0 + tx);
-                        if (i < px.length) px[i] = over(src.px()[sy * src.w() + sx], px[i]);
+                        if (i < px.length) px[i] = over(sample(src, sxp, ty, rw, rh), px[i]);
                     }
                 }
                 writeImage(root.resolve("assets").resolve("minecraft").resolve(cand), new Img(base.w(), base.h(), px));
                 applied++;
+                lastSize = base.w();
             }
             if (applied == 0) return "Nie znaleziono tekstury tarczy w tej wersji gry.";
-            return "Zapisano obraz na tarczy w pakiecie. Wlacz pakiet w ustawieniach i przeladuj tekstury.";
+            return "Zapisano obraz na tarczy (" + lastSize + "x" + lastSize + "). Wlacz pakiet w ustawieniach i przeladuj tekstury.";
         } catch (IOException | RuntimeException e) {
             return "Blad: " + e.getMessage();
         }
