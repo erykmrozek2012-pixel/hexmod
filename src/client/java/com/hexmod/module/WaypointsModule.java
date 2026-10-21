@@ -20,6 +20,25 @@ public class WaypointsModule extends Module {
         option("world", "Znaczniki", true);
         option("list", "Lista", true);
         option("dist", "Odleglosc", true);
+        option("death", "Punkt smierci", true);
+    }
+
+    private boolean wasDead = false;
+
+    /** Po smierci zapisuje waypoint "Smierc" w miejscu, gdzie zginales (poprzedni taki punkt jest zastepowany). */
+    @Override
+    public void tick() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null) {
+            wasDead = false;
+            return;
+        }
+        boolean dead = mc.player.isDead();
+        if (dead && !wasDead && option("death")) {
+            WaypointManager.removeByName("Smierc");
+            WaypointManager.addHere("Smierc");
+        }
+        wasDead = dead;
     }
 
     @Override public int w() { return 120; }

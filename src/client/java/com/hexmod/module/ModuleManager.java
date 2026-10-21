@@ -59,7 +59,12 @@ public final class ModuleManager {
         register(new SpotifyModule());
         register(new ItemLockModule());
         register(new WaypointsModule());
-        register(new RefCounterModule());
+        register(new ComboModule());
+        register(new ReachModule());
+        register(new SpeedModule());
+        register(new DirectionModule());
+        register(new ClockModule());
+        register(new MemoryModule());
     }
 
     public static void register(Module module) {
