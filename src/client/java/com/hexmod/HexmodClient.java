@@ -6,6 +6,7 @@ import com.hexmod.module.ChatCommands;
 import com.hexmod.module.MacroManager;
 import com.hexmod.module.CombatTracker;
 import com.hexmod.module.ItemLockManager;
+import com.hexmod.module.L;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
 import com.hexmod.module.AppleCountModule;
@@ -41,6 +42,7 @@ public class HexmodClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        L.load();
         ModuleManager.init();
         ModuleManager.load();
         AlliesManager.load();
