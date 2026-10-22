@@ -27,6 +27,7 @@ public final class ModuleManager {
         public boolean hidden;
         public int bindKey = -1;
         public boolean bindHold;
+        public int style;
         public Map<String, Boolean> options = new LinkedHashMap<>();
     }
 
@@ -59,6 +60,7 @@ public final class ModuleManager {
         register(new ItemLockModule());
         register(new WaypointsModule());
         register(new MemoryModule());
+        register(new SpeedModule());
         register(new ComboModule());
         register(new ReachModule());
         register(new AppleCountModule());
@@ -72,6 +74,11 @@ public final class ModuleManager {
 
     public static List<Module> all() {
         return Collections.unmodifiableList(MODULES);
+    }
+
+    /** Presety: wlacza moduly, dla ktorych predykat zwraca true, a reszte wylacza. */
+    public static void applyPreset(java.util.function.Predicate<String> on) {
+        for (Module m : MODULES) m.setEnabled(on.test(m.id));
     }
 
     public static void disableAll() {
@@ -92,6 +99,7 @@ public final class ModuleManager {
             s.hidden = m.hidden;
             s.bindKey = m.bindKey;
             s.bindHold = m.bindHold;
+            s.style = m.style;
             s.options = new LinkedHashMap<>(m.options);
             map.put(m.id, s);
         }
@@ -110,6 +118,7 @@ public final class ModuleManager {
             m.hidden = s.hidden;
             m.bindKey = s.bindKey;
             m.bindHold = s.bindHold;
+            m.style = Math.max(0, Math.min(Module.STYLE_COUNT - 1, s.style));
             if (s.options != null) {
                 for (Map.Entry<String, Boolean> e : s.options.entrySet()) {
                     if (m.options.containsKey(e.getKey()) && e.getValue() != null) {

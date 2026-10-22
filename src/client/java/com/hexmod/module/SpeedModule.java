@@ -5,15 +5,15 @@ import net.minecraft.client.gui.DrawContext;
 
 import java.util.Locale;
 
-/** Predkosc pozioma w blokach na sekunde. */
+/** Predkosciomierz: predkosc pozioma w blokach na sekunde. */
 public class SpeedModule extends Module {
     private double prevX, prevZ;
     private boolean has = false;
     private double speed = 0;
 
     public SpeedModule() {
-        super("speed", "Predkosc", "Predkosc pozioma w blokach na sekunde");
-        at(10, 238);
+        super("speed", "Speed", "Horizontal speed in blocks per second");
+        at(10, 334);
     }
 
     @Override public int w() { return 90; }
@@ -39,6 +39,6 @@ public class SpeedModule extends Module {
     protected void draw(DrawContext ctx, boolean preview) {
         MinecraftClient mc = MinecraftClient.getInstance();
         double v = preview ? 5.6 : speed;
-        ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, "%.1f b/s", v), 0, 0, rgb());
+        ctx.drawTextWithShadow(mc.textRenderer, String.format(Locale.ROOT, "%.1f", v) + " " + L.t("blocks/s"), 0, 0, rgb());
     }
 }

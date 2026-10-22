@@ -47,6 +47,11 @@ public class Module {
     public int color = 0xFFFFFF;
     public boolean hidden = false;
 
+    /** Wyglad ramki widgetu (indeks w STYLE_NAMES). */
+    public int style = 0;
+    public static final String[] STYLE_NAMES = {"Classic", "Panel", "Outline", "Underline", "Glass", "Brackets", "Pill"};
+    public static final int STYLE_COUNT = STYLE_NAMES.length;
+
     /** Klawisz (kod GLFW) do pokazywania/ukrywania widgetu, -1 = brak. */
     public int bindKey = -1;
     /** true = widget widoczny tylko, gdy trzymasz klawisz; false = klawisz przelacza. */
@@ -177,12 +182,60 @@ public class Module {
         m.pushMatrix();
         m.translate((float) x, (float) y);
         m.scale(scale, scale);
-        if (option("bg")) {
-            ctx.fill(-3, -2, w() + 3, h() + 2, 0x99000000);
-            ctx.fill(-3, -2, -1, h() + 2, 0xFFD10A0A);
-        }
+        drawFrame(ctx);
         draw(ctx, preview);
         m.popMatrix();
+    }
+
+    /** Ramka widgetu wedlug wybranego stylu (kolor akcentu = kolor widgetu). */
+    private void drawFrame(DrawContext ctx) {
+        int w = w(), h = h();
+        int c = rgb();
+        switch (style) {
+            case 1 -> { // Panel
+                ctx.fill(-3, -2, w + 3, h + 2, 0xCC101014);
+                ctx.fill(-3, -2, -1, h + 2, c);
+            }
+            case 2 -> { // Outline
+                ctx.fill(-3, -2, w + 3, h + 2, 0x55000000);
+                ctx.fill(-3, -2, w + 3, -1, c);
+                ctx.fill(-3, h + 1, w + 3, h + 2, c);
+                ctx.fill(-3, -2, -2, h + 2, c);
+                ctx.fill(w + 2, -2, w + 3, h + 2, c);
+            }
+            case 3 -> { // Underline
+                ctx.fill(-3, -2, w + 3, h + 2, 0x33000000);
+                ctx.fill(-3, h + 1, w + 3, h + 2, c);
+            }
+            case 4 -> { // Glass
+                ctx.fill(-3, -2, w + 3, h + 2, 0x66202028);
+                ctx.fill(-3, -2, w + 3, -1, 0x55FFFFFF);
+                ctx.fill(-3, h + 1, w + 3, h + 2, c);
+            }
+            case 5 -> { // Brackets
+                ctx.fill(-3, -2, w + 3, h + 2, 0x44000000);
+                int l = 4;
+                ctx.fill(-3, -2, -3 + l, -1, c);
+                ctx.fill(-3, -2, -2, -2 + l, c);
+                ctx.fill(w + 3 - l, -2, w + 3, -1, c);
+                ctx.fill(w + 2, -2, w + 3, -2 + l, c);
+                ctx.fill(-3, h + 1, -3 + l, h + 2, c);
+                ctx.fill(-3, h + 2 - l, -2, h + 2, c);
+                ctx.fill(w + 3 - l, h + 1, w + 3, h + 2, c);
+                ctx.fill(w + 2, h + 2 - l, w + 3, h + 2, c);
+            }
+            case 6 -> { // Pill
+                ctx.fill(-1, -2, w + 1, h + 2, 0xCC101014);
+                ctx.fill(-3, 0, w + 3, h, 0xCC101014);
+                ctx.fill(-2, h / 2 - 1, 0, h / 2 + 2, c);
+            }
+            default -> {
+                if (option("bg")) {
+                    ctx.fill(-3, -2, w + 3, h + 2, 0x99000000);
+                    ctx.fill(-3, -2, -1, h + 2, 0xFFD10A0A);
+                }
+            }
+        }
     }
 
     /** Wlasciwa tresc widgetu, rysowana od punktu (0,0). */
