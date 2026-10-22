@@ -74,7 +74,7 @@ public class AlliesScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
-        ctx.drawTextWithShadow(textRenderer, "SOJUSZNICY", cx - 140, 22, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("FRIENDS"), cx - 140, 22, HexTheme.RED);
         int y = 96;
         for (int i = 0; i < Math.min(7, names.size()); i++) {
             ctx.drawTextWithShadow(textRenderer, "\u2605 " + names.get(i), cx - 140, y + 6, HexTheme.TEXT);

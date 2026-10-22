@@ -48,8 +48,16 @@ public class ConfigScreen extends Screen {
             filter = filter.isEmpty() ? nameField.getText().trim() : "";
             clearAndInit();
         }).dimensions(cx - 20, 16, 160, 16).build());
-        int y = 72;
-        for (int i = 0; i < Math.min(7, names.size()); i++) {
+        String[] presetNames = {"Minimal PvP", "Full PvP", "Clean"};
+        for (int i = 0; i < presetNames.length; i++) {
+            final int pi = i;
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t(presetNames[i])), b -> {
+                applyPreset(pi);
+                status = L.t("Preset applied: ") + L.t(presetNames[pi]);
+            }).dimensions(cx - 140 + i * 94, 64, 92, 18).build());
+        }
+        int y = 94;
+        for (int i = 0; i < Math.min(6, names.size()); i++) {
             final String n = names.get(i);
             addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Load")), b -> {
                 status = ModuleManager.loadConfig(n) ? L.t("Loaded: ") + n : L.t("Could not load.");
@@ -75,6 +83,20 @@ public class ConfigScreen extends Screen {
                 .dimensions(cx - 50, by + 26, 100, 20).build());
     }
 
+    private static final java.util.Set<String> MINIMAL = java.util.Set.of("enemy_tags", "cooldowns", "totems", "effects",
+            "armor", "saturation", "pearl_timer", "fps", "ping");
+    private static final java.util.Set<String> CLEAN = java.util.Set.of("fps", "cps", "ping");
+    private static final java.util.Set<String> NOT_IN_FULL = java.util.Set.of("spotify", "memory", "badge", "waypoints", "speed");
+
+    /** Gotowe zestawy widgetow: 0 = Minimal PvP, 1 = Full PvP, 2 = Clean. */
+    private static void applyPreset(int p) {
+        switch (p) {
+            case 0 -> ModuleManager.applyPreset(MINIMAL::contains);
+            case 1 -> ModuleManager.applyPreset(id -> !NOT_IN_FULL.contains(id));
+            default -> ModuleManager.applyPreset(CLEAN::contains);
+        }
+    }
+
     @Override
     public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
         ctx.fill(0, 0, width, height, HexTheme.OVERLAY);
@@ -86,15 +108,15 @@ public class ConfigScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
-        ctx.drawTextWithShadow(textRenderer, "CONFIGI", cx - 140, 22, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("CONFIGS"), cx - 140, 22, HexTheme.RED);
 
-        int y = 72;
-        for (int i = 0; i < Math.min(7, names.size()); i++) {
+        int y = 94;
+        for (int i = 0; i < Math.min(6, names.size()); i++) {
             ctx.drawTextWithShadow(textRenderer, names.get(i), cx - 140, y + 6, HexTheme.TEXT);
             y += 24;
         }
         if (names.isEmpty()) {
-            ctx.drawTextWithShadow(textRenderer, L.t("No saved configs."), cx - 140, 78, HexTheme.TEXT_DIM);
+            ctx.drawTextWithShadow(textRenderer, L.t("No saved configs."), cx - 140, 100, HexTheme.TEXT_DIM);
         }
         if (!status.isEmpty()) {
             ctx.drawCenteredTextWithShadow(textRenderer, status, cx, height - 66, HexTheme.TEXT);

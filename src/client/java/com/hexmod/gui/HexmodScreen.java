@@ -18,7 +18,7 @@ public class HexmodScreen extends Screen {
     private static final int CELL_W = 160;
     private static final int ROW_H = 24;
     private static final int HEADER_H = 40;
-    private static final int CAT_H = 36;
+    private static final int CAT_H = 54;
     private static final int FOOTER_H = 30;
     private static final int TAB_W = 90;
 
@@ -55,9 +55,15 @@ public class HexmodScreen extends Screen {
             Map.entry("reach", "Last hit distance"),
             Map.entry("saturation", "Saturation in combat"),
             Map.entry("shield_break", "Shield break alerts"),
+            Map.entry("speed", "Movement speed"),
             Map.entry("spotify", "Current song & lyrics"),
             Map.entry("totems", "Totems you carry"),
             Map.entry("waypoints", "Saved locations"));
+
+    private static String query = "";
+    private net.minecraft.client.gui.widget.TextFieldWidget search;
+    private boolean rebuild = false;
+    private boolean refocusSearch = false;
 
     private int panelX, panelY, panelH;
 
@@ -77,8 +83,23 @@ public class HexmodScreen extends Screen {
         return out;
     }
 
+    /** Lista widoczna w menu: wyniki wyszukiwania (ze wszystkich kategorii) albo wybrana kategoria. */
     private List<Module> shown() {
-        return inCategory(cat);
+        if (query.isEmpty()) return inCategory(cat);
+        String q = query.toLowerCase();
+        List<Module> out = new java.util.ArrayList<>();
+        for (Module m : ModuleManager.all()) {
+            if (Module.extrasHidden && !m.isBasic()) continue;
+            String sub = SUB.getOrDefault(m.id, "");
+            String hay = (m.name + " " + L.t(m.name) + " " + m.id.replace('_', ' ') + " " + sub + " " + L.t(sub)).toLowerCase();
+            if (hay.contains(q)) out.add(m);
+        }
+        return out;
+    }
+
+    private int toolCount() {
+        if (Module.extrasHidden) return 3;
+        return Remote.isAdmin() ? 11 : 10;
     }
 
     private int rows() {
@@ -126,7 +147,7 @@ public class HexmodScreen extends Screen {
 
         List<Module> modules = shown();
         panelX = (width - PANEL_W) / 2;
-        panelH = tab == 0 ? headerH() + rows() * ROW_H + FOOTER_H : HEADER_H + 5 * 26 + 10;
+        panelH = tab == 0 ? headerH() + rows() * ROW_H + FOOTER_H : HEADER_H + ((toolCount() + 1) / 2) * 26 + 10;
         panelY = Math.max(2, (height - panelH) / 2);
 
         // Przelacznik jezyka (prawy gorny rog)
@@ -150,8 +171,24 @@ public class HexmodScreen extends Screen {
                 String label = L.t(CATS[i]) + " (" + inCategory(i).size() + ")";
                 addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
                     cat = c;
+                    query = "";
                     clearAndInit();
                 }).dimensions(catX(i), panelY + HEADER_H, catW(), 16).build());
+            }
+            search = new net.minecraft.client.gui.widget.TextFieldWidget(textRenderer, panelX + 8, panelY + HEADER_H + 34,
+                    PANEL_W - 16, 16, Text.literal(L.t("Search")));
+            search.setPlaceholder(Text.literal(L.t("Search modules...")));
+            search.setMaxLength(24);
+            search.setText(query);
+            search.setChangedListener(t -> {
+                query = t;
+                rebuild = true;
+                refocusSearch = true;
+            });
+            addDrawableChild(search);
+            if (refocusSearch) {
+                setInitialFocus(search);
+                refocusSearch = false;
             }
             for (int i = 0; i < modules.size(); i++) {
                 Module m = modules.get(i);
@@ -171,6 +208,7 @@ public class HexmodScreen extends Screen {
             if (full) tool("Mod Catalog", n++, new ModCatalogScreen(this));
             tool("Spotify", n++, new SpotifyScreen(this));
             if (full) tool("Texture Editor", n++, new TexturePackScreen(this));
+            if (full) tool("Community", n++, new CommunityScreen(this));
             if (full) tool("Macros", n++, new MacroScreen(this));
             if (full) tool("Waypoints", n++, new WaypointScreen(this));
             if (full) tool("Commands & Help", n++, new HelpScreen(this));
@@ -187,7 +225,7 @@ public class HexmodScreen extends Screen {
         ctx.fill(tabX(tab), panelY + 36, tabX(tab) + TAB_W, panelY + 39, HexTheme.RED);
         if (tab == 0) {
             int cy = panelY + HEADER_H + 16;
-            ctx.fill(catX(cat), cy, catX(cat) + catW(), cy + 3, HexTheme.RED);
+            if (query.isEmpty()) ctx.fill(catX(cat), cy, catX(cat) + catW(), cy + 3, HexTheme.RED);
             for (int i = 0; i < shown().size(); i++) {
                 ctx.fill(cellX(i), cellY(i), cellX(i) + CELL_W, cellY(i) + ROW_H - 1, HexTheme.PANEL_ROW);
             }
@@ -211,7 +249,7 @@ public class HexmodScreen extends Screen {
         HexLogo.draw(ctx, textRenderer, panelX + 8, panelY + 5);
         if (tab == 0) {
             // opis wybranej kategorii (maly, szary) pod przyciskami kategorii
-            String desc = textRenderer.trimToWidth(L.t(CAT_DESC[cat]), PANEL_W - 16);
+            String desc = textRenderer.trimToWidth(query.isEmpty() ? L.t(CAT_DESC[cat]) : L.t("Search results: ") + shown().size(), PANEL_W - 16);
             ctx.drawTextWithShadow(textRenderer, desc, panelX + 10, panelY + HEADER_H + 22, HexTheme.TEXT_DIM);
 
             List<Module> modules = shown();
@@ -227,6 +265,14 @@ public class HexmodScreen extends Screen {
                 ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(sub, (int) (textW / 0.75f)), 0, 0, HexTheme.TEXT_DIM);
                 mx.popMatrix();
             }
+        }
+    }
+
+    @Override
+    public void tick() {
+        if (rebuild) {
+            rebuild = false;
+            clearAndInit();
         }
     }
 

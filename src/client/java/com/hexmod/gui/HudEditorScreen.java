@@ -33,7 +33,11 @@ public class HudEditorScreen extends Screen {
     @Override
     protected void init() {
         int cx = width / 2;
-        java.util.List<String> keys = selected == null ? java.util.List.of() : new java.util.ArrayList<>(selected.options.keySet());
+        java.util.List<String> keys = new java.util.ArrayList<>();
+        if (selected != null) {
+            keys.add("__style");
+            keys.addAll(selected.options.keySet());
+        }
         int n = keys.size();
         String[] labels = new String[n];
         int[] bw = new int[n];
@@ -41,7 +45,9 @@ public class HudEditorScreen extends Screen {
         int rows = 1, cur = 0, maxW = width - 16;
         for (int i = 0; i < n; i++) {
             String k = keys.get(i);
-            labels[i] = L.t(selected.optionLabels.getOrDefault(k, k)) + ": " + (selected.option(k) ? L.t("ON") : L.t("OFF"));
+            labels[i] = k.equals("__style")
+                    ? L.t("Style: ") + L.t(Module.STYLE_NAMES[selected.style])
+                    : L.t(selected.optionLabels.getOrDefault(k, k)) + ": " + (selected.option(k) ? L.t("ON") : L.t("OFF"));
             bw[i] = Math.max(60, textRenderer.getWidth(labels[i]) + 12);
             if (cur > 0 && cur + bw[i] + 4 > maxW) {
                 rows++;
@@ -102,7 +108,11 @@ public class HudEditorScreen extends Screen {
             int ox = rowX[rowOf[i]];
             rowX[rowOf[i]] += bw[i] + 4;
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> {
-                selected.options.put(k, !selected.option(k));
+                if (k.equals("__style")) {
+                    selected.style = (selected.style + 1) % Module.STYLE_COUNT;
+                } else {
+                    selected.options.put(k, !selected.option(k));
+                }
                 ModuleManager.save();
                 needsInit = true;
             }).dimensions(ox, y0 + 54 + rowOf[i] * 22, bw[i], 20).build());

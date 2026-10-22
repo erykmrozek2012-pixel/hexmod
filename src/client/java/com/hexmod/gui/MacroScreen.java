@@ -101,7 +101,7 @@ public class MacroScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         pollListening();
         int x = width / 2 - 140;
-        ctx.drawTextWithShadow(textRenderer, "MAKRA", x, 14, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("MACROS"), x, 14, HexTheme.RED);
         ctx.drawTextWithShadow(textRenderer, L.t("The key sends a command or text in chat."), x, 27, HexTheme.TEXT_DIM);
         if (MacroManager.list().isEmpty()) {
             ctx.drawTextWithShadow(textRenderer, L.t("No macros. Click 'Add macro'."), x, 50, HexTheme.TEXT_DIM);

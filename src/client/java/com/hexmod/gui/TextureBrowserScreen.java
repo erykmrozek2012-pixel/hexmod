@@ -142,7 +142,7 @@ public class TextureBrowserScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         int x = width / 2 - 140;
-        ctx.drawTextWithShadow(textRenderer, "TEKSTURY", x, 14, HexTheme.RED);
+        ctx.drawTextWithShadow(textRenderer, L.t("TEXTURES"), x, 14, HexTheme.RED);
         String where = query.isEmpty()
                 ? "/textures/" + root.relativize(dir).toString().replace('\\', '/')
                 : L.t("Search results: ") + items.size();
