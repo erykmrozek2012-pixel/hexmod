@@ -19,6 +19,11 @@ public final class CombatTracker {
         if (p != null && p.hurtTime > 0) markCombat();
     }
 
+    /** Ile milisekund zostalo do konca walki (0, gdy nie ma walki). */
+    public static long remainingMs() {
+        return Math.max(0L, WINDOW_MS - (System.currentTimeMillis() - lastCombat));
+    }
+
     public static boolean inCombat() {
         return System.currentTimeMillis() - lastCombat < WINDOW_MS;
     }

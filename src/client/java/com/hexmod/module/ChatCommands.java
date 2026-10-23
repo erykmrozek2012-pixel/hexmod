@@ -32,7 +32,12 @@ public final class ChatCommands {
         if (first.equals(".hex")) return true;
         if (Remote.isLocked()) return false;
         // Po .hexoff dodatkowe komendy sa ukryte: nic nie robia i nie wysylaja sie na serwer.
-        if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock"))) return true;
+        if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock") || low.startsWith(".kd"))) return true;
+        if (low.startsWith(".kd")) {
+            KillStatsModule.reset();
+            say(L.t("K/D counter reset."));
+            return true;
+        }
         if (low.startsWith(".wp")) return waypoint(trimmed);
         if (low.startsWith(".lock")) return lock(trimmed);
         return false;

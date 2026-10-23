@@ -88,6 +88,13 @@ public final class SpotifyClient {
             if (Files.exists(FILE)) {
                 Cfg c = GSON.fromJson(Files.readString(FILE), Cfg.class);
                 if (c != null) cfg = c;
+                if (!cfg.refreshToken.isEmpty()) {
+                    // Stare logowanie przez API powodowalo bledy HTTP: kasujemy je, mod czyta aplikacje lokalnie.
+                    cfg.refreshToken = "";
+                    cfg.accessToken = "";
+                    cfg.expiresAt = 0;
+                    save();
+                }
             }
         } catch (IOException | RuntimeException ignored) {}
     }
@@ -117,9 +124,10 @@ public final class SpotifyClient {
         save();
     }
 
+    /** Logowanie do API Spotify jest wylaczone: mod zawsze czyta lokalnie aplikacje Spotify (bez logowania). */
     public static boolean isLoggedIn() {
         ensureLoaded();
-        return !cfg.refreshToken.isEmpty();
+        return false;
     }
 
     public static void logout() {
@@ -360,7 +368,7 @@ public final class SpotifyClient {
                 HttpResponse<String> r = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
                 if (r.statusCode() == 204) { track = null; if (status.startsWith("Spotify")) status = ""; return; }
                 if (r.statusCode() == 401) { cfg.accessToken = ""; return; }
-                if (r.statusCode() / 100 != 2) { status = "Spotify: HTTP " + r.statusCode(); return; }
+                if (r.statusCode() / 100 != 2) { status = "Spotify: " + L.t("Connection error."); return; }
                 JsonObject o = JsonParser.parseString(r.body()).getAsJsonObject();
                 JsonElement item = o.get("item");
                 if (item == null || item.isJsonNull()) { track = null; return; }
@@ -452,9 +460,12 @@ public final class SpotifyClient {
         if (os.contains("win")) {
             String out = run("powershell", "-NoProfile", "-NonInteractive", "-Command",
                     "[Console]::OutputEncoding=[Text.Encoding]::UTF8; "
-                            + "(Get-Process -Name Spotify -ErrorAction SilentlyContinue | "
-                            + "Where-Object { $_.MainWindowTitle } | Select-Object -First 1 -ExpandProperty MainWindowTitle)");
+                            + "$p = Get-Process -Name Spotify -ErrorAction SilentlyContinue; "
+                            + "if (-not $p) { '' } else { "
+                            + "$t = $p | Where-Object { $_.MainWindowTitle } | Select-Object -First 1 -ExpandProperty MainWindowTitle; "
+                            + "if ($t) { $t } else { '#hidden' } }");
             if (out.isEmpty()) return new String[]{"0", ""};
+            if (out.equals("#hidden")) return new String[]{"3", ""};
             if (out.contains(" - ")) return new String[]{"2", out};
             return new String[]{"1", ""};
         }
@@ -482,6 +493,11 @@ public final class SpotifyClient {
         if (state == 0) {
             localTrack = null;
             localInfo = L.t("Spotify is not running");
+            return;
+        }
+        if (state == 3) {
+            localTrack = null;
+            localInfo = L.t("Spotify: restore the Spotify window (it is minimized to the tray)");
             return;
         }
         if (state == 1) {

@@ -49,6 +49,7 @@ public final class L {
         add("ACCESS BLOCKED", "DOST\u0118P ZABLOKOWANY", "ZUGRIFF GESPERRT", "\u8bbf\u95ee\u5df2\u88ab\u5c01\u9501");
         add("ADMIN PANEL", "PANEL ADMINA", "ADMIN-PANEL", "\u7ba1\u7406\u9762\u677f");
         add("Above enemies", "Nad wrogiem", "\u00dcber Gegnern", "\u654c\u4eba\u5934\u9876");
+        add("Access denied.", "Brak dost\u0119pu.", "Zugriff verweigert.", "\u8bbf\u95ee\u88ab\u62d2\u7edd\u3002");
         add("Active potion effects", "Aktywne efekty mikstur", "Aktive Trankeffekte", "\u5f53\u524d\u836f\u6c34\u6548\u679c");
         add("Add", "Dodaj", "Hinzuf\u00fcgen", "\u6dfb\u52a0");
         add("Add here", "Dodaj tutaj", "Hier hinzuf\u00fcgen", "\u5728\u6b64\u6dfb\u52a0");
@@ -60,6 +61,7 @@ public final class L {
         add("Advanced", "Zaawansowane", "Erweitert", "\u9ad8\u7ea7");
         add("All textures (folders and search)", "Wszystkie tekstury (foldery i szukanie)", "Alle Texturen (Ordner und Suche)", "\u6240\u6709\u6750\u8d28 (\u6587\u4ef6\u5939\u548c\u641c\u7d22)");
         add("Already on the list.", "Ju\u017c jest na li\u015bcie.", "Steht schon auf der Liste.", "\u5df2\u5728\u5217\u8868\u4e2d\u3002");
+        add("Always show", "Zawsze pokazuj", "Immer anzeigen", "\u59cb\u7ec8\u663e\u793a");
         add("An administrator has blocked your access to Hex Client.", "Administrator zablokowa\u0142 Ci dost\u0119p do Hex Client.", "Ein Administrator hat deinen Zugriff auf Hex Client gesperrt.", "\u7ba1\u7406\u5458\u5df2\u5c01\u9501\u4f60\u5bf9 Hex Client \u7684\u8bbf\u95ee\u3002");
         add("Anchors", "Kotwice", "Anker", "\u91cd\u751f\u951a");
         add("Armor", "Zbroja", "R\u00fcstung", "\u62a4\u7532");
@@ -105,7 +107,10 @@ public final class L {
         add("Closest enemy info", "Info o najbli\u017cszym wrogu", "Infos zum n\u00e4chsten Gegner", "\u6700\u8fd1\u654c\u4eba\u4fe1\u606f");
         add("Color", "Kolor", "Farbe", "\u989c\u8272");
         add("Color removed from the list.", "Usuni\u0119to kolor z listy.", "Farbe aus der Liste entfernt.", "\u5df2\u4ece\u5217\u8868\u4e2d\u5220\u9664\u989c\u8272\u3002");
+        add("Combat Timer", "Czas walki", "Kampf-Timer", "\u6218\u6597\u8ba1\u65f6");
+        add("Combat countdown", "Odliczanie walki", "Kampf-Countdown", "\u6218\u6597\u5012\u8ba1\u65f6");
         add("Combat widgets about enemies and fights", "Widgety o wrogach i walce", "Widgets zu Gegnern und K\u00e4mpfen", "\u5173\u4e8e\u654c\u4eba\u548c\u6218\u6597\u7684\u7ec4\u4ef6");
+        add("Combat: ", "Walka: ", "Kampf: ", "\u6218\u6597: ");
         add("Combo", "Combo", "Combo", "\u8fde\u51fb");
         add("Command (/...) or text", "Komenda (/...) lub tekst", "Befehl (/...) oder Text", "\u547d\u4ee4 (/...) \u6216\u6587\u672c");
         add("Commands & Help", "Komendy i pomoc", "Befehle & Hilfe", "\u547d\u4ee4\u4e0e\u5e2e\u52a9");
@@ -117,6 +122,7 @@ public final class L {
         add("Config name", "Nazwa configu", "Konfig-Name", "\u914d\u7f6e\u540d\u79f0");
         add("Config saved.", "Zapisano config.", "Konfig gespeichert.", "\u914d\u7f6e\u5df2\u4fdd\u5b58\u3002");
         add("Configs", "Configi", "Konfigs", "\u914d\u7f6e");
+        add("Connection error.", "B\u0142\u0105d po\u0142\u0105czenia.", "Verbindungsfehler.", "\u8fde\u63a5\u9519\u8bef\u3002");
         add("Cooldowns", "Cooldowny", "Abklingzeiten", "\u51b7\u5374\u65f6\u95f4");
         add("Coords", "Koordynaty", "Koordinaten", "\u5750\u6807");
         add("Copied. Paste it into blocklist.json in the hexmod-data repository.", "Skopiowano. Wklej do blocklist.json w repozytorium hexmod-data.", "Kopiert. F\u00fcge es in blocklist.json im Repository hexmod-data ein.", "\u5df2\u590d\u5236\u3002\u8bf7\u7c98\u8d34\u5230 hexmod-data \u4ed3\u5e93\u7684 blocklist.json \u4e2d\u3002");
@@ -139,6 +145,7 @@ public final class L {
         add("Death point", "Punkt \u015bmierci", "Todespunkt", "\u6b7b\u4ea1\u70b9");
         add("Death point: ON (a Death waypoint after every death).", "Punkt \u015bmierci: W\u0141\u0104CZONY (waypoint Death po ka\u017cdej \u015bmierci).", "Todespunkt: AN (Wegpunkt Death nach jedem Tod).", "\u6b7b\u4ea1\u70b9: \u5f00\u542f (\u6bcf\u6b21\u6b7b\u4ea1\u540e\u4fdd\u5b58\u8def\u5f84\u70b9 Death)\u3002");
         add("Death point: off.", "Punkt \u015bmierci: wy\u0142\u0105czony.", "Todespunkt: aus.", "\u6b7b\u4ea1\u70b9: \u5173\u95ed\u3002");
+        add("Deaths: ", "\u015amierci: ", "Tode: ", "\u6b7b\u4ea1: ");
         add("Delete", "Usu\u0144", "L\u00f6schen", "\u5220\u9664");
         add("Deleted.", "Usuni\u0119to.", "Gel\u00f6scht.", "\u5df2\u5220\u9664\u3002");
         add("Detected:", "Wykryto:", "Erkannt:", "\u68c0\u6d4b\u5230:");
@@ -229,8 +236,14 @@ public final class L {
         add("Item lock: this item is locked.", "Item lock: ten przedmiot jest zablokowany.", "Item-Sperre: Dieses Item ist gesperrt.", "\u7269\u54c1\u9501\u5b9a: \u8be5\u7269\u54c1\u5df2\u9501\u5b9a\u3002");
         add("Item lock: this slot is locked.", "Item lock: ten slot jest zablokowany.", "Item-Sperre: Dieser Slot ist gesperrt.", "\u7269\u54c1\u9501\u5b9a: \u8be5\u680f\u4f4d\u5df2\u9501\u5b9a\u3002");
         add("Join a world first.", "Najpierw wejd\u017a do \u015bwiata.", "Betritt zuerst eine Welt.", "\u8bf7\u5148\u8fdb\u5165\u4e00\u4e2a\u4e16\u754c\u3002");
+        add("K/D Counter", "Licznik K/D", "K/D-Z\u00e4hler", "\u51fb\u6740/\u6b7b\u4ea1");
+        add("K/D counter reset.", "Licznik K/D wyzerowany.", "K/D-Z\u00e4hler zur\u00fcckgesetzt.", "K/D \u8ba1\u6570\u5df2\u91cd\u7f6e\u3002");
+        add("K/D: ", "K/D: ", "K/D: ", "K/D: ");
         add("Key ", "Klawisz ", "Taste ", "\u6309\u952e ");
         add("Key: ", "Klawisz: ", "Taste: ", "\u6309\u952e: ");
+        add("Keystrokes", "Klawisze", "Tasten", "\u6309\u952e\u663e\u793a");
+        add("Kills, deaths and streak", "Zab\u00f3jstwa, \u015bmierci i seria", "Kills, Tode und Serie", "\u51fb\u6740\u3001\u6b7b\u4ea1\u548c\u8fde\u6740");
+        add("Kills: ", "Zab\u00f3jstwa: ", "Kills: ", "\u51fb\u6740: ");
         add("Language", "J\u0119zyk", "Sprache", "\u8bed\u8a00");
         add("Last hit distance", "Dystans ostatniego trafienia", "Distanz des letzten Treffers", "\u4e0a\u6b21\u547d\u4e2d\u8ddd\u79bb");
         add("Latency to server", "Op\u00f3\u017anienie do serwera", "Latenz zum Server", "\u5230\u670d\u52a1\u5668\u7684\u5ef6\u8fdf");
@@ -267,6 +280,7 @@ public final class L {
         add("Mod Catalog", "Katalog mod\u00f3w", "Mod-Katalog", "\u6a21\u7ec4\u76ee\u5f55");
         add("Mode: ", "Tryb: ", "Modus: ", "\u6a21\u5f0f: ");
         add("Modules", "Modu\u0142y", "Module", "\u6a21\u5757");
+        add("Mouse buttons", "Przyciski myszy", "Maustasten", "\u9f20\u6807\u952e");
         add("Movement speed", "Pr\u0119dko\u015b\u0107 ruchu", "Bewegungsgeschwindigkeit", "\u79fb\u52a8\u901f\u5ea6");
         add("Name", "Nazwa", "Name", "\u540d\u79f0");
         add("Name in menu", "Nazwa w menu", "Name im Men\u00fc", "\u83dc\u5355\u4e2d\u7684\u540d\u79f0");
@@ -278,6 +292,7 @@ public final class L {
         add("No PNG images in the folder.", "Brak obraz\u00f3w PNG w folderze.", "Keine PNG-Bilder im Ordner.", "\u6587\u4ef6\u5939\u4e2d\u6ca1\u6709PNG\u56fe\u50cf\u3002");
         add("No entries yet.", "Brak wpis\u00f3w.", "Noch keine Eintr\u00e4ge.", "\u6682\u65e0\u6761\u76ee\u3002");
         add("No friends yet.", "Brak znajomych.", "Noch keine Freunde.", "\u8fd8\u6ca1\u6709\u597d\u53cb\u3002");
+        add("No internet connection or the server is unreachable.", "Brak internetu lub serwer jest nieosi\u0105galny.", "Keine Internetverbindung oder Server nicht erreichbar.", "\u6ca1\u6709\u7f51\u7edc\u8fde\u63a5\u6216\u670d\u52a1\u5668\u65e0\u6cd5\u8bbf\u95ee\u3002");
         add("No locked items (besides the totem and gapple from the options).", "Brak zablokowanych przedmiot\u00f3w (poza totemem i gapple z opcji).", "Keine gesperrten Items (au\u00dfer Totem und Goldapfel aus den Optionen).", "\u6ca1\u6709\u9501\u5b9a\u7684\u7269\u54c1 (\u9009\u9879\u4e2d\u7684\u56fe\u817e\u548c\u91d1\u82f9\u679c\u9664\u5916)\u3002");
         add("No macros. Click 'Add macro'.", "Brak makr. Kliknij 'Dodaj makro'.", "Keine Makros. Klicke auf 'Makro hinzuf\u00fcgen'.", "\u6ca1\u6709\u5b8f\u3002\u70b9\u51fb\u201c\u6dfb\u52a0\u5b8f\u201d\u3002");
         add("No modules enabled. Enable them in the Hex Client menu (Right Shift).", "Brak w\u0142\u0105czonych modu\u0142\u00f3w. W\u0142\u0105cz je w menu Hex Client (Prawy Shift).", "Keine Module aktiv. Aktiviere sie im Hex-Client-Men\u00fc (Rechts-Umschalt).", "\u6ca1\u6709\u542f\u7528\u7684\u6a21\u5757\u3002\u8bf7\u5728 Hex Client \u83dc\u5355\u4e2d\u542f\u7528 (\u53f3Shift)\u3002");
@@ -290,6 +305,7 @@ public final class L {
         add("No waypoints.", "Brak waypoint\u00f3w.", "Keine Wegpunkte.", "\u6ca1\u6709\u8def\u5f84\u70b9\u3002");
         add("No waypoints. Enter a name and click 'Add here'.", "Brak punkt\u00f3w. Wpisz nazw\u0119 i kliknij 'Dodaj tutaj'.", "Keine Wegpunkte. Gib einen Namen ein und klicke auf 'Hier hinzuf\u00fcgen'.", "\u6ca1\u6709\u8def\u5f84\u70b9\u3002\u8f93\u5165\u540d\u79f0\u5e76\u70b9\u51fb\u201c\u5728\u6b64\u6dfb\u52a0\u201d\u3002");
         add("Nobody is blocked.", "Nikt nie jest zablokowany.", "Niemand ist gesperrt.", "\u6ca1\u6709\u88ab\u5c01\u9501\u7684\u4eba\u3002");
+        add("Not found (the file or list is not published yet).", "Nie znaleziono (plik lub lista nie jest jeszcze opublikowana).", "Nicht gefunden (Datei oder Liste ist noch nicht ver\u00f6ffentlicht).", "\u672a\u627e\u5230 (\u6587\u4ef6\u6216\u5217\u8868\u5c1a\u672a\u53d1\u5e03)\u3002");
         add("OFF", "WY\u0141.", "AUS", "\u5173");
         add("ON", "W\u0141.", "AN", "\u5f00");
         add("Obsidian", "Obsydian", "Obsidian", "\u9ed1\u66dc\u77f3");
@@ -300,6 +316,7 @@ public final class L {
         add("Opening the browser... log in and come back to the game.", "Otwieram przegl\u0105dark\u0119... zaloguj si\u0119 i wr\u00f3\u0107 do gry.", "\u00d6ffne den Browser... melde dich an und kehre zum Spiel zur\u00fcck.", "\u6b63\u5728\u6253\u5f00\u6d4f\u89c8\u5668... \u8bf7\u767b\u5f55\u540e\u8fd4\u56de\u6e38\u620f\u3002");
         add("Optional: logging in to Spotify gives the exact track time and synced lyrics ", "Opcjonalnie: logowanie do Spotify daje dok\u0142adny czas utworu i zsynchronizowany tekst ", "Optional: Die Anmeldung bei Spotify liefert die genaue Songzeit und synchronen Text ", "\u53ef\u9009: \u767b\u5f55 Spotify \u53ef\u83b7\u5f97\u7cbe\u786e\u7684\u64ad\u653e\u65f6\u95f4\u548c\u540c\u6b65\u6b4c\u8bcd ");
         add("Other", "Inne", "Sonstige", "\u5176\u4ed6");
+        add("Out of combat", "Poza walk\u0105", "Au\u00dfer Kampf", "\u975e\u6218\u6597\u72b6\u6001");
         add("Outline", "Obrys", "Umriss", "\u8f6e\u5ed3");
         add("Own count", "Moje", "Eigene", "\u81ea\u5df1\u7684");
         add("Own icon", "W\u0142asna ikona", "Eigenes Symbol", "\u81ea\u5df1\u7684\u56fe\u6807");
@@ -330,6 +347,7 @@ public final class L {
         add("Preset applied: ", "Zastosowano preset: ", "Preset angewendet: ", "\u5df2\u5e94\u7528\u9884\u8bbe: ");
         add("Press a key...", "Naci\u015bnij klawisz...", "Taste dr\u00fccken...", "\u8bf7\u6309\u952e...");
         add("Press...", "Naci\u015bnij...", "Dr\u00fccken...", "\u6309\u952e...");
+        add("Pressed keys and mouse buttons", "Wci\u015bni\u0119te klawisze i przyciski myszy", "Gedr\u00fcckte Tasten und Maustasten", "\u6309\u4e0b\u7684\u6309\u952e\u548c\u9f20\u6807\u952e");
         add("Protect items from drops", "Chroni itemy przed wyrzuceniem", "Sch\u00fctzt Items vor Wegwerfen", "\u9632\u6b62\u7269\u54c1\u88ab\u4e22\u5f03");
         add("PvP", "PvP", "PvP", "\u6218\u6597");
         add("PvP Items", "Itemy PvP", "PvP-Items", "PvP\u7269\u54c1");
@@ -352,12 +370,15 @@ public final class L {
         add("Remove", "Usu\u0144", "Entfernen", "\u5220\u9664");
         add("Removed: ", "Usuni\u0119to: ", "Entfernt: ", "\u5df2\u5220\u9664: ");
         add("Removes a waypoint. .wp list shows all of them.", "Usuwa waypoint. .wp list pokazuje wszystkie.", "Entfernt einen Wegpunkt. .wp list zeigt alle an.", "\u5220\u9664\u8def\u5f84\u70b9\u3002.wp list \u663e\u793a\u5168\u90e8\u3002");
+        add("Reset", "Resetuj", "Zur\u00fccksetzen", "\u91cd\u7f6e");
+        add("Resets the K/D counter.", "Zeruje licznik K/D.", "Setzt den K/D-Z\u00e4hler zur\u00fcck.", "\u91cd\u7f6e\u51fb\u6740/\u6b7b\u4ea1\u8ba1\u6570\u3002");
         add("Right Alt", "Prawy Alt", "Rechte Alt", "\u53f3Alt");
         add("Right Ctrl", "Prawy Ctrl", "Rechte Strg", "\u53f3Ctrl");
         add("Right Shift opens the Hex Client menu (changeable in Controls). Modules are split into PvP, Status and Other.", "Prawy Shift otwiera menu Hex Client (zmiana w Sterowaniu). Modu\u0142y s\u0105 podzielone na PvP, Status i Inne.", "Rechts-Umschalt \u00f6ffnet das Hex-Client-Men\u00fc (\u00e4nderbar in den Steuerungseinstellungen). Module sind in PvP, Status und Sonstige unterteilt.", "\u6309\u53f3Shift\u6253\u5f00 Hex Client \u83dc\u5355 (\u53ef\u5728\u63a7\u5236\u8bbe\u7f6e\u4e2d\u66f4\u6539)\u3002\u6a21\u5757\u5206\u4e3a\u6218\u6597\u3001\u72b6\u6001\u548c\u5176\u4ed6\u3002");
         add("Right arrow", "Strza\u0142ka w prawo", "Pfeil rechts", "\u53f3\u7bad\u5934");
         add("Rockets", "Rakiety", "Raketen", "\u70df\u82b1\u706b\u7bad");
         add("SHIELD IMAGE", "OBRAZ NA TARCZ\u0118", "SCHILDBILD", "\u76fe\u724c\u56fe\u50cf");
+        add("SPACE", "SPACJA", "LEER", "\u7a7a\u683c");
         add("STEALTH", "STEALTH", "STEALTH", "\u9690\u85cf");
         add("Saturation", "Saturacja", "S\u00e4ttigung", "\u9971\u548c\u5ea6");
         add("Saturation in combat", "Saturacja w walce", "S\u00e4ttigung im Kampf", "\u6218\u6597\u4e2d\u7684\u9971\u548c\u5ea6");
@@ -403,6 +424,7 @@ public final class L {
         add("Slot 8", "Slot 8", "Slot 8", "\u680f\u4f4d 8");
         add("Slot 9", "Slot 9", "Slot 9", "\u680f\u4f4d 9");
         add("Space", "Spacja", "Leertaste", "\u7a7a\u683c");
+        add("Space bar", "Spacja", "Leertaste", "\u7a7a\u683c\u952e");
         add("Speed", "Pr\u0119dko\u015b\u0107", "Geschwindigkeit", "\u901f\u5ea6");
         add("Splash potions", "Miotane mikstury", "Wurftr\u00e4nke", "\u55b7\u6e85\u836f\u6c34");
         add("Spotify", "Spotify", "Spotify", "Spotify");
@@ -410,8 +432,10 @@ public final class L {
         add("Spotify rejected the login.", "Spotify odrzuci\u0142 logowanie.", "Spotify hat die Anmeldung abgelehnt.", "Spotify \u62d2\u7edd\u4e86\u767b\u5f55\u3002");
         add("Spotify: nothing playing (start music in the app)", "Spotify: nic nie gra (w\u0142\u0105cz muzyk\u0119 w aplikacji)", "Spotify: nichts spielt (Musik in der App starten)", "Spotify: \u6ca1\u6709\u64ad\u653e (\u8bf7\u5728\u5e94\u7528\u4e2d\u64ad\u653e\u97f3\u4e50)");
         add("Spotify: paused", "Spotify: pauza", "Spotify: pausiert", "Spotify: \u5df2\u6682\u505c");
+        add("Spotify: restore the Spotify window (it is minimized to the tray)", "Spotify: przywr\u00f3\u0107 okno Spotify (jest zwini\u0119te do zasobnika)", "Spotify: Stelle das Spotify-Fenster wieder her (es ist im Tray minimiert)", "Spotify: \u8bf7\u8fd8\u539f Spotify \u7a97\u53e3 (\u5b83\u5df2\u6700\u5c0f\u5316\u5230\u6258\u76d8)");
         add("Spotify: start music in the app", "Spotify: w\u0142\u0105cz muzyk\u0119 w aplikacji", "Spotify: Musik in der App starten", "Spotify: \u8bf7\u5728\u5e94\u7528\u4e2d\u64ad\u653e\u97f3\u4e50");
         add("Status", "Status", "Status", "\u72b6\u6001");
+        add("Streak: ", "Seria: ", "Serie: ", "\u8fde\u6740: ");
         add("Style: ", "Styl: ", "Stil: ", "\u6837\u5f0f: ");
         add("TEXTURE EDITOR", "EDYTOR TEKSTUR", "TEXTUR-EDITOR", "\u6750\u8d28\u7f16\u8f91\u5668");
         add("TEXTURES", "TEKSTURY", "TEXTUREN", "\u6750\u8d28");
@@ -431,7 +455,9 @@ public final class L {
         add("The current lyric line appears here", "Tu pojawi si\u0119 aktualna linijka tekstu", "Hier erscheint die aktuelle Textzeile", "\u8fd9\u91cc\u663e\u793a\u5f53\u524d\u6b4c\u8bcd");
         add("The key sends a command or text in chat.", "Klawisz wysy\u0142a komend\u0119 albo tekst na czacie.", "Die Taste sendet einen Befehl oder Text im Chat.", "\u6309\u952e\u4f1a\u5728\u804a\u5929\u4e2d\u53d1\u9001\u547d\u4ee4\u6216\u6587\u672c\u3002");
         add("The login timed out. Try again.", "Czas na logowanie min\u0105\u0142. Spr\u00f3buj ponownie.", "Zeit\u00fcberschreitung bei der Anmeldung. Versuche es erneut.", "\u767b\u5f55\u8d85\u65f6\uff0c\u8bf7\u91cd\u8bd5\u3002");
+        add("The lyrics sync from the start of the track, so after seeking they may drift.", "Tekst synchronizuje si\u0119 od pocz\u0105tku utworu, wi\u0119c po przewini\u0119ciu mo\u017ce si\u0119 rozjecha\u0107.", "Der Text synchronisiert sich ab dem Songanfang und kann nach dem Vorspulen abweichen.", "\u6b4c\u8bcd\u4ece\u6b4c\u66f2\u5f00\u5934\u5f00\u59cb\u540c\u6b65\uff0c\u62d6\u52a8\u8fdb\u5ea6\u540e\u53ef\u80fd\u4e0d\u540c\u6b65\u3002");
         add("The lyrics sync from the start of the track, so after seeking they may drift. ", "Tekst synchronizuje si\u0119 od pocz\u0105tku utworu, wi\u0119c po przewini\u0119ciu piosenki mo\u017ce si\u0119 rozjecha\u0107. ", "Der Text synchronisiert sich ab dem Songanfang und kann nach dem Vorspulen abweichen. ", "\u6b4c\u8bcd\u4ece\u6b4c\u66f2\u5f00\u5934\u5f00\u59cb\u540c\u6b65\uff0c\u62d6\u52a8\u8fdb\u5ea6\u540e\u53ef\u80fd\u4e0d\u540c\u6b65\u3002");
+        add("The server has a problem. Try again later.", "Serwer ma problem. Spr\u00f3buj p\u00f3\u017aniej.", "Der Server hat ein Problem. Versuche es sp\u00e4ter erneut.", "\u670d\u52a1\u5668\u51fa\u73b0\u95ee\u9898\u3002\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002");
         add("The widget will show the track and lyrics by itself.", "Widget sam poka\u017ce utw\u00f3r i tekst.", "Das Widget zeigt Titel und Text von selbst an.", "\u7ec4\u4ef6\u4f1a\u81ea\u52a8\u663e\u793a\u6b4c\u66f2\u548c\u6b4c\u8bcd\u3002");
         add("This color is already saved.", "Ten kolor jest ju\u017c zapisany.", "Diese Farbe ist schon gespeichert.", "\u8be5\u989c\u8272\u5df2\u4fdd\u5b58\u3002");
         add("This color is not in the list.", "Tego koloru nie ma na li\u015bcie.", "Diese Farbe ist nicht in der Liste.", "\u5217\u8868\u4e2d\u6ca1\u6709\u8be5\u989c\u8272\u3002");
@@ -439,6 +465,7 @@ public final class L {
         add("This texture does not exist in the game: ", "Brak tej tekstury w grze: ", "Diese Textur gibt es im Spiel nicht: ", "\u6e38\u620f\u4e2d\u6ca1\u6709\u6b64\u6750\u8d28: ");
         add("Through walls", "Przez \u015bciany", "Durch W\u00e4nde", "\u7a7f\u5899\u663e\u793a");
         add("To see the changes, the pack must be enabled in the game settings (Resource Packs).", "Aby zobaczy\u0107 zmiany, pakiet musi by\u0107 w\u0142\u0105czony w ustawieniach gry (Pakiety zasob\u00f3w).", "Um die \u00c4nderungen zu sehen, muss das Paket in den Spieleinstellungen aktiviert sein (Ressourcenpakete).", "\u8981\u67e5\u770b\u66f4\u6539\uff0c\u5fc5\u987b\u5728\u6e38\u620f\u8bbe\u7f6e\u4e2d\u542f\u7528\u8be5\u8d44\u6e90\u5305 (\u8d44\u6e90\u5305)\u3002");
+        add("Too many requests. Try again in a minute.", "Za du\u017co zapyta\u0144. Spr\u00f3buj za minut\u0119.", "Zu viele Anfragen. Versuche es in einer Minute erneut.", "\u8bf7\u6c42\u8fc7\u591a\u3002\u8bf7\u4e00\u5206\u949f\u540e\u91cd\u8bd5\u3002");
         add("Tools", "Narz\u0119dzia", "Werkzeuge", "\u5de5\u5177");
         add("Total: %.1f (%s)", "Razem: %.1f (%s)", "Gesamt: %.1f (%s)", "\u603b\u8ba1: %.1f (%s)");
         add("Total: 12.5 (Enemy)", "Razem: 12.5 (Wr\u00f3g)", "Gesamt: 12.5 (Gegner)", "\u603b\u8ba1: 12.5 (\u654c\u4eba)");

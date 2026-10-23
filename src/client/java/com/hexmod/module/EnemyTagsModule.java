@@ -28,7 +28,7 @@ public class EnemyTagsModule extends Module {
     private static final int ROW = 10;
 
     private record ArmorEntry(ItemStack stack, String text, int color) {}
-    private record TagData(float hp, float maxHp, List<ArmorEntry> armor, int pops, boolean blocking, int ping) {}
+    private record TagData(float hp, float maxHp, List<ArmorEntry> armor, int pops, boolean blocking, int ping, float dist) {}
     private record Row(String text, int color, List<ArmorEntry> armor) {}
 
     private static final Map<UUID, Integer> POPS = new HashMap<>();
@@ -43,6 +43,7 @@ public class EnemyTagsModule extends Module {
         option("pops", "Totems", true);
         option("shield", "Shield", true);
         option("ping", "Ping", true);
+        option("dist", "Distance", false);
         option("pct", "Percent", false);
     }
 
@@ -116,7 +117,8 @@ public class EnemyTagsModule extends Module {
             if (entry != null) ping = entry.getLatency();
         }
         return new TagData(pl.getHealth() + pl.getAbsorptionAmount(), pl.getMaxHealth(), armor,
-                POPS.getOrDefault(pl.getUuid(), 0), pl.isBlocking(), ping);
+                POPS.getOrDefault(pl.getUuid(), 0), pl.isBlocking(), ping,
+                MinecraftClient.getInstance().player == null ? 0f : MinecraftClient.getInstance().player.distanceTo(pl));
     }
 
     private TagData sample() {
@@ -130,7 +132,7 @@ public class EnemyTagsModule extends Module {
         for (int i = 0; i < 4; i++) {
             armor.add(new ArmorEntry(stacks[i], option("pct") ? pcts[i] : uses[i], pctColor(fr[i])));
         }
-        return new TagData(14.5f, 20f, armor, 2, true, 38);
+        return new TagData(14.5f, 20f, armor, 2, true, 38, 4.2f);
     }
 
     private List<Row> rows(TagData d) {
@@ -141,6 +143,9 @@ public class EnemyTagsModule extends Module {
         if (option("ping") && d.ping() >= 0) {
             int pc = d.ping() < 80 ? 0x30D158 : d.ping() < 150 ? 0xFFD60A : 0xD10A0A;
             rows.add(new Row("Ping: " + d.ping() + "ms", pc, null));
+        }
+        if (option("dist")) {
+            rows.add(new Row(String.format(Locale.ROOT, "%.1fm", d.dist()), color, null));
         }
         if (option("hp")) {
             float ratio = d.hp() / Math.max(1f, d.maxHp());

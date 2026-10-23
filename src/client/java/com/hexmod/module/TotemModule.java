@@ -31,6 +31,6 @@ public class TotemModule extends Module {
             }
             if (inv.size() <= 36 && p.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING)) n++;
         }
-        ctx.drawTextWithShadow(mc.textRenderer, L.t("Totems: ") + n, 0, 0, n == 0 ? 0xFFD10A0A : rgb());
+        ctx.drawTextWithShadow(mc.textRenderer, L.t("Totems: ") + n, 0, 0, n == 0 ? 0xFFD10A0A : (n == 1 ? 0xFFFF9500 : rgb()));
     }
 }

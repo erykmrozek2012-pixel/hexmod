@@ -26,6 +26,7 @@ public class ArmorModule extends Module {
         int line = 0;
         for (int i = 0; i < SLOTS.length; i++) {
             String t;
+            int col = rgb();
             if (preview) {
                 t = L.t(LABELS[i]) + ": 87%";
             } else {
@@ -33,8 +34,10 @@ public class ArmorModule extends Module {
                 if (s.isEmpty() || !s.isDamageable()) continue;
                 int pct = Math.round(100f * (s.getMaxDamage() - s.getDamage()) / s.getMaxDamage());
                 t = L.t(LABELS[i]) + ": " + pct + "%";
+                if (pct <= 15) col = 0xFFD10A0A;
+                else if (pct <= 35) col = 0xFFFF9500;
             }
-            ctx.drawTextWithShadow(mc.textRenderer, t, 0, line, rgb());
+            ctx.drawTextWithShadow(mc.textRenderer, t, 0, line, col);
             line += 12;
         }
     }

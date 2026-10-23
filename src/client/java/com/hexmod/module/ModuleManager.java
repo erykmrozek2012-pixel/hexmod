@@ -61,6 +61,9 @@ public final class ModuleManager {
         register(new WaypointsModule());
         register(new MemoryModule());
         register(new SpeedModule());
+        register(new KeystrokesModule());
+        register(new CombatTimerModule());
+        register(new KillStatsModule());
         register(new ComboModule());
         register(new ReachModule());
         register(new AppleCountModule());

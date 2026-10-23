@@ -15,7 +15,7 @@ public class Module {
     /** Globalny przelacznik: gdy true, widoczne sa tylko podstawowe widgety. */
     public static boolean extrasHidden = false;
     private static final Set<String> CAT_PVP = Set.of("enemy_tags", "enemy_shield", "nearest_enemy", "reach", "combo",
-            "damage_dealt", "shield_break", "apples", "allies", "cps");
+            "damage_dealt", "shield_break", "apples", "allies", "cps", "combat_timer", "kd");
     private static final Set<String> CAT_OTHER = Set.of("fps", "ping", "coords", "memory", "waypoints", "spotify");
     private static final Set<String> BASIC = Set.of("fps", "cps", "cooldowns", "effects", "spotify");
     public static final int[] PALETTE = {0xD10A0A, 0xFFFFFF, 0xFFD60A, 0x30D158, 0x64D2FF, 0x0A84FF, 0xBF5AF2};
@@ -75,10 +75,24 @@ public class Module {
         option("stealth", "Hide until key", false);
     }
 
+    private int defX = 10, defY = 10;
+
     public Module at(int x, int y) {
         this.x = x;
         this.y = y;
+        this.defX = x;
+        this.defY = y;
         return this;
+    }
+
+    /** Przywraca domyslna pozycje, skale, kolor i styl widgetu. */
+    public void resetLook() {
+        x = defX;
+        y = defY;
+        scale = 1f;
+        color = 0xFFFFFF;
+        style = 0;
+        hidden = false;
     }
 
     /** Domyslnie na srodku ekranu, przesuniety w dol o dy. */
