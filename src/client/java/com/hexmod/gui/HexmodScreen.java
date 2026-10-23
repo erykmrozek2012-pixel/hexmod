@@ -56,6 +56,9 @@ public class HexmodScreen extends Screen {
             Map.entry("saturation", "Saturation in combat"),
             Map.entry("shield_break", "Shield break alerts"),
             Map.entry("speed", "Movement speed"),
+            Map.entry("keystrokes", "Pressed keys and mouse buttons"),
+            Map.entry("combat_timer", "Combat countdown"),
+            Map.entry("kd", "Kills, deaths and streak"),
             Map.entry("spotify", "Current song & lyrics"),
             Map.entry("totems", "Totems you carry"),
             Map.entry("waypoints", "Saved locations"));

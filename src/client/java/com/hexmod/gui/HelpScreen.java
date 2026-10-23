@@ -18,6 +18,7 @@ public class HelpScreen extends Screen {
             {".lock", "Locks the item in your hand. .lock name (e.g. ender_pearl) locks by name."},
             {".lock offhand", "Locks or unlocks the offhand (free by default)."},
             {".lock list / clear", "Shows or clears the list of locked items."},
+            {".kd", "Resets the K/D counter."},
     };
 
     private static final int PER_PAGE = 5;

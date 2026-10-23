@@ -36,6 +36,7 @@ public class HudEditorScreen extends Screen {
         java.util.List<String> keys = new java.util.ArrayList<>();
         if (selected != null) {
             keys.add("__style");
+            keys.add("__reset");
             keys.addAll(selected.options.keySet());
         }
         int n = keys.size();
@@ -45,7 +46,7 @@ public class HudEditorScreen extends Screen {
         int rows = 1, cur = 0, maxW = width - 16;
         for (int i = 0; i < n; i++) {
             String k = keys.get(i);
-            labels[i] = k.equals("__style")
+            labels[i] = k.equals("__reset") ? L.t("Reset") : k.equals("__style")
                     ? L.t("Style: ") + L.t(Module.STYLE_NAMES[selected.style])
                     : L.t(selected.optionLabels.getOrDefault(k, k)) + ": " + (selected.option(k) ? L.t("ON") : L.t("OFF"));
             bw[i] = Math.max(60, textRenderer.getWidth(labels[i]) + 12);
@@ -108,7 +109,9 @@ public class HudEditorScreen extends Screen {
             int ox = rowX[rowOf[i]];
             rowX[rowOf[i]] += bw[i] + 4;
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> {
-                if (k.equals("__style")) {
+                if (k.equals("__reset")) {
+                    selected.resetLook();
+                } else if (k.equals("__style")) {
                     selected.style = (selected.style + 1) % Module.STYLE_COUNT;
                 } else {
                     selected.options.put(k, !selected.option(k));
