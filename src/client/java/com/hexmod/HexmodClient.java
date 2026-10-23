@@ -6,6 +6,7 @@ import com.hexmod.module.ChatCommands;
 import com.hexmod.module.MacroManager;
 import com.hexmod.module.CombatTracker;
 import com.hexmod.module.ItemLockManager;
+import com.hexmod.module.KillStatsModule;
 import com.hexmod.module.L;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
@@ -79,6 +80,7 @@ public class HexmodClient implements ClientModInitializer {
                 if (entity instanceof PlayerEntity victim) {
                     DamageDealtModule.onAttack(victim);
                     ComboModule.onAttack();
+                    KillStatsModule.onAttack(victim);
                     ReachModule.onAttack(player, entity);
                 }
                 if (entity instanceof PlayerEntity target
