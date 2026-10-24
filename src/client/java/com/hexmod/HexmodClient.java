@@ -10,6 +10,7 @@ import com.hexmod.module.KillStatsModule;
 import com.hexmod.module.L;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
+import com.hexmod.gui.SpotifyControls;
 import com.hexmod.module.AppleCountModule;
 import com.hexmod.module.ComboModule;
 import com.hexmod.module.ReachModule;
@@ -44,6 +45,7 @@ public class HexmodClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         L.load();
+        SpotifyControls.register();
         ModuleManager.init();
         ModuleManager.load();
         AlliesManager.load();
