@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.Favorites;
 import com.hexmod.module.L;
 import com.hexmod.module.ModCatalog;
 import com.hexmod.module.Remote;
@@ -7,8 +8,10 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +24,7 @@ public class ModCatalogScreen extends Screen {
     private volatile boolean needsInit;
     private volatile String status = "";
     private List<Remote.CatalogEntry> entries = List.of();
+    private static boolean favOnly = false;
 
     public ModCatalogScreen(Screen parent) {
         super(Text.literal(L.t("Mod Catalog")));
@@ -30,11 +34,25 @@ public class ModCatalogScreen extends Screen {
     @Override
     protected void init() {
         int cx = width / 2;
-        entries = Remote.catalog().mods;
+        List<Remote.CatalogEntry> favs = new ArrayList<>(), rest = new ArrayList<>();
+        for (Remote.CatalogEntry e : Remote.catalog().mods) {
+            if (Favorites.has("mod:" + e.modrinth)) favs.add(e);
+            else if (!favOnly) rest.add(e);
+        }
+        favs.addAll(rest);
+        entries = favs;
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Favorites only: ") + (favOnly ? L.t("ON") : L.t("OFF"))), b -> {
+            favOnly = !favOnly;
+            clearAndInit();
+        }).dimensions(cx + 10, 14, 130, 16).build());
         int y = 44;
         for (int i = 0; i < Math.min(7, entries.size()); i++) {
             Remote.CatalogEntry e = entries.get(i);
             final String slug = e.modrinth;
+            addDrawableChild(ButtonWidget.builder(Text.literal("\u2605").formatted(Favorites.has("mod:" + slug) ? Formatting.GOLD : Formatting.DARK_GRAY), b -> {
+                Favorites.toggle("mod:" + slug);
+                clearAndInit();
+            }).dimensions(cx + 46, y + 2, 16, 16).build());
             if (busy.contains(slug)) { y += 26; continue; }
             ModCatalog.State st = ModCatalog.state(slug);
             if (st == ModCatalog.State.NOT_INSTALLED) {

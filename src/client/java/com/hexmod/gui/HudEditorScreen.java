@@ -23,6 +23,8 @@ public class HudEditorScreen extends Screen {
     private boolean needsInit;
     private Module listening;
     private boolean paletteOpen;
+    private float hue = 0f, sat = 1f, val = 1f;
+    private int dragMode = 0; // 0 nic, 1 kwadrat, 2 pasek odcienia
     private final boolean[] heldAtStart = new boolean[349];
 
     public HudEditorScreen(Screen parent) {
@@ -71,7 +73,10 @@ public class HudEditorScreen extends Screen {
                 .dimensions(x, y0 + 6, 24, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("+"), b -> changeScale(0.1f))
                 .dimensions(x + 28, y0 + 6, 24, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Color")), b -> paletteOpen = !paletteOpen)
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Color")), b -> {
+            paletteOpen = !paletteOpen;
+            if (paletteOpen) syncHsv();
+        })
                 .dimensions(x + 56, y0 + 6, 56, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(selected.hidden ? L.t("Show") : L.t("Hide")), b -> {
             selected.hidden = !selected.hidden;
@@ -130,7 +135,15 @@ public class HudEditorScreen extends Screen {
 
     private int paletteX() { return width / 2 - 105; }
 
-    private int paletteY() { return height - panelH - 70; }
+    private int paletteY() { return height - panelH - 96; }
+
+    private void syncHsv() {
+        if (selected == null) return;
+        float[] hsv = ColorUtil.toHsv(selected.color);
+        if (hsv[1] > 0f) hue = hsv[0];
+        sat = hsv[1];
+        val = hsv[2];
+    }
 
     private void resetHeld() {
         long win = client.getWindow().getHandle();
@@ -232,18 +245,51 @@ public class HudEditorScreen extends Screen {
         long win = client.getWindow().getHandle();
         boolean down = GLFW.glfwGetMouseButton(win, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 
-        if (paletteOpen && down && !wasDown && selected != null) {
+        if (paletteOpen && selected != null) {
             int px0 = paletteX(), py0 = paletteY();
-            if (mx >= px0 && mx < px0 + 8 * 16 + 4 && my >= py0 && my < py0 + 4 * 16 + 4) {
-                int col = Math.floorDiv(mx - px0 - 2, 16), row = Math.floorDiv(my - py0 - 2, 16);
-                if (col >= 0 && col < 8 && row >= 0 && row < 4) {
-                    selected.color = PALETTE_HEX[row * 8 + col];
-                    ModuleManager.save();
+            int svx = px0 + 138, svy = py0, hux = px0 + 222;
+            if (down && !wasDown) {
+                if (mx >= px0 && mx < px0 + 8 * 16 + 4 && my >= py0 && my < py0 + 4 * 16 + 4) {
+                    int col = Math.floorDiv(mx - px0 - 2, 16), row = Math.floorDiv(my - py0 - 2, 16);
+                    if (col >= 0 && col < 8 && row >= 0 && row < 4) {
+                        selected.color = PALETTE_HEX[row * 8 + col];
+                        syncHsv();
+                        ModuleManager.save();
+                    }
+                    wasDown = true;
+                    return;
                 }
+                if (mx >= px0 && mx < px0 + 8 * 16 + 4 && my >= py0 + 70 && my < py0 + 88) {
+                    int col = Math.floorDiv(mx - px0 - 2, 16);
+                    if (col == 0) {
+                        ColorStore.add(selected.color);
+                    } else if (col >= 1 && col <= ColorStore.list().size()) {
+                        selected.color = ColorStore.list().get(col - 1);
+                        syncHsv();
+                        ModuleManager.save();
+                    }
+                    wasDown = true;
+                    return;
+                }
+                if (mx >= svx && mx < svx + 80 && my >= svy && my < svy + 64) dragMode = 1;
+                else if (mx >= hux && mx < hux + 10 && my >= svy && my < svy + 64) dragMode = 2;
+                else if (!overPanelWidget(mx, my)) paletteOpen = false;
+            }
+            if (down && dragMode != 0) {
+                if (dragMode == 1) {
+                    sat = Math.max(0f, Math.min(1f, (mx - svx) / 79f));
+                    val = 1f - Math.max(0f, Math.min(1f, (my - svy) / 63f));
+                } else {
+                    hue = Math.max(0f, Math.min(1f, (my - svy) / 63f)) * 0.9999f;
+                }
+                selected.color = ColorUtil.hsv(hue, sat, val);
                 wasDown = true;
                 return;
             }
-            if (!overPanelWidget(mx, my)) paletteOpen = false;
+            if (!down && dragMode != 0) {
+                dragMode = 0;
+                ModuleManager.save();
+            }
         }
 
         if (down && !wasDown && !overPanelWidget(mx, my)) {
@@ -323,13 +369,40 @@ public class HudEditorScreen extends Screen {
 
         if (paletteOpen && selected != null) {
             int px0 = paletteX(), py0 = paletteY();
-            ctx.fill(px0 - 2, py0 - 2, px0 + 8 * 16 + 4, py0 + 4 * 16 + 4, 0xFF000000);
-            ctx.fill(px0 - 1, py0 - 1, px0 + 8 * 16 + 3, py0 + 4 * 16 + 3, HexTheme.PANEL);
+            ctx.fill(px0 - 2, py0 - 2, px0 + 236, py0 + 90, 0xFF000000);
+            ctx.fill(px0 - 1, py0 - 1, px0 + 235, py0 + 89, HexTheme.PANEL);
             for (int i = 0; i < PALETTE_HEX.length; i++) {
                 int sx = px0 + 2 + (i % 8) * 16, sy = py0 + 2 + (i / 8) * 16;
                 ctx.fill(sx, sy, sx + 14, sy + 14, 0xFF000000 | PALETTE_HEX[i]);
                 if (PALETTE_HEX[i] == selected.color) outline(ctx, sx - 1, sy - 1, sx + 15, sy + 15, HexTheme.RED);
             }
+            // kwadrat nasycenie/jasnosc + pasek odcienia
+            int svx = px0 + 138, svy = py0, hux = px0 + 222;
+            for (int yy = 0; yy < 32; yy++) {
+                for (int xx = 0; xx < 40; xx++) {
+                    ctx.fill(svx + xx * 2, svy + yy * 2, svx + xx * 2 + 2, svy + yy * 2 + 2,
+                            0xFF000000 | ColorUtil.hsv(hue, xx / 39f, 1f - yy / 31f));
+                }
+            }
+            int mxp = svx + Math.round(sat * 79f), myp = svy + Math.round((1f - val) * 63f);
+            ctx.fill(mxp - 3, myp - 3, mxp + 4, myp + 4, 0xFF000000);
+            ctx.fill(mxp - 2, myp - 2, mxp + 3, myp + 3, 0xFFFFFFFF);
+            ctx.fill(mxp - 1, myp - 1, mxp + 2, myp + 2, 0xFF000000 | selected.color);
+            for (int i = 0; i < 32; i++) {
+                ctx.fill(hux, svy + i * 2, hux + 10, svy + i * 2 + 2, 0xFF000000 | ColorUtil.hsv(i / 32f, 1f, 1f));
+            }
+            int hy = svy + Math.round(hue * 63f);
+            ctx.fill(hux - 2, hy - 1, hux + 12, hy + 2, 0xFF000000);
+            ctx.fill(hux - 1, hy, hux + 11, hy + 1, 0xFFFFFFFF);
+            // wlasne kolory: [+] zapisuje biezacy, kolejne to zapisane
+            int cy = py0 + 70;
+            ctx.fill(px0 + 2, cy, px0 + 16, cy + 14, 0xFF2A2A30);
+            ctx.drawCenteredTextWithShadow(textRenderer, "+", px0 + 9, cy + 3, HexTheme.TEXT);
+            for (int i = 0; i < ColorStore.MAX; i++) {
+                int sx = px0 + 2 + (i + 1) * 16;
+                ctx.fill(sx, cy, sx + 14, cy + 14, i < ColorStore.list().size() ? 0xFF000000 | ColorStore.list().get(i) : 0xFF2A2A30);
+            }
+            ctx.drawTextWithShadow(textRenderer, String.format("#%06X", selected.color & 0xFFFFFF), px0 + 138, py0 + 72, HexTheme.TEXT);
         }
 
         String hint = any

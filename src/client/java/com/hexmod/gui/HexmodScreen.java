@@ -1,5 +1,6 @@
 package com.hexmod.gui;
 
+import com.hexmod.module.Favorites;
 import com.hexmod.module.L;
 import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 import java.util.Map;
@@ -22,19 +24,19 @@ public class HexmodScreen extends Screen {
     private static final int FOOTER_H = 30;
     private static final int TAB_W = 90;
 
-    private static final String[] CATS = {"PvP", "Status", "Other"};
+    private static final String[] CATS = {"PvP", "Status", "Other", "Favorites"};
     private static final String[] CAT_DESC = {
             "Combat widgets about enemies and fights",
             "Your own stats, items and cooldowns",
-            "Everything else: FPS, waypoints, music"};
-    private static int cat = 0; // 0 = PvP, 1 = Status, 2 = Other
+            "Everything else: FPS, waypoints, music",
+            "Your starred modules. Click the star next to a module to add or remove it."};
+    private static int cat = 0; // 0 = PvP, 1 = Status, 2 = Other, 3 = Favorites
 
     private static int tab = 0; // 0 = Modules, 1 = Tools
 
     /** Krotkie podpisy pod nazwami modulow (po angielsku, tlumaczone przez L.t). */
     private static final Map<String, String> SUB = Map.ofEntries(
             Map.entry("allies", "Friends near you"),
-            Map.entry("apples", "Gapples held by enemies"),
             Map.entry("armor", "Armor durability"),
             Map.entry("combo", "Hits in a row"),
             Map.entry("cooldowns", "Item cooldowns"),
@@ -49,7 +51,6 @@ public class HexmodScreen extends Screen {
             Map.entry("item_count", "PvP item counters"),
             Map.entry("item_lock", "Protect items from drops"),
             Map.entry("memory", "Game memory usage"),
-            Map.entry("nearest_enemy", "Closest enemy info"),
             Map.entry("pearl_timer", "Pearl flight time"),
             Map.entry("ping", "Latency to server"),
             Map.entry("reach", "Last hit distance"),
@@ -81,7 +82,8 @@ public class HexmodScreen extends Screen {
     private List<Module> inCategory(int c) {
         List<Module> out = new java.util.ArrayList<>();
         for (Module m : ModuleManager.all()) {
-            if ((!Module.extrasHidden || m.isBasic()) && m.category().equals(CATS[c])) out.add(m);
+            boolean inCat = c == 3 ? Favorites.has(m.id) : m.category().equals(CATS[c]);
+            if ((!Module.extrasHidden || m.isBasic()) && inCat) out.add(m);
         }
         return out;
     }
@@ -118,7 +120,7 @@ public class HexmodScreen extends Screen {
     }
 
     private int catW() {
-        return (PANEL_W - 16 - 8) / 3;
+        return (PANEL_W - 16 - 12) / 4;
     }
 
     private int catX(int i) {
@@ -171,7 +173,7 @@ public class HexmodScreen extends Screen {
         if (tab == 0) {
             for (int i = 0; i < CATS.length; i++) {
                 final int c = i;
-                String label = L.t(CATS[i]) + " (" + inCategory(i).size() + ")";
+                String label = textRenderer.trimToWidth((i == 3 ? "\u2605 " : "") + L.t(CATS[i]) + " (" + inCategory(i).size() + ")", catW() - 6);
                 addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
                     cat = c;
                     query = "";
@@ -195,6 +197,12 @@ public class HexmodScreen extends Screen {
             }
             for (int i = 0; i < modules.size(); i++) {
                 Module m = modules.get(i);
+                final String fid = m.id;
+                boolean fav = Favorites.has(fid);
+                addDrawableChild(ButtonWidget.builder(Text.literal("\u2605").formatted(fav ? Formatting.GOLD : Formatting.DARK_GRAY), b -> {
+                    Favorites.toggle(fid);
+                    clearAndInit();
+                }).dimensions(cellX(i) + CELL_W - 58, cellY(i) + 4, 16, 16).build());
                 addDrawableChild(new ToggleSwitch(cellX(i) + CELL_W - 36 - 2, cellY(i) + 3, m.isEnabled(), m::setEnabled));
             }
             int by = panelY + panelH - FOOTER_H + 6;
@@ -256,7 +264,7 @@ public class HexmodScreen extends Screen {
             ctx.drawTextWithShadow(textRenderer, desc, panelX + 10, panelY + HEADER_H + 22, HexTheme.TEXT_DIM);
 
             List<Module> modules = shown();
-            int textW = CELL_W - 46;
+            int textW = CELL_W - 64;
             for (int i = 0; i < modules.size(); i++) {
                 Module mod = modules.get(i);
                 ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(L.t(mod.name), textW), cellX(i) + 6, cellY(i) + 3, HexTheme.TEXT);
