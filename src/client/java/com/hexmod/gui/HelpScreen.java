@@ -19,6 +19,7 @@ public class HelpScreen extends Screen {
             {".lock offhand", "Locks or unlocks the offhand (free by default)."},
             {".lock list / clear", "Shows or clears the list of locked items."},
             {".kd", "Resets the K/D counter."},
+            {".lyrics 0.5", "Shifts the Spotify lyrics (positive = earlier)."},
     };
 
     private static final int PER_PAGE = 5;

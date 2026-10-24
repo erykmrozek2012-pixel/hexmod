@@ -36,7 +36,7 @@ public class WaypointScreen extends Screen {
             clearAndInit();
         }).dimensions(cx + 46, 40, 94, 20).build());
 
-        List<WaypointManager.Waypoint> list = WaypointManager.list();
+        List<WaypointManager.Waypoint> list = WaypointManager.forServer();
         int y = 70;
         for (int i = 0; i < Math.min(ROWS, list.size()); i++) {
             final WaypointManager.Waypoint w = list.get(i);
@@ -67,7 +67,8 @@ public class WaypointScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
         ctx.drawTextWithShadow(textRenderer, L.t("WAYPOINTS"), cx - 140, 22, HexTheme.RED);
-        List<WaypointManager.Waypoint> list = WaypointManager.list();
+        ctx.drawTextWithShadow(textRenderer, textRenderer.trimToWidth(L.t("Server: ") + WaypointManager.currentServer(), 150), cx - 20, 22, HexTheme.TEXT_DIM);
+        List<WaypointManager.Waypoint> list = WaypointManager.forServer();
         int y = 70;
         for (int i = 0; i < Math.min(ROWS, list.size()); i++) {
             WaypointManager.Waypoint w = list.get(i);

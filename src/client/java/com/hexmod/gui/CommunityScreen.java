@@ -45,13 +45,14 @@ public class CommunityScreen extends Screen {
     }
 
     private List<Community.Entry> entries() {
+        if (tab == 2) return List.of();
         return tab == 0 ? data.configs : data.packs;
     }
 
     @Override
     protected void init() {
         int cx = width / 2;
-        String[] tabs = {"Configs", "Texture packs"};
+        String[] tabs = {"Configs", "Texture packs", "Guide"};
         for (int i = 0; i < tabs.length; i++) {
             final int t = i;
             addDrawableChild(ButtonWidget.builder(Text.literal(L.t(tabs[i])), b -> {
@@ -59,7 +60,7 @@ public class CommunityScreen extends Screen {
                 page = 0;
                 status = "";
                 clearAndInit();
-            }).dimensions(cx - 140 + i * 142, 34, 138, 18).build());
+            }).dimensions(cx - 140 + i * 94, 34, 92, 18).build());
         }
 
         List<Community.Entry> list = entries();
@@ -128,7 +129,7 @@ public class CommunityScreen extends Screen {
         ctx.fill(width / 2 - 150, 8, width / 2 + 150, height - 4, HexTheme.PANEL);
         ctx.fill(width / 2 - 150, 8, width / 2 + 150, 11, HexTheme.RED);
         int cx = width / 2;
-        ctx.fill(cx - 140 + tab * 142, 52, cx - 140 + tab * 142 + 138, 55, HexTheme.RED);
+        ctx.fill(cx - 140 + tab * 94, 52, cx - 140 + tab * 94 + 92, 55, HexTheme.RED);
     }
 
     @Override
@@ -136,6 +137,24 @@ public class CommunityScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         int cx = width / 2;
         ctx.drawTextWithShadow(textRenderer, L.t("COMMUNITY"), cx - 140, 20, HexTheme.RED);
+        if (tab == 2) {
+            String[] steps = {
+                    L.t("How to add your own textures to Community:"),
+                    L.t("1. Edit textures in Tools > Texture Editor. The edited pack is saved in your resourcepacks folder (a folder, e.g. ending with _hexedit)."),
+                    L.t("2. Right-click that folder > Send to > Compressed (zipped) folder. The .zip must contain pack.mcmeta."),
+                    L.t("3. Send the .zip (up to 25 MB) to the admin, for example on Discord."),
+                    L.t("4. The admin uploads it to hexmod-data/packs and adds it to community.json. After a few minutes everyone sees it in Tools > Community."),
+                    L.t("Configs: Tools > Configs > Copy to clipboard, then send the text to the admin.")};
+            int gy = 62;
+            for (int i = 0; i < steps.length; i++) {
+                for (var line : textRenderer.wrapLines(Text.literal(steps[i]), 290)) {
+                    ctx.drawTextWithShadow(textRenderer, line, cx - 140, gy, i == 0 ? HexTheme.RED : HexTheme.TEXT);
+                    gy += 10;
+                }
+                gy += 4;
+            }
+            return;
+        }
         List<Community.Entry> list = entries();
         for (int i = 0; i < PER_PAGE; i++) {
             int idx = page * PER_PAGE + i;
