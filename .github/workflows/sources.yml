@@ -1,0 +1,37 @@
+name: Export Minecraft sources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Generate Minecraft sources
+        run: gradle genSources
+
+      - name: Collect rendering sources
+        run: |
+          JAR=$(find "$HOME" "$GITHUB_WORKSPACE" -name '*-sources.jar' -path '*minecraft*' 2>/dev/null | head -n 1)
+          echo "Found: $JAR"
+          mkdir -p out
+          cd out
+          unzip -q "$JAR" 'net/minecraft/client/render/*' 'net/minecraft/client/network/*' 'net/minecraft/client/texture/*' 'net/minecraft/client/util/*' 'net/minecraft/entity/player/*' 'net/minecraft/item/*' || true
+          cd ..
+          zip -qr minecraft-render-sources.zip out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: minecraft-render-sources
+          path: minecraft-render-sources.zip
