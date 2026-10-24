@@ -11,7 +11,6 @@ import com.hexmod.module.L;
 import com.hexmod.module.ItemLockModule;
 import com.hexmod.module.WaypointManager;
 import com.hexmod.gui.SpotifyControls;
-import com.hexmod.module.AppleCountModule;
 import com.hexmod.module.ComboModule;
 import com.hexmod.module.ReachModule;
 import com.hexmod.module.WaypointsModule;
@@ -104,7 +103,6 @@ public class HexmodClient implements ClientModInitializer {
                         if (m.isEnabled()) m.render(ctx);
                     }
                     WaypointsModule.renderMarkers(ctx);
-                    AppleCountModule.renderMarkers(ctx);
                 });
     }
 }
