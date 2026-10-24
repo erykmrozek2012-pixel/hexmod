@@ -66,9 +66,7 @@ public final class ModuleManager {
         register(new KillStatsModule());
         register(new ComboModule());
         register(new ReachModule());
-        register(new AppleCountModule());
         register(new ItemCountModule());
-        register(new NearestEnemyModule());
     }
 
     public static void register(Module module) {

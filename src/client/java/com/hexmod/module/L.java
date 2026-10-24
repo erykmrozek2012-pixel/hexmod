@@ -52,7 +52,6 @@ public final class L {
         add("< Previous", "< Poprzednia", "< Zur\u00fcck", "< \u4e0a\u4e00\u9875");
         add("ACCESS BLOCKED", "DOST\u0118P ZABLOKOWANY", "ZUGRIFF GESPERRT", "\u8bbf\u95ee\u5df2\u88ab\u5c01\u9501");
         add("ADMIN PANEL", "PANEL ADMINA", "ADMIN-PANEL", "\u7ba1\u7406\u9762\u677f");
-        add("Above enemies", "Nad wrogiem", "\u00dcber Gegnern", "\u654c\u4eba\u5934\u9876");
         add("Access denied.", "Brak dost\u0119pu.", "Zugriff verweigert.", "\u8bbf\u95ee\u88ab\u62d2\u7edd\u3002");
         add("Active potion effects", "Aktywne efekty mikstur", "Aktive Trankeffekte", "\u5f53\u524d\u836f\u6c34\u6548\u679c");
         add("Add", "Dodaj", "Hinzuf\u00fcgen", "\u6dfb\u52a0");
@@ -108,7 +107,6 @@ public final class L {
         add("Clicks per second", "Klikni\u0119cia na sekund\u0119", "Klicks pro Sekunde", "\u6bcf\u79d2\u70b9\u51fb");
         add("Client ID saved.", "Zapisano Client ID.", "Client-ID gespeichert.", "Client ID \u5df2\u4fdd\u5b58\u3002");
         add("Close", "Zamknij", "Schlie\u00dfen", "\u5173\u95ed");
-        add("Closest enemy info", "Info o najbli\u017cszym wrogu", "Infos zum n\u00e4chsten Gegner", "\u6700\u8fd1\u654c\u4eba\u4fe1\u606f");
         add("Color", "Kolor", "Farbe", "\u989c\u8272");
         add("Color removed from the list.", "Usuni\u0119to kolor z listy.", "Farbe aus der Liste entfernt.", "\u5df2\u4ece\u5217\u8868\u4e2d\u5220\u9664\u989c\u8272\u3002");
         add("Combat Timer", "Czas walki", "Kampf-Timer", "\u6218\u6597\u8ba1\u65f6");
@@ -168,8 +166,6 @@ public final class L {
         add("Downloading: ", "Pobieranie: ", "Lade herunter: ", "\u6b63\u5728\u4e0b\u8f7d: ");
         add("Drag a widget with the mouse. Click a widget to set scale, color and options.", "Przeci\u0105gnij widget myszk\u0105. Kliknij widget, aby ustawi\u0107 skal\u0119, kolor i opcje.", "Ziehe ein Widget mit der Maus. Klicke ein Widget an, um Skalierung, Farbe und Optionen einzustellen.", "\u7528\u9f20\u6807\u62d6\u52a8\u7ec4\u4ef6\u3002\u70b9\u51fb\u7ec4\u4ef6\u53ef\u8bbe\u7f6e\u7f29\u653e\u3001\u989c\u8272\u548c\u9009\u9879\u3002");
         add("E-Gapple", "Kox", "Ench. Goldapfel", "\u9644\u9b54\u91d1\u82f9\u679c");
-        add("E-Gapple x", "Kox x", "Ench. Apfel x", "\u9644\u9b54\u91d1\u82f9\u679c x");
-        add("E-Gapple: ", "Kox: ", "Ench. Apfel: ", "\u9644\u9b54\u91d1\u82f9\u679c: ");
         add("Eat Timer", "Czas jedzenia", "Essens-Timer", "\u8fdb\u98df\u8ba1\u65f6");
         add("Eating countdown", "Odliczanie jedzenia", "Essens-Countdown", "\u8fdb\u98df\u5012\u8ba1\u65f6");
         add("Eating: %.2fs", "Jedzenie: %.2fs", "Essen: %.2fs", "\u8fdb\u98df: %.2fs");
@@ -184,8 +180,6 @@ public final class L {
         add("Enemy shield: UP", "Tarcza wroga: UNIESIONA", "Gegnerschild: OBEN", "\u654c\u65b9\u76fe\u724c: \u4e3e\u8d77");
         add("Enemy shield: down", "Tarcza wroga: opuszczona", "Gegnerschild: unten", "\u654c\u65b9\u76fe\u724c: \u653e\u4e0b");
         add("Enemy shield: none", "Tarcza wroga: brak", "Gegnerschild: keins", "\u654c\u65b9\u76fe\u724c: \u65e0");
-        add("Enemy: 4.2m", "Wr\u00f3g: 4.2m", "Gegner: 4.2m", "\u654c\u4eba: 4.2m");
-        add("Enemy: none", "Wr\u00f3g: brak", "Gegner: keiner", "\u654c\u4eba: \u65e0");
         add("Enter a color as #RRGGBB.", "Wpisz kolor jako #RRGGBB.", "Gib eine Farbe als #RRGGBB ein.", "\u8bf7\u4ee5 #RRGGBB \u8f93\u5165\u989c\u8272\u3002");
         add("Enter a name (letters, digits, - and _).", "Wpisz nazw\u0119 (litery, cyfry, - i _).", "Gib einen Namen ein (Buchstaben, Ziffern, - und _).", "\u8bf7\u8f93\u5165\u540d\u79f0 (\u5b57\u6bcd\u3001\u6570\u5b57\u3001- \u548c _)\u3002");
         add("Enter a nick (or it is already on the list).", "Wpisz nick (lub ju\u017c jest na li\u015bcie).", "Gib einen Namen ein (oder er steht schon auf der Liste).", "\u8bf7\u8f93\u5165\u6635\u79f0 (\u6216\u5df2\u5728\u5217\u8868\u4e2d)\u3002");
@@ -198,6 +192,8 @@ public final class L {
         add("Extra widgets visible.", "Dodatkowe widgety widoczne.", "Zusatz-Widgets sichtbar.", "\u9644\u52a0\u7ec4\u4ef6\u5df2\u663e\u793a\u3002");
         add("FPS", "FPS", "FPS", "\u5e27\u7387");
         add("FRIENDS", "ZNAJOMI", "FREUNDE", "\u597d\u53cb");
+        add("Favorites", "Ulubione", "Favoriten", "\u6536\u85cf");
+        add("Favorites only: ", "Tylko ulubione: ", "Nur Favoriten: ", "\u4ec5\u6536\u85cf: ");
         add("Fill", "Wype\u0142nij", "F\u00fcllen", "\u586b\u5145");
         add("Filter: ", "Filtr: ", "Filter: ", "\u7b5b\u9009: ");
         add("Fishing rod: cast", "W\u0119dka: zarzucona", "Angel: ausgeworfen", "\u9493\u9c7c\u7aff: \u5df2\u629b\u51fa");
@@ -210,10 +206,6 @@ public final class L {
         add("Full PvP", "Pe\u0142ny PvP", "Voll-PvP", "\u5b8c\u6574PvP");
         add("Game memory usage", "Zu\u017cycie pami\u0119ci gry", "Speichernutzung des Spiels", "\u6e38\u620f\u5185\u5b58\u5360\u7528");
         add("Gapple", "Ref", "Goldapfel", "\u91d1\u82f9\u679c");
-        add("Gapple Count", "Licznik ref\u00f3w i kox\u00f3w", "Goldapfel-Z\u00e4hler", "\u91d1\u82f9\u679c\u8ba1\u6570");
-        add("Gapple x", "Ref x", "Goldapfel x", "\u91d1\u82f9\u679c x");
-        add("Gapple: ", "Ref: ", "Goldapfel: ", "\u91d1\u82f9\u679c: ");
-        add("Gapples held by enemies", "Refy i koxy w r\u0119kach wrog\u00f3w", "Gold\u00e4pfel in Gegnerh\u00e4nden", "\u654c\u4eba\u624b\u6301\u7684\u91d1\u82f9\u679c");
         add("Glass", "Szk\u0142o", "Glas", "\u73bb\u7483");
         add("Glowstone", "Glowstone", "Glowstone", "\u8367\u77f3");
         add("Guide", "Poradnik", "Anleitung", "\u6307\u5357");
@@ -228,6 +220,10 @@ public final class L {
         add("Hide", "Ukryj", "Verstecken", "\u9690\u85cf");
         add("Hide until key", "Ukryj do klawisza", "Bis Taste verstecken", "\u6309\u952e\u524d\u9690\u85cf");
         add("Hide zeros", "Ukryj zera", "Nullen ausblenden", "\u9690\u85cf\u96f6\u503c");
+        add("Hit Reach", "Zasi\u0119g trafienia", "Trefferreichweite", "\u547d\u4e2d\u8ddd\u79bb");
+        add("Hit reach: %.2f", "Zasi\u0119g trafienia: %.2f", "Trefferreichweite: %.2f", "\u547d\u4e2d\u8ddd\u79bb: %.2f");
+        add("Hit reach: -", "Zasi\u0119g trafienia: -", "Trefferreichweite: -", "\u547d\u4e2d\u8ddd\u79bb: -");
+        add("Hit reach: 2.84", "Zasi\u0119g trafienia: 2.84", "Trefferreichweite: 2.84", "\u547d\u4e2d\u8ddd\u79bb: 2.84");
         add("Hits in a row", "Trafienia z rz\u0119du", "Treffer in Folge", "\u8fde\u7eed\u547d\u4e2d");
         add("Hold an item or type: .lock name (e.g. .lock ender_pearl).", "Trzymaj przedmiot w r\u0119ce albo wpisz: .lock nazwa (np. .lock ender_pearl).", "Halte ein Item oder tippe: .lock Name (z. B. .lock ender_pearl).", "\u624b\u6301\u7269\u54c1\u6216\u8f93\u5165: .lock \u540d\u79f0 (\u4f8b\u5982 .lock ender_pearl)\u3002");
         add("Home: 120m", "Dom: 120m", "Zuhause: 120m", "\u5bb6: 120m");
@@ -331,7 +327,6 @@ public final class L {
         add("Other", "Inne", "Sonstige", "\u5176\u4ed6");
         add("Out of combat", "Poza walk\u0105", "Au\u00dfer Kampf", "\u975e\u6218\u6597\u72b6\u6001");
         add("Outline", "Obrys", "Umriss", "\u8f6e\u5ed3");
-        add("Own count", "Moje", "Eigene", "\u81ea\u5df1\u7684");
         add("Own icon", "W\u0142asna ikona", "Eigenes Symbol", "\u81ea\u5df1\u7684\u56fe\u6807");
         add("PVP ITEMS  ", "ITEMY PVP  ", "PVP-ITEMS  ", "PVP\u7269\u54c1  ");
         add("Pack too large (max 8 MB)", "Paczka za du\u017ca (maks. 8 MB)", "Paket zu gro\u00df (max. 8 MB)", "\u8d44\u6e90\u5305\u8fc7\u5927 (\u6700\u5927 8 MB)");
@@ -368,10 +363,6 @@ public final class L {
         add("PvP items (quick pick)", "Itemy PvP (szybki wyb\u00f3r)", "PvP-Items (Schnellauswahl)", "PvP\u7269\u54c1 (\u5feb\u901f\u9009\u62e9)");
         add("Quality: ", "Jako\u015b\u0107: ", "Qualit\u00e4t: ", "\u8d28\u91cf: ");
         add("RAM Usage", "U\u017cycie RAM", "RAM-Nutzung", "\u5185\u5b58\u5360\u7528");
-        add("Reach", "Zasi\u0119g", "Reichweite", "\u653b\u51fb\u8ddd\u79bb");
-        add("Reach: %.2f", "Zasi\u0119g: %.2f", "Reichweite: %.2f", "\u8ddd\u79bb: %.2f");
-        add("Reach: -", "Zasi\u0119g: -", "Reichweite: -", "\u8ddd\u79bb: -");
-        add("Reach: 2.84", "Zasi\u0119g: 2.84", "Reichweite: 2.84", "\u8ddd\u79bb: 2.84");
         add("Refresh", "Od\u015bwie\u017c", "Aktualisieren", "\u5237\u65b0");
         add("Refresh catalog", "Od\u015bwie\u017c katalog", "Katalog aktualisieren", "\u5237\u65b0\u76ee\u5f55");
         add("Refresh list", "Od\u015bwie\u017c list\u0119", "Liste aktualisieren", "\u5237\u65b0\u5217\u8868");
@@ -457,7 +448,6 @@ public final class L {
         add("Style: ", "Styl: ", "Stil: ", "\u6837\u5f0f: ");
         add("TEXTURE EDITOR", "EDYTOR TEKSTUR", "TEXTUR-EDITOR", "\u6750\u8d28\u7f16\u8f91\u5668");
         add("TEXTURES", "TEKSTURY", "TEXTUREN", "\u6750\u8d28");
-        add("Target Info", "Informacje o celu", "Zielinfo", "\u76ee\u6807\u4fe1\u606f");
         add("Text", "Tekst", "Text", "\u6587\u672c");
         add("Texture Editor", "Edytor tekstur", "Textur-Editor", "\u6750\u8d28\u7f16\u8f91\u5668");
         add("Texture packs", "Paczki tekstur", "Texturpakete", "\u6750\u8d28\u5305");
@@ -481,7 +471,6 @@ public final class L {
         add("This color is not in the list.", "Tego koloru nie ma na li\u015bcie.", "Diese Farbe ist nicht in der Liste.", "\u5217\u8868\u4e2d\u6ca1\u6709\u8be5\u989c\u8272\u3002");
         add("This pack has no textures folder yet. First edit an item in 'PvP items'.", "Ten pakiet nie ma jeszcze folderu tekstur. Najpierw edytuj item w 'Itemy PvP'.", "Dieses Paket hat noch keinen Texturordner. Bearbeite zuerst ein Item unter 'PvP-Items'.", "\u6b64\u8d44\u6e90\u5305\u8fd8\u6ca1\u6709\u6750\u8d28\u6587\u4ef6\u5939\u3002\u8bf7\u5148\u5728\u201cPvP\u7269\u54c1\u201d\u4e2d\u7f16\u8f91\u4e00\u4e2a\u7269\u54c1\u3002");
         add("This texture does not exist in the game: ", "Brak tej tekstury w grze: ", "Diese Textur gibt es im Spiel nicht: ", "\u6e38\u620f\u4e2d\u6ca1\u6709\u6b64\u6750\u8d28: ");
-        add("Through walls", "Przez \u015bciany", "Durch W\u00e4nde", "\u7a7f\u5899\u663e\u793a");
         add("To see the changes, the pack must be enabled in the game settings (Resource Packs).", "Aby zobaczy\u0107 zmiany, pakiet musi by\u0107 w\u0142\u0105czony w ustawieniach gry (Pakiety zasob\u00f3w).", "Um die \u00c4nderungen zu sehen, muss das Paket in den Spieleinstellungen aktiviert sein (Ressourcenpakete).", "\u8981\u67e5\u770b\u66f4\u6539\uff0c\u5fc5\u987b\u5728\u6e38\u620f\u8bbe\u7f6e\u4e2d\u542f\u7528\u8be5\u8d44\u6e90\u5305 (\u8d44\u6e90\u5305)\u3002");
         add("Too many requests. Try again in a minute.", "Za du\u017co zapyta\u0144. Spr\u00f3buj za minut\u0119.", "Zu viele Anfragen. Versuche es in einer Minute erneut.", "\u8bf7\u6c42\u8fc7\u591a\u3002\u8bf7\u4e00\u5206\u949f\u540e\u91cd\u8bd5\u3002");
         add("Tools", "Narz\u0119dzia", "Werkzeuge", "\u5de5\u5177");
@@ -522,6 +511,7 @@ public final class L {
         add("Your own stats, items and cooldowns", "Twoje statystyki, itemy i cooldowny", "Deine Werte, Items und Abklingzeiten", "\u4f60\u7684\u72b6\u6001\u3001\u7269\u54c1\u548c\u51b7\u5374");
         add("Your position", "Twoja pozycja", "Deine Position", "\u4f60\u7684\u4f4d\u7f6e");
         add("Your shield: broken %.1fs", "Twoja tarcza: z\u0142amana %.1fs", "Dein Schild: gebrochen %.1fs", "\u4f60\u7684\u76fe\u724c: \u7834\u635f %.1fs");
+        add("Your starred modules. Click the star next to a module to add or remove it.", "Twoje ulubione modu\u0142y. Kliknij gwiazdk\u0119 przy module, aby doda\u0107 lub usun\u0105\u0107.", "Deine markierten Module. Klicke den Stern neben einem Modul zum Hinzuf\u00fcgen oder Entfernen.", "\u4f60\u6536\u85cf\u7684\u6a21\u5757\u3002\u70b9\u51fb\u6a21\u5757\u65c1\u7684\u661f\u6807\u5373\u53ef\u6dfb\u52a0\u6216\u79fb\u9664\u3002");
         add("[..] back", "[..] wstecz", "[..] zur\u00fcck", "[..] \u8fd4\u56de");
         add("blocks/s", "bl/s", "Bl\u00f6cke/s", "\u683c/\u79d2");
         add("by ", "od ", "von ", "\u4f5c\u8005 ");
