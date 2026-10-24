@@ -11,6 +11,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -54,6 +55,7 @@ public final class SpotifyClient {
         String accessToken = "";
         long expiresAt = 0;
         String verifier = "";
+        long lyricOffsetMs = 0;
     }
 
     public static class Track {
@@ -65,7 +67,10 @@ public final class SpotifyClient {
         public volatile boolean playing;
         public volatile long sampledAt;
         public volatile TreeMap<Long, String> lyrics = new TreeMap<>();
+        public volatile int[] cover = null; // COVER x COVER pikseli ARGB (okladka)
     }
+
+    public static final int COVER = 28;
 
     private static Cfg cfg = new Cfg();
     private static boolean loaded = false;
@@ -142,6 +147,18 @@ public final class SpotifyClient {
 
     public static Track current() {
         return isLoggedIn() ? track : localTrack;
+    }
+
+    /** Przesuniecie tekstu w ms (dodatnie = tekst pojawia sie wczesniej). */
+    public static long lyricOffsetMs() {
+        ensureLoaded();
+        return cfg.lyricOffsetMs;
+    }
+
+    public static void setLyricOffsetMs(long ms) {
+        ensureLoaded();
+        cfg.lyricOffsetMs = Math.max(-10000L, Math.min(10000L, ms));
+        save();
     }
 
     public static long progressNow(Track t) {
@@ -408,6 +425,50 @@ public final class SpotifyClient {
         });
     }
 
+    /** Okladka utworu z iTunes Search API (bez logowania i klucza), zmniejszona do COVER x COVER pikseli. */
+    private static void fetchCover(Track t) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                String url = "https://itunes.apple.com/search?term=" + enc(t.artist + " " + t.title) + "&entity=song&limit=1";
+                JsonArray res = JsonParser.parseString(Web.get(url)).getAsJsonObject().getAsJsonArray("results");
+                if (res == null || res.size() == 0) return;
+                JsonElement art = res.get(0).getAsJsonObject().get("artworkUrl100");
+                if (art == null || art.isJsonNull()) return;
+                String png = art.getAsString().replaceAll("\\.(jpg|jpeg)$", ".png");
+                Path tmp = FILE.getParent().resolve("cover.tmp");
+                Files.createDirectories(tmp.getParent());
+                Web.download(png, tmp);
+                PackTools.Img img;
+                try (InputStream in = Files.newInputStream(tmp)) {
+                    img = PackTools.readImage(in);
+                } finally {
+                    Files.deleteIfExists(tmp);
+                }
+                int[] out = new int[COVER * COVER];
+                for (int y = 0; y < COVER; y++) {
+                    for (int x = 0; x < COVER; x++) {
+                        int x0 = x * img.w() / COVER, x1 = Math.max(x0 + 1, (x + 1) * img.w() / COVER);
+                        int y0 = y * img.h() / COVER, y1 = Math.max(y0 + 1, (y + 1) * img.h() / COVER);
+                        long r = 0, g = 0, b = 0;
+                        int n = 0;
+                        for (int yy = y0; yy < Math.min(y1, img.h()); yy++) {
+                            for (int xx = x0; xx < Math.min(x1, img.w()); xx++) {
+                                int c = img.px()[yy * img.w() + xx];
+                                r += (c >> 16) & 255;
+                                g += (c >> 8) & 255;
+                                b += c & 255;
+                                n++;
+                            }
+                        }
+                        if (n == 0) n = 1;
+                        out[y * COVER + x] = 0xFF000000 | ((int) (r / n) << 16) | ((int) (g / n) << 8) | (int) (b / n);
+                    }
+                }
+                t.cover = out;
+            } catch (IOException | RuntimeException ignored) {}
+        });
+    }
+
     private static void fetchLyrics(Track t) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -458,16 +519,17 @@ public final class SpotifyClient {
     private static String[] readLocal() {
         String os = System.getProperty("os.name", "").toLowerCase();
         if (os.contains("win")) {
-            String out = run("powershell", "-NoProfile", "-NonInteractive", "-Command",
-                    "[Console]::OutputEncoding=[Text.Encoding]::UTF8; "
-                            + "$p = Get-Process -Name Spotify -ErrorAction SilentlyContinue; "
-                            + "if (-not $p) { '' } else { "
-                            + "$t = $p | Where-Object { $_.MainWindowTitle } | Select-Object -First 1 -ExpandProperty MainWindowTitle; "
-                            + "if ($t) { $t } else { '#hidden' } }");
-            if (out.isEmpty()) return new String[]{"0", ""};
-            if (out.equals("#hidden")) return new String[]{"3", ""};
-            if (out.contains(" - ")) return new String[]{"2", out};
-            return new String[]{"1", ""};
+            startWindowsWatcher();
+            String line = winLine;
+            if (line.isEmpty()) return new String[]{"-1", ""};
+            if (line.equals("N")) return new String[]{"0", ""};
+            if (line.equals("H")) return new String[]{"3", ""};
+            if (line.startsWith("T|")) {
+                String title = line.substring(2).trim();
+                if (title.contains(" - ")) return new String[]{"2", title};
+                return new String[]{"1", ""};
+            }
+            return new String[]{"0", ""};
         }
         if (os.contains("mac")) {
             String out = run("osascript", "-e",
@@ -488,6 +550,7 @@ public final class SpotifyClient {
 
     private static void applyLocal(String[] r) {
         int state = Integer.parseInt(r[0]);
+        if (state < 0) return;
         Track t = localTrack;
         long now = System.currentTimeMillis();
         if (state == 0) {
@@ -521,11 +584,66 @@ public final class SpotifyClient {
             nt.playing = true;
             localTrack = nt;
             fetchLyrics(nt);
+            fetchCover(nt);
         } else if (!t.playing) {
             t.sampledAt = now;
             t.playing = true;
         }
         localInfo = L.t("Playing: ") + full;
+    }
+
+    // --- Windows: jeden dzialajacy PowerShell odczytuje tytul okna Spotify co 0.3 s (szybko, bez ciaglego uruchamiania procesow) ---
+    private static volatile String winLine = "";
+    private static Thread winThread = null;
+
+    private static synchronized void startWindowsWatcher() {
+        if (winThread != null && winThread.isAlive()) return;
+        try {
+            String script = "[Console]::OutputEncoding=[Text.Encoding]::UTF8; while ($true) { "
+                    + "$p = Get-Process -Name Spotify -ErrorAction SilentlyContinue; "
+                    + "if (-not $p) { 'N' } else { "
+                    + "$t = $p | Where-Object { $_.MainWindowTitle } | Select-Object -First 1 -ExpandProperty MainWindowTitle; "
+                    + "if ($t) { 'T|' + $t } else { 'H' } }; "
+                    + "[Console]::Out.Flush(); Start-Sleep -Milliseconds 300 }";
+            final Process p = new ProcessBuilder("powershell", "-NoProfile", "-NonInteractive", "-Command", script)
+                    .redirectErrorStream(true).start();
+            Runtime.getRuntime().addShutdownHook(new Thread(p::destroyForcibly));
+            winThread = new Thread(() -> {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                    String l;
+                    while ((l = br.readLine()) != null) {
+                        l = l.replace("\uFEFF", "").trim();
+                        if (!l.isEmpty()) winLine = l;
+                    }
+                } catch (IOException ignored) {}
+            }, "hexmod-spotify-watch");
+            winThread.setDaemon(true);
+            winThread.start();
+        } catch (IOException e) {
+            winThread = null;
+        }
+    }
+
+    /** Co ile tickow sprawdzac Spotify: na Windows czesto (czytamy gotowy wynik), gdzie indziej rzadziej. */
+    public static int pollEvery() {
+        return System.getProperty("os.name", "").toLowerCase().contains("win") ? 5 : 40;
+    }
+
+    /** Sterowanie odtwarzaczem: 0 = poprzedni, 1 = odtworz/pauza, 2 = nastepny (klawisze multimedialne systemu). */
+    public static void media(int action) {
+        CompletableFuture.runAsync(() -> {
+            String os = System.getProperty("os.name", "").toLowerCase();
+            if (os.contains("win")) {
+                int code = action == 0 ? 177 : action == 1 ? 179 : 176;
+                run("powershell", "-NoProfile", "-NonInteractive", "-Command",
+                        "(New-Object -ComObject WScript.Shell).SendKeys([char]" + code + ")");
+            } else if (os.contains("mac")) {
+                run("osascript", "-e", "tell application \"Spotify\" to "
+                        + (action == 0 ? "previous track" : action == 1 ? "playpause" : "next track"));
+            } else {
+                run("sh", "-c", "playerctl -p spotify " + (action == 0 ? "previous" : action == 1 ? "play-pause" : "next"));
+            }
+        });
     }
 
     private static void pollLocalAsync() {

@@ -33,6 +33,19 @@ public final class ChatCommands {
         if (Remote.isLocked()) return false;
         // Po .hexoff dodatkowe komendy sa ukryte: nic nie robia i nie wysylaja sie na serwer.
         if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock") || low.startsWith(".kd"))) return true;
+        if (first.equals(".lyrics")) {
+            String[] p = trimmed.split("\\s+");
+            if (p.length > 1) {
+                try {
+                    SpotifyClient.setLyricOffsetMs(Math.round(Double.parseDouble(p[1].replace(',', '.')) * 1000.0));
+                } catch (NumberFormatException e) {
+                    say(L.t("Usage: .lyrics <seconds>, e.g. .lyrics 0.5"));
+                    return true;
+                }
+            }
+            say(L.t("Lyrics offset: ") + String.format(java.util.Locale.ROOT, "%+.1fs", SpotifyClient.lyricOffsetMs() / 1000.0));
+            return true;
+        }
         if (low.startsWith(".kd")) {
             KillStatsModule.reset();
             say(L.t("K/D counter reset."));
@@ -53,8 +66,8 @@ public final class ChatCommands {
             case "add" -> say(WaypointManager.addHere(arg) ? L.t("Waypoint added.") : L.t("Cannot add waypoint."));
             case "del" -> say(WaypointManager.removeByName(arg.trim()) ? L.t("Waypoint removed.") : L.t("No such waypoint."));
             case "list" -> {
-                if (WaypointManager.list().isEmpty()) say(L.t("No waypoints."));
-                for (WaypointManager.Waypoint w : WaypointManager.list()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
+                if (WaypointManager.forServer().isEmpty()) say(L.t("No waypoints."));
+                for (WaypointManager.Waypoint w : WaypointManager.forServer()) say(w.name + ": " + w.x + " " + w.y + " " + w.z);
             }
             case "death" -> say(WaypointsModule.toggleDeath()
                     ? L.t("Death point: ON (a Death waypoint after every death).") : L.t("Death point: off."));

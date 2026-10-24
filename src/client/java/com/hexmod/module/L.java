@@ -40,11 +40,15 @@ public final class L {
         add(". Check the Client ID and Redirect URI.", ". Sprawd\u017a Client ID i Redirect URI.", ". Pr\u00fcfe Client-ID und Redirect-URI.", ". \u8bf7\u68c0\u67e5 Client ID \u548c Redirect URI\u3002");
         add(".wp add [name] / .wp del name / .wp list / .wp death", ".wp add [nazwa] / .wp del nazwa / .wp list / .wp death", ".wp add [Name] / .wp del Name / .wp list / .wp death", ".wp add [\u540d\u79f0] / .wp del \u540d\u79f0 / .wp list / .wp death");
         add("1. Click 'Open folder' and put your PNG file there.  2. Click 'Refresh list'.  ", "1. Kliknij 'Otw\u00f3rz folder' i wrzu\u0107 tam sw\u00f3j plik PNG.  2. Kliknij 'Od\u015bwie\u017c list\u0119'.  ", "1. Klicke auf 'Ordner \u00f6ffnen' und lege deine PNG-Datei dort ab.  2. Klicke auf 'Liste aktualisieren'.  ", "1. \u70b9\u51fb\u201c\u6253\u5f00\u6587\u4ef6\u5939\u201d\u5e76\u653e\u5165\u4f60\u7684PNG\u6587\u4ef6\u3002  2. \u70b9\u51fb\u201c\u5237\u65b0\u5217\u8868\u201d\u3002  ");
+        add("1. Edit textures in Tools > Texture Editor. The edited pack is saved in your resourcepacks folder (a folder, e.g. ending with _hexedit).", "1. Edytuj tekstury w Narz\u0119dzia > Edytor tekstur. Edytowana paczka zapisuje si\u0119 w folderze resourcepacks (folder, np. z ko\u0144c\u00f3wk\u0105 _hexedit).", "1. Bearbeite Texturen unter Werkzeuge > Textur-Editor. Das bearbeitete Paket wird im Ordner resourcepacks gespeichert (ein Ordner, z. B. mit der Endung _hexedit).", "1. \u5728 \u5de5\u5177 > \u6750\u8d28\u7f16\u8f91\u5668 \u4e2d\u7f16\u8f91\u6750\u8d28\u3002\u7f16\u8f91\u540e\u7684\u8d44\u6e90\u5305\u4fdd\u5b58\u5728 resourcepacks \u6587\u4ef6\u5939\u4e2d (\u6587\u4ef6\u5939\uff0c\u4f8b\u5982\u4ee5 _hexedit \u7ed3\u5c3e)\u3002");
         add("1. Start the Spotify app on your computer and play music.", "1. Uruchom aplikacj\u0119 Spotify na komputerze i w\u0142\u0105cz muzyk\u0119.", "1. Starte die Spotify-App auf deinem Computer und spiele Musik ab.", "1. \u5728\u7535\u8111\u4e0a\u542f\u52a8 Spotify \u5e94\u7528\u5e76\u64ad\u653e\u97f3\u4e50\u3002");
         add("2. In the Hex Client menu (Right Shift), Modules tab, enable 'Spotify'.", "2. W menu Hex Client (Prawy Shift), zak\u0142adka Modu\u0142y, w\u0142\u0105cz 'Spotify'.", "2. Aktiviere im Hex-Client-Men\u00fc (Rechts-Umschalt), Tab Module, 'Spotify'.", "2. \u5728 Hex Client \u83dc\u5355 (\u53f3Shift) \u7684\u201c\u6a21\u5757\u201d\u6807\u7b7e\u9875\u4e2d\u542f\u7528 Spotify\u3002");
+        add("2. Right-click that folder > Send to > Compressed (zipped) folder. The .zip must contain pack.mcmeta.", "2. Kliknij ten folder prawym przyciskiem > Wy\u015blij do > Folder skompresowany. Plik .zip musi zawiera\u0107 pack.mcmeta.", "2. Rechtsklick auf den Ordner > Senden an > ZIP-komprimierter Ordner. Die .zip muss pack.mcmeta enthalten.", "2. \u53f3\u952e\u70b9\u51fb\u8be5\u6587\u4ef6\u5939 > \u53d1\u9001\u5230 > \u538b\u7f29\u6587\u4ef6\u5939\u3002.zip \u4e2d\u5fc5\u987b\u5305\u542b pack.mcmeta\u3002");
         add("3. Click 'Use' next to the image.", "3. Kliknij 'U\u017cyj' przy obrazku.", "3. Klicke bei dem Bild auf 'Verwenden'.", "3. \u70b9\u51fb\u56fe\u50cf\u65c1\u7684\u201c\u4f7f\u7528\u201d\u3002");
+        add("3. Send the .zip (up to 25 MB) to the admin, for example on Discord.", "3. Wy\u015blij plik .zip (do 25 MB) adminowi, np. na Discordzie.", "3. Schick die .zip (bis 25 MB) an den Admin, z. B. \u00fcber Discord.", "3. \u628a .zip (\u6700\u592725 MB) \u53d1\u7ed9\u7ba1\u7406\u5458\uff0c\u4f8b\u5982\u901a\u8fc7 Discord\u3002");
         add("3. The track and lyrics appear on screen. No login needed.", "3. Utw\u00f3r i tekst piosenki pojawi\u0105 si\u0119 na ekranie. Nie trzeba si\u0119 logowa\u0107.", "3. Titel und Songtext erscheinen auf dem Bildschirm. Keine Anmeldung n\u00f6tig.", "3. \u6b4c\u66f2\u548c\u6b4c\u8bcd\u4f1a\u663e\u793a\u5728\u5c4f\u5e55\u4e0a\uff0c\u65e0\u9700\u767b\u5f55\u3002");
         add("4. Set the widget position, size and color in the 'HUD Editor'.", "4. Pozycj\u0119, wielko\u015b\u0107 i kolor widgetu ustawisz w 'Edytorze HUD'.", "4. Position, Gr\u00f6\u00dfe und Farbe des Widgets stellst du im 'HUD-Editor' ein.", "4. \u53ef\u5728\u201cHUD\u7f16\u8f91\u5668\u201d\u4e2d\u8bbe\u7f6e\u7ec4\u4ef6\u7684\u4f4d\u7f6e\u3001\u5927\u5c0f\u548c\u989c\u8272\u3002");
+        add("4. The admin uploads it to hexmod-data/packs and adds it to community.json. After a few minutes everyone sees it in Tools > Community.", "4. Admin wgrywa j\u0105 do hexmod-data/packs i dopisuje w community.json. Po kilku minutach ka\u017cdy widzi j\u0105 w Narz\u0119dzia > Spo\u0142eczno\u015b\u0107.", "4. Der Admin l\u00e4dt sie nach hexmod-data/packs hoch und tr\u00e4gt sie in community.json ein. Nach wenigen Minuten sehen alle sie unter Werkzeuge > Community.", "4. \u7ba1\u7406\u5458\u5c06\u5176\u4e0a\u4f20\u5230 hexmod-data/packs \u5e76\u6dfb\u52a0\u5230 community.json\u3002\u51e0\u5206\u949f\u540e\u6240\u6709\u4eba\u90fd\u80fd\u5728 \u5de5\u5177 > \u793e\u533a \u4e2d\u770b\u5230\u3002");
         add("< Previous", "< Poprzednia", "< Zur\u00fcck", "< \u4e0a\u4e00\u9875");
         add("ACCESS BLOCKED", "DOST\u0118P ZABLOKOWANY", "ZUGRIFF GESPERRT", "\u8bbf\u95ee\u5df2\u88ab\u5c01\u9501");
         add("ADMIN PANEL", "PANEL ADMINA", "ADMIN-PANEL", "\u7ba1\u7406\u9762\u677f");
@@ -122,6 +126,7 @@ public final class L {
         add("Config name", "Nazwa configu", "Konfig-Name", "\u914d\u7f6e\u540d\u79f0");
         add("Config saved.", "Zapisano config.", "Konfig gespeichert.", "\u914d\u7f6e\u5df2\u4fdd\u5b58\u3002");
         add("Configs", "Configi", "Konfigs", "\u914d\u7f6e");
+        add("Configs: Tools > Configs > Copy to clipboard, then send the text to the admin.", "Configi: Narz\u0119dzia > Configi > Kopiuj do schowka, potem wy\u015blij tekst adminowi.", "Konfigs: Werkzeuge > Konfigs > In Zwischenablage kopieren, dann den Text an den Admin schicken.", "\u914d\u7f6e: \u5de5\u5177 > \u914d\u7f6e > \u590d\u5236\u5230\u526a\u8d34\u677f\uff0c\u7136\u540e\u628a\u6587\u672c\u53d1\u7ed9\u7ba1\u7406\u5458\u3002");
         add("Connection error.", "B\u0142\u0105d po\u0142\u0105czenia.", "Verbindungsfehler.", "\u8fde\u63a5\u9519\u8bef\u3002");
         add("Cooldowns", "Cooldowny", "Abklingzeiten", "\u51b7\u5374\u65f6\u95f4");
         add("Coords", "Koordynaty", "Koordinaten", "\u5750\u6807");
@@ -133,6 +138,7 @@ public final class L {
         add("Could not load.", "Nie uda\u0142o si\u0119 wczyta\u0107.", "Laden fehlgeschlagen.", "\u52a0\u8f7d\u5931\u8d25\u3002");
         add("Could not load: ", "Nie uda\u0142o si\u0119 wczyta\u0107: ", "Laden fehlgeschlagen: ", "\u52a0\u8f7d\u5931\u8d25: ");
         add("Count", "Licznik", "Z\u00e4hler", "\u8ba1\u6570");
+        add("Cover image", "Ok\u0142adka", "Titelbild", "\u5c01\u9762");
         add("Crossbow: loaded", "Kusza: naci\u0105gni\u0119ta", "Armbrust: gespannt", "\u5f29: \u5df2\u4e0a\u5f26");
         add("Crystals", "Kryszta\u0142y", "Kristalle", "\u6c34\u6676");
         add("Current song & lyrics", "Aktualny utw\u00f3r i tekst", "Aktueller Song & Text", "\u5f53\u524d\u6b4c\u66f2\u548c\u6b4c\u8bcd");
@@ -145,10 +151,12 @@ public final class L {
         add("Death point", "Punkt \u015bmierci", "Todespunkt", "\u6b7b\u4ea1\u70b9");
         add("Death point: ON (a Death waypoint after every death).", "Punkt \u015bmierci: W\u0141\u0104CZONY (waypoint Death po ka\u017cdej \u015bmierci).", "Todespunkt: AN (Wegpunkt Death nach jedem Tod).", "\u6b7b\u4ea1\u70b9: \u5f00\u542f (\u6bcf\u6b21\u6b7b\u4ea1\u540e\u4fdd\u5b58\u8def\u5f84\u70b9 Death)\u3002");
         add("Death point: off.", "Punkt \u015bmierci: wy\u0142\u0105czony.", "Todespunkt: aus.", "\u6b7b\u4ea1\u70b9: \u5173\u95ed\u3002");
+        add("Deaths", "\u015amierci", "Tode", "\u6b7b\u4ea1");
         add("Deaths: ", "\u015amierci: ", "Tode: ", "\u6b7b\u4ea1: ");
         add("Delete", "Usu\u0144", "L\u00f6schen", "\u5220\u9664");
         add("Deleted.", "Usuni\u0119to.", "Gel\u00f6scht.", "\u5df2\u5220\u9664\u3002");
         add("Detected:", "Wykryto:", "Erkannt:", "\u68c0\u6d4b\u5230:");
+        add("Direction arrows", "Strza\u0142ki kierunku", "Richtungspfeile", "\u65b9\u5411\u7bad\u5934");
         add("Disable all modules", "Wy\u0142\u0105cz wszystkie modu\u0142y", "Alle Module ausschalten", "\u5173\u95ed\u6240\u6709\u6a21\u5757");
         add("Distance", "Odleg\u0142o\u015b\u0107", "Entfernung", "\u8ddd\u79bb");
         add("Done", "Gotowe", "Fertig", "\u5b8c\u6210");
@@ -223,6 +231,7 @@ public final class L {
         add("Hits in a row", "Trafienia z rz\u0119du", "Treffer in Folge", "\u8fde\u7eed\u547d\u4e2d");
         add("Hold an item or type: .lock name (e.g. .lock ender_pearl).", "Trzymaj przedmiot w r\u0119ce albo wpisz: .lock nazwa (np. .lock ender_pearl).", "Halte ein Item oder tippe: .lock Name (z. B. .lock ender_pearl).", "\u624b\u6301\u7269\u54c1\u6216\u8f93\u5165: .lock \u540d\u79f0 (\u4f8b\u5982 .lock ender_pearl)\u3002");
         add("Home: 120m", "Dom: 120m", "Zuhause: 120m", "\u5bb6: 120m");
+        add("How to add your own textures to Community:", "Jak doda\u0107 w\u0142asne tekstury do Spo\u0142eczno\u015bci:", "So f\u00fcgst du eigene Texturen zur Community hinzu:", "\u5982\u4f55\u5411\u793e\u533a\u6dfb\u52a0\u4f60\u81ea\u5df1\u7684\u6750\u8d28:");
         add("Image ", "Obraz ", "Bild ", "\u56fe\u50cf ");
         add("Info above enemies", "Informacje nad wrogami", "Infos \u00fcber Gegnern", "\u654c\u4eba\u5934\u9876\u4fe1\u606f");
         add("Install", "Zainstaluj", "Installieren", "\u5b89\u88c5");
@@ -236,12 +245,14 @@ public final class L {
         add("Item lock: this item is locked.", "Item lock: ten przedmiot jest zablokowany.", "Item-Sperre: Dieses Item ist gesperrt.", "\u7269\u54c1\u9501\u5b9a: \u8be5\u7269\u54c1\u5df2\u9501\u5b9a\u3002");
         add("Item lock: this slot is locked.", "Item lock: ten slot jest zablokowany.", "Item-Sperre: Dieser Slot ist gesperrt.", "\u7269\u54c1\u9501\u5b9a: \u8be5\u680f\u4f4d\u5df2\u9501\u5b9a\u3002");
         add("Join a world first.", "Najpierw wejd\u017a do \u015bwiata.", "Betritt zuerst eine Welt.", "\u8bf7\u5148\u8fdb\u5165\u4e00\u4e2a\u4e16\u754c\u3002");
+        add("K/D", "K/D", "K/D", "K/D");
         add("K/D Counter", "Licznik K/D", "K/D-Z\u00e4hler", "\u51fb\u6740/\u6b7b\u4ea1");
         add("K/D counter reset.", "Licznik K/D wyzerowany.", "K/D-Z\u00e4hler zur\u00fcckgesetzt.", "K/D \u8ba1\u6570\u5df2\u91cd\u7f6e\u3002");
         add("K/D: ", "K/D: ", "K/D: ", "K/D: ");
         add("Key ", "Klawisz ", "Taste ", "\u6309\u952e ");
         add("Key: ", "Klawisz: ", "Taste: ", "\u6309\u952e: ");
         add("Keystrokes", "Klawisze", "Tasten", "\u6309\u952e\u663e\u793a");
+        add("Kills", "Zab\u00f3jstwa", "Kills", "\u51fb\u6740");
         add("Kills, deaths and streak", "Zab\u00f3jstwa, \u015bmierci i seria", "Kills, Tode und Serie", "\u51fb\u6740\u3001\u6b7b\u4ea1\u548c\u8fde\u6740");
         add("Kills: ", "Zab\u00f3jstwa: ", "Kills: ", "\u51fb\u6740: ");
         add("Language", "J\u0119zyk", "Sprache", "\u8bed\u8a00");
@@ -269,6 +280,8 @@ public final class L {
         add("Login error: ", "B\u0142\u0105d logowania: ", "Anmeldefehler: ", "\u767b\u5f55\u9519\u8bef: ");
         add("Login is already in progress. Finish it in the browser.", "Logowanie ju\u017c trwa. Doko\u0144cz je w przegl\u0105darce.", "Die Anmeldung l\u00e4uft bereits. Schlie\u00dfe sie im Browser ab.", "\u767b\u5f55\u6b63\u5728\u8fdb\u884c\u3002\u8bf7\u5728\u6d4f\u89c8\u5668\u4e2d\u5b8c\u6210\u3002");
         add("Looking up player ", "Szukam gracza ", "Suche Spieler ", "\u6b63\u5728\u67e5\u627e\u73a9\u5bb6 ");
+        add("Lyrics", "Tekst", "Songtext", "\u6b4c\u8bcd");
+        add("Lyrics offset: ", "Przesuni\u0119cie tekstu: ", "Text-Versatz: ", "\u6b4c\u8bcd\u504f\u79fb: ");
         add("MACROS", "MAKRA", "MAKROS", "\u5b8f");
         add("MENU", "MENU", "MEN\u00dc", "\u83dc\u5355");
         add("MOD CATALOG", "KATALOG MOD\u00d3W", "MOD-KATALOG", "\u6a21\u7ec4\u76ee\u5f55");
@@ -377,6 +390,7 @@ public final class L {
         add("Right Shift opens the Hex Client menu (changeable in Controls). Modules are split into PvP, Status and Other.", "Prawy Shift otwiera menu Hex Client (zmiana w Sterowaniu). Modu\u0142y s\u0105 podzielone na PvP, Status i Inne.", "Rechts-Umschalt \u00f6ffnet das Hex-Client-Men\u00fc (\u00e4nderbar in den Steuerungseinstellungen). Module sind in PvP, Status und Sonstige unterteilt.", "\u6309\u53f3Shift\u6253\u5f00 Hex Client \u83dc\u5355 (\u53ef\u5728\u63a7\u5236\u8bbe\u7f6e\u4e2d\u66f4\u6539)\u3002\u6a21\u5757\u5206\u4e3a\u6218\u6597\u3001\u72b6\u6001\u548c\u5176\u4ed6\u3002");
         add("Right arrow", "Strza\u0142ka w prawo", "Pfeil rechts", "\u53f3\u7bad\u5934");
         add("Rockets", "Rakiety", "Raketen", "\u70df\u82b1\u706b\u7bad");
+        add("Rounded", "Zaokr\u0105glony", "Abgerundet", "\u5706\u89d2");
         add("SHIELD IMAGE", "OBRAZ NA TARCZ\u0118", "SCHILDBILD", "\u76fe\u724c\u56fe\u50cf");
         add("SPACE", "SPACJA", "LEER", "\u7a7a\u683c");
         add("STEALTH", "STEALTH", "STEALTH", "\u9690\u85cf");
@@ -398,6 +412,7 @@ public final class L {
         add("Search modules...", "Szukaj modu\u0142\u00f3w...", "Module suchen...", "\u641c\u7d22\u6a21\u5757...");
         add("Search results: ", "Wyniki wyszukiwania: ", "Suchergebnisse: ", "\u641c\u7d22\u7ed3\u679c: ");
         add("Search textures (e.g. shield, sword)", "Szukaj tekstury (np. shield, sword)", "Texturen suchen (z. B. shield, sword)", "\u641c\u7d22\u6750\u8d28 (\u4f8b\u5982 shield, sword)");
+        add("Server: ", "Serwer: ", "Server: ", "\u670d\u52a1\u5668: ");
         add("Set", "Ustaw", "Setzen", "\u8bbe\u7f6e");
         add("Shield", "Tarcza", "Schild", "\u76fe\u724c");
         add("Shield (model texture)", "Tarcza (tekstura modelu)", "Schild (Modelltextur)", "\u76fe\u724c (\u6a21\u578b\u6750\u8d28)");
@@ -409,7 +424,9 @@ public final class L {
         add("Shield image saved (", "Zapisano obraz na tarczy (", "Schildbild gespeichert (", "\u76fe\u724c\u56fe\u50cf\u5df2\u4fdd\u5b58 (");
         add("Shield texture not found in this game version.", "Nie znaleziono tekstury tarczy w tej wersji gry.", "Schildtextur in dieser Spielversion nicht gefunden.", "\u6b64\u6e38\u620f\u7248\u672c\u4e2d\u627e\u4e0d\u5230\u76fe\u724c\u6750\u8d28\u3002");
         add("Shield!", "Tarcza!", "Schild!", "\u76fe\u724c!");
+        add("Shifts the Spotify lyrics (positive = earlier).", "Przesuwa tekst Spotify (dodatnie = wcze\u015bniej).", "Verschiebt den Spotify-Text (positiv = fr\u00fcher).", "\u8c03\u6574 Spotify \u6b4c\u8bcd\u65f6\u95f4 (\u6b63\u6570 = \u63d0\u524d)\u3002");
         add("Show", "Poka\u017c", "Zeigen", "\u663e\u793a");
+        add("Show 5 waypoints", "Poka\u017c 5 waypoint\u00f3w", "5 Wegpunkte zeigen", "\u663e\u793a5\u4e2a\u8def\u5f84\u70b9");
         add("Showing ", "Wida\u0107 ", "Zeige ", "\u663e\u793a ");
         add("Shows or clears the list of locked items.", "Pokazuje albo czy\u015bci list\u0119 zablokowanych przedmiot\u00f3w.", "Zeigt oder leert die Liste der gesperrten Items.", "\u663e\u793a\u6216\u6e05\u7a7a\u9501\u5b9a\u7269\u54c1\u5217\u8868\u3002");
         add("Shows who uses Hex Client", "Pokazuje, kto u\u017cywa Hex Client", "Zeigt, wer Hex Client nutzt", "\u663e\u793a\u8c01\u5728\u4f7f\u7528 Hex Client");
@@ -435,6 +452,7 @@ public final class L {
         add("Spotify: restore the Spotify window (it is minimized to the tray)", "Spotify: przywr\u00f3\u0107 okno Spotify (jest zwini\u0119te do zasobnika)", "Spotify: Stelle das Spotify-Fenster wieder her (es ist im Tray minimiert)", "Spotify: \u8bf7\u8fd8\u539f Spotify \u7a97\u53e3 (\u5b83\u5df2\u6700\u5c0f\u5316\u5230\u6258\u76d8)");
         add("Spotify: start music in the app", "Spotify: w\u0142\u0105cz muzyk\u0119 w aplikacji", "Spotify: Musik in der App starten", "Spotify: \u8bf7\u5728\u5e94\u7528\u4e2d\u64ad\u653e\u97f3\u4e50");
         add("Status", "Status", "Status", "\u72b6\u6001");
+        add("Streak", "Seria", "Serie", "\u8fde\u6740");
         add("Streak: ", "Seria: ", "Serie: ", "\u8fde\u6740: ");
         add("Style: ", "Styl: ", "Stil: ", "\u6837\u5f0f: ");
         add("TEXTURE EDITOR", "EDYTOR TEKSTUR", "TEXTUR-EDITOR", "\u6750\u8d28\u7f16\u8f91\u5668");
@@ -485,6 +503,7 @@ public final class L {
         add("Upload", "Wy\u015blij", "Hochladen", "\u4e0a\u4f20");
         add("Uploaded: ", "Wys\u0142ano: ", "Hochgeladen: ", "\u5df2\u4e0a\u4f20: ");
         add("Uploading...", "Wysy\u0142anie...", "Wird hochgeladen...", "\u6b63\u5728\u4e0a\u4f20...");
+        add("Usage: .lyrics <seconds>, e.g. .lyrics 0.5", "U\u017cycie: .lyrics <sekundy>, np. .lyrics 0.5", "Nutzung: .lyrics <Sekunden>, z. B. .lyrics 0.5", "\u7528\u6cd5: .lyrics <\u79d2>, \u4f8b\u5982 .lyrics 0.5");
         add("Use: ", "U\u017cyj: ", "Verwenden: ", "\u4f7f\u7528: ");
         add("WAYPOINTS", "WAYPOINTY", "WEGPUNKTE", "\u8def\u5f84\u70b9");
         add("Waiting for data from the Spotify app...", "Czekam na dane z aplikacji Spotify...", "Warte auf Daten aus der Spotify-App...", "\u6b63\u5728\u7b49\u5f85 Spotify \u5e94\u7528\u7684\u6570\u636e...");

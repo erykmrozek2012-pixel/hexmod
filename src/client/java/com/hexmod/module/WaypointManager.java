@@ -18,6 +18,7 @@ public final class WaypointManager {
         public String name = "Punkt";
         public int x, y, z;
         public String dim = "";
+        public String server = ""; // pusty = stary waypoint (widoczny wszedzie)
         public int color = 0xFFD60A;
     }
 
@@ -50,6 +51,28 @@ public final class WaypointManager {
         } catch (IOException ignored) {}
     }
 
+    /** Klucz biezacego serwera (adres bez domyslnego portu), "singleplayer" dla swiata jednoosobowego. */
+    public static String currentServer() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        net.minecraft.client.network.ServerInfo si = mc.getCurrentServerEntry();
+        if (si == null) return mc.isInSingleplayer() ? "singleplayer" : "other";
+        String a = si.address == null ? "" : si.address.trim().toLowerCase();
+        if (a.endsWith(":25565")) a = a.substring(0, a.length() - 6);
+        return a;
+    }
+
+    /** Czy waypoint nalezy do biezacego serwera (stare waypointy bez serwera pasuja wszedzie). */
+    public static boolean onThisServer(Waypoint w) {
+        return w.server == null || w.server.isEmpty() || w.server.equals(currentServer());
+    }
+
+    /** Waypointy tylko z biezacego serwera. */
+    public static List<Waypoint> forServer() {
+        List<Waypoint> out = new ArrayList<>();
+        for (Waypoint w : LIST) if (onThisServer(w)) out.add(w);
+        return out;
+    }
+
     public static String currentDim() {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return "";
@@ -59,15 +82,16 @@ public final class WaypointManager {
     /** Dodaje waypoint w miejscu, w ktorym stoisz. Zwraca false, gdy nie da sie (brak gracza, limit). */
     public static boolean addHere(String name) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.player == null || mc.world == null || LIST.size() >= MAX) return false;
+        if (mc.player == null || mc.world == null || forServer().size() >= MAX) return false;
         Waypoint w = new Waypoint();
         String n = name == null ? "" : name.trim();
-        w.name = n.isEmpty() ? "Punkt " + (LIST.size() + 1) : n;
+        w.name = n.isEmpty() ? "Waypoint " + (forServer().size() + 1) : n;
         w.x = mc.player.getBlockX();
         w.y = mc.player.getBlockY();
         w.z = mc.player.getBlockZ();
         w.dim = currentDim();
-        w.color = COLORS[LIST.size() % COLORS.length];
+        w.server = currentServer();
+        w.color = COLORS[forServer().size() % COLORS.length];
         LIST.add(w);
         save();
         return true;
@@ -86,7 +110,7 @@ public final class WaypointManager {
     }
 
     public static boolean removeByName(String name) {
-        for (Waypoint w : LIST) {
+        for (Waypoint w : forServer()) {
             if (w.name.equalsIgnoreCase(name)) {
                 remove(w);
                 return true;

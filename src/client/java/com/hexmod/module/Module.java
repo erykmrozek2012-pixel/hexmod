@@ -28,6 +28,19 @@ public class Module {
         return CAT_OTHER.contains(id) ? "Other" : "Status";
     }
 
+    /** Wypelniony prostokat z zaokraglonymi rogami (promien r). */
+    public static void roundRect(DrawContext ctx, int x, int y, int w, int h, int r, int color) {
+        for (int i = 0; i < h; i++) {
+            int d = Math.min(i, h - 1 - i);
+            int inset = 0;
+            if (d < r) {
+                double dy = r - d - 0.5;
+                inset = r - (int) Math.round(Math.sqrt(Math.max(0.0, r * r - dy * dy)));
+            }
+            ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, color);
+        }
+    }
+
     /** Rysuje pasek postepu (0..1). */
     protected static void drawBar(DrawContext ctx, int x, int y, int w, int h, float frac, int argb) {
         float f = frac < 0f ? 0f : Math.min(frac, 1f);
@@ -49,7 +62,7 @@ public class Module {
 
     /** Wyglad ramki widgetu (indeks w STYLE_NAMES). */
     public int style = 0;
-    public static final String[] STYLE_NAMES = {"Classic", "Panel", "Outline", "Underline", "Glass", "Brackets", "Pill"};
+    public static final String[] STYLE_NAMES = {"Classic", "Panel", "Outline", "Underline", "Glass", "Brackets", "Pill", "Rounded"};
     public static final int STYLE_COUNT = STYLE_NAMES.length;
 
     /** Klawisz (kod GLFW) do pokazywania/ukrywania widgetu, -1 = brak. */
@@ -76,6 +89,14 @@ public class Module {
     }
 
     private int defX = 10, defY = 10;
+    private int defStyle = 0;
+
+    /** Ustawia domyslny styl ramki widgetu (uzywany tez przez Reset). */
+    protected Module defaultStyle(int s) {
+        this.style = s;
+        this.defStyle = s;
+        return this;
+    }
 
     public Module at(int x, int y) {
         this.x = x;
@@ -91,7 +112,7 @@ public class Module {
         y = defY;
         scale = 1f;
         color = 0xFFFFFF;
-        style = 0;
+        style = defStyle;
         hidden = false;
     }
 
@@ -242,6 +263,10 @@ public class Module {
                 ctx.fill(-1, -2, w + 1, h + 2, 0xCC101014);
                 ctx.fill(-3, 0, w + 3, h, 0xCC101014);
                 ctx.fill(-2, h / 2 - 1, 0, h / 2 + 2, c);
+            }
+            case 7 -> { // Rounded
+                roundRect(ctx, -5, -4, w + 10, h + 8, 5, 0x66000000 | (c & 0xFFFFFF));
+                roundRect(ctx, -4, -3, w + 8, h + 6, 4, 0xDD101014);
             }
             default -> {
                 if (option("bg")) {
