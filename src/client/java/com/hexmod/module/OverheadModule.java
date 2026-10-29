@@ -32,7 +32,7 @@ public abstract class OverheadModule extends Module {
 
         for (PlayerEntity pl : mc.world.getPlayers()) {
             if (pl == mc.player || pl.isSpectator() || pl.isInvisible()) continue;
-            if (mc.player.squaredDistanceTo(pl) > 48.0 * 48.0 || !mc.player.canSee(pl)) continue;
+            if (mc.player.squaredDistanceTo(pl) > 48.0 * 48.0 || !Projection.canSee(pl)) continue;
             float[] s = Projection.project(ctx, pl.getLerpedPos(tp).add(0, pl.getHeight() + 0.55, 0));
             if (s == null) continue;
             String t = text(pl);

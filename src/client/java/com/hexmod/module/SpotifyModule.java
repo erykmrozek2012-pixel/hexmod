@@ -3,6 +3,9 @@ package com.hexmod.module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Widget Spotify: okladka, aktualny utwor i tekst piosenki zsynchronizowany z muzyka (bez logowania). */
@@ -14,6 +17,7 @@ public class SpotifyModule extends Module {
         at(10, 150);
         option("cover", "Cover image", true);
         option("lyrics", "Lyrics", true);
+        option("hq_cover", "Sharp cover (slower)", false);
         defaultStyle(7);
     }
 
@@ -27,11 +31,79 @@ public class SpotifyModule extends Module {
         ctx.fill(x + 6, y + 2, x + 7, y + 4, c);
     }
 
-    private static void drawCover(DrawContext ctx, int x, int y, int[] px) {
+    private int[] coverSrc;
+    private int coverStep = -1;
+    private int[] coverRects = new int[0];
+
+    /** Skleja piksele okladki w jak najmniej prostokatow (mniej prostokatow = duzo wiecej FPS). */
+    private static int[] buildRects(int[] px, int c, int step) {
+        int g = c / step;
+        int[] cell = new int[g * g];
+        for (int j = 0; j < g; j++) {
+            for (int i = 0; i < g; i++) {
+                int r = 0, gr = 0, b = 0, n = 0;
+                for (int dy = 0; dy < step; dy++) {
+                    for (int dx = 0; dx < step; dx++) {
+                        int p = px[(j * step + dy) * c + i * step + dx];
+                        r += (p >> 16) & 255;
+                        gr += (p >> 8) & 255;
+                        b += p & 255;
+                        n++;
+                    }
+                }
+                r /= n;
+                gr /= n;
+                b /= n;
+                if (step > 1) {
+                    r &= 0xF8;
+                    gr &= 0xF8;
+                    b &= 0xF8;
+                }
+                cell[j * g + i] = 0xFF000000 | (r << 16) | (gr << 8) | b;
+            }
+        }
+        List<int[]> out = new ArrayList<>();
+        Map<Long, int[]> open = new HashMap<>();
+        for (int j = 0; j < g; j++) {
+            Map<Long, int[]> next = new HashMap<>();
+            int i = 0;
+            while (i < g) {
+                int col = cell[j * g + i];
+                int e = i;
+                while (e + 1 < g && cell[j * g + e + 1] == col) e++;
+                int w = e - i + 1;
+                long key = ((long) i << 40) | ((long) w << 32) | (col & 0xFFFFFFFFL);
+                int[] r = open.get(key);
+                if (r == null) {
+                    r = new int[]{i, j, w, 1, col};
+                    out.add(r);
+                } else {
+                    r[3]++;
+                }
+                next.put(key, r);
+                i = e + 1;
+            }
+            open = next;
+        }
+        int[] flat = new int[out.size() * 5];
+        for (int k = 0; k < out.size(); k++) System.arraycopy(out.get(k), 0, flat, k * 5, 5);
+        return flat;
+    }
+
+    private void drawCover(DrawContext ctx, int x, int y, int[] px) {
         int c = SpotifyClient.COVER;
+        int step = option("hq_cover") ? 1 : 2;
+        if (px.length < c * c) return;
+        if (px != coverSrc || step != coverStep) {
+            coverRects = buildRects(px, c, step);
+            coverSrc = px;
+            coverStep = step;
+        }
         ctx.fill(x - 1, y - 1, x + c + 1, y + c + 1, 0xFF000000);
-        for (int j = 0; j < c; j++) {
-            for (int i = 0; i < c; i++) ctx.fill(x + i, y + j, x + i + 1, y + j + 1, px[j * c + i]);
+        int[] r = coverRects;
+        for (int k = 0; k < r.length; k += 5) {
+            ctx.fill(x + r[k] * step, y + r[k + 1] * step,
+                    x + (r[k] + r[k + 2]) * step, y + (r[k + 1] + r[k + 3]) * step, r[k + 4]);
         }
     }
 

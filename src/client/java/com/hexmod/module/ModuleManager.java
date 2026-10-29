@@ -28,6 +28,7 @@ public final class ModuleManager {
         public int bindKey = -1;
         public boolean bindHold;
         public int style;
+        public int range;
         public Map<String, Boolean> options = new LinkedHashMap<>();
     }
 
@@ -48,6 +49,14 @@ public final class ModuleManager {
         register(new CooldownModule());
         register(new TotemModule());
         register(new EnemyTagsModule());
+        register(new HexBadgeModule());
+        register(new HealthModule());
+        register(new AttackCooldownModule());
+        register(new FallDistanceModule());
+        register(new CritModule());
+        register(new MovementModule());
+        register(new LowHealthModule());
+        register(new HitMarkerModule());
         register(new DamageDealtModule());
         register(new PearlTimerModule());
         register(new CpsModule());
@@ -101,6 +110,7 @@ public final class ModuleManager {
             s.bindKey = m.bindKey;
             s.bindHold = m.bindHold;
             s.style = m.style;
+            s.range = m.range;
             s.options = new LinkedHashMap<>(m.options);
             map.put(m.id, s);
         }
@@ -120,6 +130,7 @@ public final class ModuleManager {
             m.bindKey = s.bindKey;
             m.bindHold = s.bindHold;
             m.style = Math.max(0, Math.min(Module.STYLE_COUNT - 1, s.style));
+            if (m.hasRange() && s.range > 0) m.range = Math.max(4, Math.min(128, s.range));
             if (s.options != null) {
                 for (Map.Entry<String, Boolean> e : s.options.entrySet()) {
                     if (m.options.containsKey(e.getKey()) && e.getValue() != null) {

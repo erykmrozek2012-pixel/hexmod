@@ -15,8 +15,9 @@ public class Module {
     /** Globalny przelacznik: gdy true, widoczne sa tylko podstawowe widgety. */
     public static boolean extrasHidden = false;
     private static final Set<String> CAT_PVP = Set.of("enemy_tags", "enemy_shield", "reach", "combo",
-            "damage_dealt", "shield_break", "allies", "cps", "combat_timer", "kd");
-    private static final Set<String> CAT_OTHER = Set.of("fps", "ping", "coords", "memory", "waypoints", "spotify");
+            "damage_dealt", "shield_break", "allies", "cps", "combat_timer", "kd",
+            "attack_cooldown", "crit", "low_hp", "hit_marker");
+    private static final Set<String> CAT_OTHER = Set.of("fps", "ping", "coords", "memory", "waypoints", "spotify", "hex_badge");
     private static final Set<String> BASIC = Set.of("fps", "cps", "cooldowns", "effects", "spotify");
     public static final int[] PALETTE = {0xD10A0A, 0xFFFFFF, 0xFFD60A, 0x30D158, 0x64D2FF, 0x0A84FF, 0xBF5AF2};
 
@@ -62,7 +63,7 @@ public class Module {
 
     /** Wyglad ramki widgetu (indeks w STYLE_NAMES). */
     public int style = 0;
-    public static final String[] STYLE_NAMES = {"Classic", "Panel", "Outline", "Underline", "Glass", "Brackets", "Pill", "Rounded"};
+    public static final String[] STYLE_NAMES = {"Classic", "Panel", "Outline", "Underline", "Glass", "Brackets", "Pill", "Rounded", "Neon", "Gradient", "Shadow", "Split"};
     public static final int STYLE_COUNT = STYLE_NAMES.length;
 
     /** Klawisz (kod GLFW) do pokazywania/ukrywania widgetu, -1 = brak. */
@@ -91,6 +92,20 @@ public class Module {
     private int defX = 10, defY = 10;
     private int defStyle = 0;
 
+    /** Zasieg w blokach (0 = modul nie ma ustawienia zasiegu). Ustawiany w edytorze HUD. */
+    public int range = 0;
+    private int defRange = 0;
+
+    protected Module rangeOption(int def) {
+        this.range = def;
+        this.defRange = def;
+        return this;
+    }
+
+    public boolean hasRange() {
+        return defRange > 0;
+    }
+
     /** Ustawia domyslny styl ramki widgetu (uzywany tez przez Reset). */
     protected Module defaultStyle(int s) {
         this.style = s;
@@ -113,6 +128,7 @@ public class Module {
         scale = 1f;
         color = 0xFFFFFF;
         style = defStyle;
+        range = defRange;
         hidden = false;
     }
 
@@ -184,12 +200,12 @@ public class Module {
 
     /** Sprawdza klawisz widgetu co klatke (tylko gdy nie ma otwartego ekranu, np. czatu). */
     private void pollKey() {
-        boolean stealth = option("stealth");
         if (bindKey <= 0) {
             keyHidden = false;
             stealthInit = false;
             return;
         }
+        boolean stealth = option("stealth");
         if (!stealthInit || stealth != lastStealth) {
             stealthInit = true;
             lastStealth = stealth;
@@ -224,7 +240,11 @@ public class Module {
 
     /** Ramka widgetu wedlug wybranego stylu (kolor akcentu = kolor widgetu). */
     private void drawFrame(DrawContext ctx) {
-        int w = w(), h = h();
+        drawStyleFrame(ctx, w(), h());
+    }
+
+    /** Ramka wedlug stylu dla prostokata w x h od punktu (0,0); uzywana tez przez moduly nakladkowe (np. ping nad glowa). */
+    protected final void drawStyleFrame(DrawContext ctx, int w, int h) {
         int c = rgb();
         switch (style) {
             case 1 -> { // Panel
@@ -267,6 +287,31 @@ public class Module {
             case 7 -> { // Rounded
                 roundRect(ctx, -5, -4, w + 10, h + 8, 5, 0x66000000 | (c & 0xFFFFFF));
                 roundRect(ctx, -4, -3, w + 8, h + 6, 4, 0xDD101014);
+            }
+            case 8 -> { // Neon
+                ctx.fill(-4, -3, w + 4, h + 3, 0x55000000 | (c & 0xFFFFFF));
+                ctx.fill(-3, -2, w + 3, h + 2, 0xDD08080C);
+                ctx.fill(-3, -2, w + 3, -1, c);
+                ctx.fill(-3, h + 1, w + 3, h + 2, c);
+                ctx.fill(-3, -2, -2, h + 2, c);
+                ctx.fill(w + 2, -2, w + 3, h + 2, c);
+            }
+            case 9 -> { // Gradient
+                int rows = h + 4;
+                for (int i = 0; i < rows; i++) {
+                    int a = 0xDD - ((0xDD - 0x33) * i) / Math.max(1, rows - 1);
+                    ctx.fill(-3, -2 + i, w + 3, -1 + i, (a << 24) | 0x101014);
+                }
+                ctx.fill(-3, -2, w + 3, -1, c);
+            }
+            case 10 -> { // Shadow
+                ctx.fill(-1, 0, w + 5, h + 4, 0x77000000);
+                ctx.fill(-3, -2, w + 3, h + 2, 0xCC14141A);
+            }
+            case 11 -> { // Split
+                ctx.fill(-3, -2, w + 3, h + 2, 0xAA000000);
+                ctx.fill(-3, -2, 0, h + 2, c);
+                ctx.fill(0, h + 1, w + 3, h + 2, 0x88000000 | (c & 0xFFFFFF));
             }
             default -> {
                 if (option("bg")) {

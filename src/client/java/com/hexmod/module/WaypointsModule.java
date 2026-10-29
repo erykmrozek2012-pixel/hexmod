@@ -77,15 +77,37 @@ public class WaypointsModule extends Module {
         return Math.round(d) + "m";
     }
 
-    /** Waypointy z biezacego serwera i wymiaru. */
+    private List<WaypointManager.Waypoint> hereCache = new ArrayList<>();
+    private List<WaypointManager.Waypoint> nearestCache = new ArrayList<>();
+    private long hereAt = 0;
+
+    /** Waypointy z biezacego serwera i wymiaru (odswiezane co 250 ms, nie w kazdej klatce). */
     private List<WaypointManager.Waypoint> here() {
+        refreshCache();
+        return hereCache;
+    }
+
+    /** To samo, ale posortowane od najblizszego. */
+    private List<WaypointManager.Waypoint> nearest() {
+        refreshCache();
+        return nearestCache;
+    }
+
+    private void refreshCache() {
+        long now = System.currentTimeMillis();
+        if (now - hereAt < 250) return;
+        hereAt = now;
         String dim = WaypointManager.currentDim();
         List<WaypointManager.Waypoint> out = new ArrayList<>();
         for (WaypointManager.Waypoint w : WaypointManager.list()) {
             if (!WaypointManager.onThisServer(w)) continue;
             if (w.dim == null || w.dim.isEmpty() || w.dim.equals(dim)) out.add(w);
         }
-        return out;
+        hereCache = out;
+        List<WaypointManager.Waypoint> sorted = new ArrayList<>(out);
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player != null) sorted.sort(Comparator.comparingDouble(w -> dist(mc, w)));
+        nearestCache = sorted;
     }
 
     private static double dist(MinecraftClient mc, WaypointManager.Waypoint w) {
@@ -124,8 +146,7 @@ public class WaypointsModule extends Module {
             return;
         }
         if (mc.player == null) return;
-        List<WaypointManager.Waypoint> pts = here();
-        pts.sort(Comparator.comparingDouble(w -> dist(mc, w)));
+        List<WaypointManager.Waypoint> pts = nearest();
         int y = 0;
         for (int i = 0; i < Math.min(limit(), pts.size()); i++) {
             WaypointManager.Waypoint wp = pts.get(i);

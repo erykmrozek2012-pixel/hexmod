@@ -5,7 +5,10 @@ import net.minecraft.client.MinecraftClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -31,6 +34,15 @@ public final class Remote {
         public String modrinth = "";
     }
 
+    public static class UserEntry {
+        public String uuid = "";
+        public String nick = "";
+    }
+
+    public static class Users {
+        public List<UserEntry> users = new ArrayList<>();
+    }
+
     public static class AppConfig {
         public String spotifyClientId = "";
     }
@@ -44,6 +56,7 @@ public final class Remote {
     private static volatile Catalog catalog = new Catalog();
     private static volatile boolean ready = false;
     private static volatile AppConfig appConfig = new AppConfig();
+    private static volatile Set<String> userKeys = new HashSet<>();
 
     private Remote() {}
 
@@ -58,11 +71,31 @@ public final class Remote {
                 if (c != null && c.mods != null) catalog = c;
             } catch (IOException | RuntimeException ignored) {}
             try {
+                Users u = GSON.fromJson(Web.get(BASE + "users.json"), Users.class);
+                if (u != null && u.users != null) {
+                    Set<String> keys = new HashSet<>();
+                    for (UserEntry e : u.users) {
+                        if (e == null) continue;
+                        if (e.nick != null && !e.nick.isBlank()) keys.add("n:" + e.nick.trim().toLowerCase(Locale.ROOT));
+                        if (e.uuid != null && !e.uuid.isBlank()) keys.add("u:" + e.uuid.replace("-", "").trim().toLowerCase(Locale.ROOT));
+                    }
+                    userKeys = keys;
+                }
+            } catch (IOException | RuntimeException ignored) {}
+            try {
                 AppConfig a = GSON.fromJson(Web.get(BASE + "config.json"), AppConfig.class);
                 if (a != null) appConfig = a;
             } catch (IOException | RuntimeException ignored) {}
             ready = true;
         });
+    }
+
+    /** Czy gracz jest na liscie hexmod-data/users.json (po nicku albo UUID). */
+    public static boolean isHexUser(String nick, String uuid) {
+        Set<String> k = userKeys;
+        if (k.isEmpty()) return false;
+        if (nick != null && k.contains("n:" + nick.toLowerCase(Locale.ROOT))) return true;
+        return uuid != null && k.contains("u:" + uuid.replace("-", "").toLowerCase(Locale.ROOT));
     }
 
     public static Blocklist blocklist() { return blocklist; }
@@ -87,7 +120,18 @@ public final class Remote {
     }
 
     /** Blokada po UUID lub nicku. Gdy nie da sie pobrac listy, dostep zostaje (brak blokady). */
+    private static long blockAt = 0;
+    private static boolean blockVal = false;
+
     public static boolean isBlocked() {
+        long now = System.currentTimeMillis();
+        if (now - blockAt < 500) return blockVal;
+        blockVal = computeBlocked();
+        blockAt = now;
+        return blockVal;
+    }
+
+    private static boolean computeBlocked() {
         String name = username();
         String id = uuid();
         for (BlockedEntry e : blocklist.blocked) {

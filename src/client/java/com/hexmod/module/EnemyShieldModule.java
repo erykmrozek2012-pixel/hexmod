@@ -32,7 +32,7 @@ public class EnemyShieldModule extends Module {
             Optional<Vec3d> hit = pl.getBoundingBox().expand(0.2).raycast(eye, end);
             if (hit.isEmpty()) continue;
             double d = eye.squaredDistanceTo(hit.get());
-            if (d < bestDist && mc.player.canSee(pl)) {
+            if (d < bestDist && Projection.canSee(pl)) {
                 best = pl;
                 bestDist = d;
             }

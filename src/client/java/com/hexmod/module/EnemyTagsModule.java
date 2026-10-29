@@ -12,7 +12,8 @@ public class EnemyTagsModule extends Module {
 
     public EnemyTagsModule() {
         super("enemy_tags", "Enemy Tags", "Ping of the player above the enemy head");
-        at(0, -2); // przesuniecie wzgledem domyslnej pozycji nad glowa
+        at(0, -6); // przesuniecie w pikselach nad glowa (stale, niezalezne od odleglosci)
+        rangeOption(48); // zasieg w blokach, ustawiany w edytorze HUD
     }
 
     @Override
@@ -42,7 +43,14 @@ public class EnemyTagsModule extends Module {
         m.pushMatrix();
         m.translate((float) (ax + x), (float) (ay + y));
         m.scale(scale, scale);
-        ctx.drawTextWithShadow(tr, text, -tr.getWidth(text) / 2, -ROW, 0xFF000000 | color);
+        int tw = tr.getWidth(text);
+        if (style != 0) {
+            m.pushMatrix();
+            m.translate((float) (-tw / 2), (float) -ROW);
+            drawStyleFrame(ctx, tw, 9);
+            m.popMatrix();
+        }
+        ctx.drawTextWithShadow(tr, text, -tw / 2, -ROW, 0xFF000000 | color);
         m.popMatrix();
     }
 
@@ -52,12 +60,13 @@ public class EnemyTagsModule extends Module {
         if (preview || mc.player == null || mc.world == null) return;
         float tp = mc.getRenderTickCounter().getTickProgress(false);
 
+        double rangeSq = (double) range * range;
         for (PlayerEntity pl : mc.world.getPlayers()) {
             if (pl == mc.player || pl.isSpectator() || pl.isInvisible()) continue;
-            if (mc.player.squaredDistanceTo(pl) > 48.0 * 48.0 || !mc.player.canSee(pl)) continue;
+            if (mc.player.squaredDistanceTo(pl) > rangeSq || !Projection.canSee(pl)) continue;
             int ping = pingOf(pl);
             if (ping < 0) continue;
-            float[] s = Projection.project(ctx, pl.getLerpedPos(tp).add(0, pl.getHeight() + 0.55, 0));
+            float[] s = Projection.project(ctx, pl.getLerpedPos(tp).add(0, pl.getHeight() + 0.1, 0));
             if (s == null) continue;
             drawText(ctx, "Ping: " + ping + "ms", pingColor(ping), Math.round(s[0]), Math.round(s[1]));
         }
