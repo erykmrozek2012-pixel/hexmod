@@ -3,10 +3,11 @@
   "id": "hexmod",
   "version": "${version}",
   "name": "Hexmod",
-  "description": "Mod PvP z konfigurowalnym HUD, widgetami i kosmetykami.",
+  "description": "PvP mod with a configurable HUD, widgets and cosmetics.",
   "authors": ["er__is"],
+  "icon": "assets/hexmod/icon.png",
   "environment": "client",
-    "mixins": [
+  "mixins": [
     { "config": "hexmod.client.mixins.json", "environment": "client" }
   ],
   "entrypoints": {
