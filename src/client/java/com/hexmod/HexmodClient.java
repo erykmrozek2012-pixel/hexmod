@@ -15,6 +15,7 @@ import com.hexmod.module.ComboModule;
 import com.hexmod.module.ReachModule;
 import com.hexmod.module.WaypointsModule;
 import com.hexmod.module.DamageDealtModule;
+import com.hexmod.module.HitMarkerModule;
 import com.hexmod.module.Module;
 import com.hexmod.module.ModuleManager;
 import com.hexmod.module.Remote;
@@ -83,6 +84,7 @@ public class HexmodClient implements ClientModInitializer {
                     ComboModule.onAttack();
                     KillStatsModule.onAttack(victim);
                     ReachModule.onAttack(player, entity);
+                    HitMarkerModule.onAttack();
                 }
                 if (entity instanceof PlayerEntity target
                         && target.isBlocking()
