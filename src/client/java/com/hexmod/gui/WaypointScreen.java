@@ -40,9 +40,8 @@ public class WaypointScreen extends Screen {
         int y = 70;
         for (int i = 0; i < Math.min(ROWS, list.size()); i++) {
             final WaypointManager.Waypoint w = list.get(i);
-            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Color")), b -> {
-                WaypointManager.cycleColor(w);
-            }).dimensions(cx + 26, y, 54, 20).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Color")), b -> client.setScreen(new ColorPickerScreen(this, w.color,
+                    c -> w.color = c & 0xFFFFFF, WaypointManager::save))).dimensions(cx + 26, y, 54, 20).build());
             addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> {
                 WaypointManager.remove(w);
                 status = L.t("Removed: ") + w.name;

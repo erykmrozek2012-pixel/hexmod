@@ -45,7 +45,9 @@ public class PixelEditorScreen extends Screen {
     // --- wybor koloru jak w Paincie: kwadrat nasycenie/jasnosc + pasek odcienia + wlasne kolory ---
     private static final int SB_W = 128;
     private static final int SV_W = 100, SV_H = 80, HUE_W = 14;
-    private static final int MAX_FAV = 16;
+    private static final int FAV_PAGE = 16;
+    private static final int FAV_LIMIT = 1000;
+    private int favPage = 0;
     private static final List<Integer> FAV = new ArrayList<>();
     private static boolean favLoaded = false;
     private float hue = 0f, sat = 1f, val = 1f;
@@ -105,6 +107,13 @@ public class PixelEditorScreen extends Screen {
                 .dimensions(sbX(), 144, 76, 18).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Remove")), b -> removeFav())
                 .dimensions(sbX() + 80, 144, 40, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("<"), b -> favPage = Math.max(0, favPage - 1))
+                .dimensions(sbX(), 166, 20, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(">"), b -> favPage = Math.min(favPages() - 1, favPage + 1))
+                .dimensions(sbX() + 24, 166, 20, 18).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("More colors")), b ->
+                client.setScreen(new ColorPickerScreen(this, color & 0xFFFFFF, c -> setColor(0xFF000000 | c), null)))
+                .dimensions(sbX() + 48, 166, 76, 18).build());
 
         int areaX = 96, areaW = width - 96 - 8 - SB_W, areaH = height - 70;
         zoom = Math.max(1, Math.min(areaW / w, areaH / h));
@@ -189,9 +198,11 @@ public class PixelEditorScreen extends Screen {
             } else if (mx >= sx0 + SV_W + 6 && mx < sx0 + SV_W + 6 + HUE_W && my >= sy0 && my < sy0 + SV_H) {
                 drag = 2;
             } else {
-                for (int i = 0; i < FAV.size(); i++) {
+                for (int i = 0; i < FAV_PAGE; i++) {
+                    int idx = favPage * FAV_PAGE + i;
+                    if (idx >= FAV.size()) break;
                     int fx = sx0 + (i % 8) * 15, fy = 112 + (i / 8) * 14;
-                    if (mx >= fx && mx < fx + 13 && my >= fy && my < fy + 12) setColor(FAV.get(i));
+                    if (mx >= fx && mx < fx + 13 && my >= fy && my < fy + 12) setColor(FAV.get(idx));
                 }
             }
         }
@@ -355,16 +366,22 @@ public class PixelEditorScreen extends Screen {
         ctx.fill(hx - 1, hy, hx + HUE_W + 1, hy + 1, 0xFFFFFFFF);
 
         ctx.drawTextWithShadow(textRenderer, L.t("Custom colors"), sx0, 100, HexTheme.TEXT_DIM);
-        for (int i = 0; i < MAX_FAV; i++) {
+        favPage = Math.min(favPage, favPages() - 1);
+        for (int i = 0; i < FAV_PAGE; i++) {
+            int idx = favPage * FAV_PAGE + i;
             int fx = sx0 + (i % 8) * 15, fy = 112 + (i / 8) * 14;
             ctx.fill(fx, fy, fx + 13, fy + 12, 0xFF000000);
-            if (i < FAV.size()) {
-                ctx.fill(fx + 1, fy + 1, fx + 12, fy + 11, FAV.get(i));
-                if (FAV.get(i) == color) ctx.fill(fx, fy + 12, fx + 13, fy + 13, HexTheme.RED);
+            if (idx < FAV.size()) {
+                ctx.fill(fx + 1, fy + 1, fx + 12, fy + 11, FAV.get(idx));
+                if (FAV.get(idx) == color) ctx.fill(fx, fy + 12, fx + 13, fy + 13, HexTheme.RED);
             } else {
                 ctx.fill(fx + 1, fy + 1, fx + 12, fy + 11, 0xFF2A2A2E);
             }
         }
+    }
+
+    private static int favPages() {
+        return Math.max(1, (FAV.size() + FAV_PAGE - 1) / FAV_PAGE);
     }
 
     private static Path favFile() {
@@ -378,7 +395,7 @@ public class PixelEditorScreen extends Screen {
             if (!Files.exists(favFile())) return;
             for (String line : Files.readAllLines(favFile())) {
                 String t = line.trim().replace("#", "");
-                if (t.length() == 6 && FAV.size() < MAX_FAV) FAV.add(0xFF000000 | Integer.parseInt(t, 16));
+                if (t.length() == 6 && FAV.size() < FAV_LIMIT) FAV.add(0xFF000000 | Integer.parseInt(t, 16));
             }
         } catch (IOException | RuntimeException ignored) {}
     }
@@ -396,8 +413,6 @@ public class PixelEditorScreen extends Screen {
         int c = color | 0xFF000000;
         if (FAV.contains(c)) {
             status = L.t("This color is already saved.");
-        } else if (FAV.size() >= MAX_FAV) {
-            status = L.t("Maximum ") + MAX_FAV + L.t(" custom colors. Remove one.");
         } else {
             FAV.add(c);
             saveFavs();

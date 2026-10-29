@@ -38,6 +38,13 @@ public class HudEditorScreen extends Screen {
         java.util.List<String> keys = new java.util.ArrayList<>();
         if (selected != null) {
             keys.add("__style");
+            keys.add("__styleall");
+            if (selected.hasRange()) {
+                keys.add("__range");
+                keys.add("__rangeD");
+            }
+            keys.add("__picker");
+            keys.add("__all");
             keys.add("__reset");
             keys.addAll(selected.options.keySet());
         }
@@ -48,7 +55,11 @@ public class HudEditorScreen extends Screen {
         int rows = 1, cur = 0, maxW = width - 16;
         for (int i = 0; i < n; i++) {
             String k = keys.get(i);
-            labels[i] = k.equals("__reset") ? L.t("Reset") : k.equals("__style")
+            labels[i] = k.equals("__reset") ? L.t("Reset") : k.equals("__picker") ? L.t("More colors")
+                    : k.equals("__styleall") ? L.t("Style for all")
+                    : k.equals("__range") ? L.t("Range: ") + selected.range + L.t(" blocks") + " (+4)"
+                    : k.equals("__rangeD") ? L.t("Range: ") + selected.range + L.t(" blocks") + " (-4)"
+                    : k.equals("__all") ? L.t("Color for all") : k.equals("__style")
                     ? L.t("Style: ") + L.t(Module.STYLE_NAMES[selected.style])
                     : L.t(selected.optionLabels.getOrDefault(k, k)) + ": " + (selected.option(k) ? L.t("ON") : L.t("OFF"));
             bw[i] = Math.max(60, textRenderer.getWidth(labels[i]) + 12);
@@ -116,6 +127,24 @@ public class HudEditorScreen extends Screen {
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> {
                 if (k.equals("__reset")) {
                     selected.resetLook();
+                } else if (k.equals("__picker")) {
+                    final Module target = selected;
+                    client.setScreen(new ColorPickerScreen(this, target.color,
+                            c -> target.color = c & 0xFFFFFF, ModuleManager::save));
+                    return;
+                } else if (k.equals("__all")) {
+                    final int start = selected.color;
+                    client.setScreen(new ColorPickerScreen(this, start, c -> {
+                        for (Module mm : ModuleManager.all()) mm.color = c & 0xFFFFFF;
+                    }, ModuleManager::save));
+                    return;
+                } else if (k.equals("__range")) {
+                    selected.range = Math.max(4, Math.min(128, selected.range + 4));
+                } else if (k.equals("__rangeD")) {
+                    selected.range = Math.max(4, Math.min(128, selected.range - 4));
+                } else if (k.equals("__styleall")) {
+                    int ns = (selected.style + 1) % Module.STYLE_COUNT;
+                    for (Module mm : ModuleManager.all()) mm.style = ns;
                 } else if (k.equals("__style")) {
                     selected.style = (selected.style + 1) % Module.STYLE_COUNT;
                 } else {
