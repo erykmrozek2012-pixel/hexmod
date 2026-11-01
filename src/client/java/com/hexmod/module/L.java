@@ -22,6 +22,12 @@ public final class L {
     }
 
     static {
+        add("Fit: ", "Dopasowanie: ", "Anpassung: ", "\u9002\u914d: ");
+        add("Crop", "Przytnij", "Zuschneiden", "\u88c1\u526a");
+        add("Stretch", "Rozci\u0105gnij", "Strecken", "\u62c9\u4f38");
+        add("Strict (block moving inside inventory)", "\u015acis\u0142y (blokuj przek\u0142adanie w ekwipunku)", "Streng (Verschieben im Inventar blockieren)", "\u4e25\u683c\uff08\u7981\u6b62\u5728\u7269\u54c1\u680f\u5185\u79fb\u52a8\uff09");
+        add("Hex users here (", "Gracze Hex tutaj (", "Hex-Nutzer hier (", "\u6b64\u5904\u7684Hex\u7528\u6237 (");
+        add("none nearby", "brak w pobli\u017cu", "keine in der N\u00e4he", "\u9644\u8fd1\u6ca1\u6709");
         add("Style for all", "Styl dla wszystkich", "Stil f\u00fcr alle", "\u5168\u90e8\u6837\u5f0f");
         add("Range: ", "Zasi\u0119g: ", "Reichweite: ", "\u8303\u56f4: ");
         add(" blocks", " kratek", " Bl\u00f6cke", " \u683c");

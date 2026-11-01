@@ -5,6 +5,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -25,6 +26,7 @@ public class ItemLockModule extends Module {
         option("totem", "Totem", true);
         option("gapple", "Gapple", true);
         option("lockoffhand", "Block offhand", false);
+        option("strict", "Strict (block moving inside inventory)", false);
     }
 
     @Override public int w() { return 150; }
@@ -109,7 +111,8 @@ public class ItemLockModule extends Module {
         ScreenHandler h = player.currentScreenHandler;
         if (h == null || h.syncId != syncId) return false;
         if (type != SlotActionType.PICKUP && type != SlotActionType.QUICK_MOVE && type != SlotActionType.SWAP
-                && type != SlotActionType.THROW && type != SlotActionType.PICKUP_ALL) {
+                && type != SlotActionType.THROW && type != SlotActionType.PICKUP_ALL
+                && type != SlotActionType.QUICK_CRAFT) {
             return false;
         }
 
@@ -120,22 +123,37 @@ public class ItemLockModule extends Module {
             return false;
         }
 
+        boolean strict = m.option("strict");
+        boolean offhandFree = !m.option("lockoffhand");
+        boolean externalOpen = !(h instanceof PlayerScreenHandler); // skrzynia, kuznia itp.
         Slot slot = h.slots.get(slotId);
+        boolean own = ownSlot(player, slot);
+        ItemStack cursor = h.getCursorStack();
+
         if (type == SlotActionType.PICKUP_ALL) {
-            return stackLocked(m, h.getCursorStack()) && deny(L.t("Item lock: item is locked."));
+            return strict && stackLocked(m, cursor) && deny(L.t("Item lock: item is locked."));
         }
 
-        boolean offhandFree = !m.option("lockoffhand");
         // Zamiana z druga reka (klawisz F nad slotem) jest dozwolona, chyba ze slot paska jest zamrozony.
-        if (type == SlotActionType.SWAP && button == 40 && offhandFree && !(ownSlot(player, slot) && slotFrozen(m, player, slot))) {
+        if (type == SlotActionType.SWAP && button == 40 && offhandFree && !(own && slotFrozen(m, player, slot))) {
             return false;
         }
-        if (ownSlot(player, slot)) {
+
+        if (own) {
             boolean isOffhandSlot = slot.getIndex() == 40;
+            // Zamrozony slot paska (opcje Slot 1-9) jest nietykalny.
             if (slotFrozen(m, player, slot)) return deny(L.t("Item lock: this slot is locked."));
-            if (!(isOffhandSlot && offhandFree) && stackLocked(m, slot.getStack())) {
-                return deny(L.t("Item lock: this item is locked."));
+            boolean lockedStack = !(isOffhandSlot && offhandFree) && stackLocked(m, slot.getStack());
+            if (lockedStack) {
+                if (strict) return deny(L.t("Item lock: this item is locked."));
+                // Luzny tryb (PvP): mozna przekladac w swoim ekwipunku, ale nie wyrzucic ani wynosic do skrzyni.
+                if (type == SlotActionType.THROW) return deny(L.t("Item lock: cannot drop."));
+                if (type == SlotActionType.QUICK_MOVE && externalOpen) return deny(L.t("Item lock: this item is locked."));
             }
+        } else if (stackLocked(m, cursor)
+                && (type == SlotActionType.PICKUP || type == SlotActionType.QUICK_CRAFT)) {
+            // Wkladanie zablokowanego przedmiotu z kursora do skrzyni / innego okna.
+            return deny(L.t("Item lock: this item is locked."));
         }
 
         // Klawisze 1-9 / F nad slotem: zamiana z paskiem. Sprawdzamy tez slot docelowy.
@@ -148,7 +166,9 @@ public class ItemLockModule extends Module {
             } else if (button == 40 && !offhandFree) {
                 target = player.getOffHandStack();
             }
-            if (frozen || stackLocked(m, target)) return deny(L.t("Item lock: swap blocked."));
+            if (frozen) return deny(L.t("Item lock: swap blocked."));
+            // Przedmiot z paska nie moze wyladowac w skrzyni; przekladanie w swoim ekwipunku jest dozwolone (poza trybem strict).
+            if (stackLocked(m, target) && (strict || !own)) return deny(L.t("Item lock: swap blocked."));
         }
         return false;
     }

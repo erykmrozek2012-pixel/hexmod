@@ -1,6 +1,7 @@
 package com.hexmod.module;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 
 /**
@@ -32,7 +33,21 @@ public final class ChatCommands {
         if (first.equals(".hex")) return true;
         if (Remote.isLocked()) return false;
         // Po .hexoff dodatkowe komendy sa ukryte: nic nie robia i nie wysylaja sie na serwer.
-        if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock") || low.startsWith(".kd"))) return true;
+        if (Module.extrasHidden && (low.startsWith(".wp") || low.startsWith(".lock") || low.startsWith(".kd") || low.startsWith(".hexusers"))) return true;
+        if (first.equals(".hexusers")) {
+            MinecraftClient mc = MinecraftClient.getInstance();
+            if (mc.world == null) return true;
+            StringBuilder sb = new StringBuilder();
+            int n = 0;
+            for (PlayerEntity pl : mc.world.getPlayers()) {
+                String nick = pl.getName().getString();
+                if (!Remote.isHexUser(nick, pl.getUuid().toString())) continue;
+                if (n++ > 0) sb.append(", ");
+                sb.append(nick);
+            }
+            say(L.t("Hex users here (") + WaypointManager.currentServer() + "): " + (n == 0 ? L.t("none nearby") : sb.toString()));
+            return true;
+        }
         if (first.equals(".lyrics")) {
             String[] p = trimmed.split("\\s+");
             if (p.length > 1) {

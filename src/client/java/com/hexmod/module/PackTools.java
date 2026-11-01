@@ -183,6 +183,98 @@ public final class PackTools {
         return (Math.round(a) << 24) | (Math.round(r / a) << 16) | (Math.round(g / a) << 8) | Math.round(b / a);
     }
 
+    private static double lanczos3(double x) {
+        if (x == 0.0) return 1.0;
+        if (x <= -3.0 || x >= 3.0) return 0.0;
+        double px = Math.PI * x;
+        return 3.0 * Math.sin(px) * Math.sin(px / 3.0) / (px * px);
+    }
+
+    /** Wagi filtra Lanczos3 dla jednej osi: dla kazdego piksela docelowego indeks startu i wagi (znormalizowane). */
+    private static void taps(int srcLen, int dstLen, int[] start, float[][] weights) {
+        double scale = (double) srcLen / dstLen;
+        double fs = Math.max(1.0, scale);
+        double radius = 3.0 * fs;
+        for (int i = 0; i < dstLen; i++) {
+            double center = (i + 0.5) * scale - 0.5;
+            int a = (int) Math.floor(center - radius);
+            int b = (int) Math.ceil(center + radius);
+            float[] w = new float[b - a + 1];
+            double sum = 0;
+            for (int k = a; k <= b; k++) {
+                double v = lanczos3((k - center) / fs);
+                w[k - a] = (float) v;
+                sum += v;
+            }
+            if (sum != 0) for (int k = 0; k < w.length; k++) w[k] /= (float) sum;
+            start[i] = a;
+            weights[i] = w;
+        }
+    }
+
+    /**
+     * Skaluje fragment (cx, cy, cw, ch) obrazu zrodlowego do rozmiaru dw x dh filtrem Lanczos3
+     * (ostrzejszy i dokladniejszy niz usrednianie czy dwuliniowe). Kanaly liczone z alfa mnozona wstepnie.
+     */
+    private static Img lanczosResize(Img s, int cx, int cy, int cw, int ch, int dw, int dh) {
+        int[] hs = new int[dw];
+        float[][] hw = new float[dw][];
+        taps(cw, dw, hs, hw);
+        int[] vs = new int[dh];
+        float[][] vw = new float[dh][];
+        taps(ch, dh, vs, vw);
+
+        float[] tA = new float[ch * dw], tR = new float[ch * dw], tG = new float[ch * dw], tB = new float[ch * dw];
+        for (int y = 0; y < ch; y++) {
+            int row = (cy + y) * s.w();
+            for (int x = 0; x < dw; x++) {
+                float[] w = hw[x];
+                float a = 0, r = 0, g = 0, b = 0;
+                for (int k = 0; k < w.length; k++) {
+                    int sx = Math.max(0, Math.min(cw - 1, hs[x] + k));
+                    int c = s.px()[row + cx + sx];
+                    float al = (c >>> 24) / 255f;
+                    float wk = w[k];
+                    a += al * wk;
+                    r += ((c >> 16) & 255) * al * wk;
+                    g += ((c >> 8) & 255) * al * wk;
+                    b += (c & 255) * al * wk;
+                }
+                int i = y * dw + x;
+                tA[i] = a;
+                tR[i] = r;
+                tG[i] = g;
+                tB[i] = b;
+            }
+        }
+        int[] out = new int[dw * dh];
+        for (int y = 0; y < dh; y++) {
+            float[] w = vw[y];
+            for (int x = 0; x < dw; x++) {
+                float a = 0, r = 0, g = 0, b = 0;
+                for (int k = 0; k < w.length; k++) {
+                    int sy = Math.max(0, Math.min(ch - 1, vs[y] + k));
+                    int i = sy * dw + x;
+                    float wk = w[k];
+                    a += tA[i] * wk;
+                    r += tR[i] * wk;
+                    g += tG[i] * wk;
+                    b += tB[i] * wk;
+                }
+                a = Math.max(0f, Math.min(1f, a));
+                if (a < 0.004f) {
+                    out[y * dw + x] = 0;
+                    continue;
+                }
+                int ri = Math.max(0, Math.min(255, Math.round(r / a)));
+                int gi = Math.max(0, Math.min(255, Math.round(g / a)));
+                int bi = Math.max(0, Math.min(255, Math.round(b / a)));
+                out[y * dw + x] = (Math.round(a * 255f) << 24) | (ri << 16) | (gi << 8) | bi;
+            }
+        }
+        return new Img(dw, dh, out);
+    }
+
     /** Usrednia fragment obrazu zrodlowego odpowiadajacy jednemu pikselowi docelowemu (ostry obraz po zmniejszeniu). */
     private static int sample(Img s, int tx, int ty, int rw, int rh) {
         if (s.w() < rw || s.h() < rh) return bilinear(s, tx, ty, rw, rh);
@@ -221,6 +313,11 @@ public final class PackTools {
      * Baza to aktualna tekstura tarczy z gry. Zwraca komunikat dla uzytkownika.
      */
     public static String applyShield(Path packFolder, Path userImage, int quality, boolean flip) {
+        return applyShield(packFolder, userImage, quality, flip, false);
+    }
+
+    /** crop = true: obraz jest przycinany do proporcji tarczy zamiast rozciagany (bez znieksztalcen). */
+    public static String applyShield(Path packFolder, Path userImage, int quality, boolean flip, boolean crop) {
         try {
             Img src = readImage(userImage);
             var rm = MinecraftClient.getInstance().getResourceManager();
@@ -241,11 +338,23 @@ public final class PackTools {
                 int f = Math.max(1, base.w() / 64);
                 int x0 = f, y0 = f, rw = 12 * f, rh = 22 * f;
                 int[] px = base.px().clone();
+                int cx = 0, cy = 0, cw = src.w(), ch = src.h();
+                if (crop) {
+                    float want = (float) rw / rh;
+                    if ((float) cw / ch > want) {
+                        cw = Math.max(1, Math.round(ch * want));
+                        cx = (src.w() - cw) / 2;
+                    } else {
+                        ch = Math.max(1, Math.round(cw / want));
+                        cy = (src.h() - ch) / 2;
+                    }
+                }
+                Img region = lanczosResize(src, cx, cy, cw, ch, rw, rh);
                 for (int ty = 0; ty < rh; ty++) {
                     for (int tx = 0; tx < rw; tx++) {
                         int sxp = flip ? rw - 1 - tx : tx;
                         int i = (y0 + ty) * base.w() + (x0 + tx);
-                        if (i < px.length) px[i] = over(sample(src, sxp, ty, rw, rh), px[i]);
+                        if (i < px.length) px[i] = over(region.px()[ty * rw + sxp], px[i]);
                     }
                 }
                 writeImage(root.resolve("assets").resolve("minecraft").resolve(cand), new Img(base.w(), base.h(), px));
