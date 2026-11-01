@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 public class ShieldImageScreen extends Screen {
     private static int quality = 8;
     private static boolean flip = false;
+    private static boolean crop = true;
 
     private final Screen parent;
     private final Path packFolder;
@@ -51,13 +52,13 @@ public class ShieldImageScreen extends Screen {
             final Path p = images.get(i);
             String label = textRenderer.trimToWidth(L.t("Use: ") + p.getFileName(), 270);
             addDrawableChild(ButtonWidget.builder(Text.literal(label), b -> {
-                status = PackTools.applyShield(packFolder, p, quality, flip);
+                status = PackTools.applyShield(packFolder, p, quality, flip, crop);
             }).dimensions(cx - 140, y, 280, 18).build());
             y += 20;
         }
         int by = height - 74;
         addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Quality: ") + quality + "x (" + (64 * quality) + "px)"), b -> {
-            quality = quality >= 16 ? 2 : quality * 2;
+            quality = quality >= 32 ? 2 : quality * 2;
             clearAndInit();
         }).dimensions(cx - 140, by - 24, 138, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Mirror horizontally: ") + (flip ? L.t("ON") : L.t("OFF"))), b -> {
@@ -77,7 +78,11 @@ public class ShieldImageScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Reload textures in game")), b -> {
             client.reloadResources();
             status = L.t("Reloading textures...");
-        }).dimensions(cx - 140, by + 24, 280, 20).build());
+        }).dimensions(cx - 140, by + 24, 138, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Fit: ") + (crop ? L.t("Crop") : L.t("Stretch"))), b -> {
+            crop = !crop;
+            clearAndInit();
+        }).dimensions(cx + 2, by + 24, 138, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(L.t("Back")), b -> client.setScreen(parent))
                 .dimensions(cx - 50, height - 28, 100, 20).build());
     }
